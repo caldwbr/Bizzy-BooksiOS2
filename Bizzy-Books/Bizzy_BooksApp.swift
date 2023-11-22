@@ -22,7 +22,7 @@ struct Bizzy_BooksApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainScreenView()
         }
     }
 }
