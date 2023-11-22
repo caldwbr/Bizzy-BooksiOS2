@@ -14,6 +14,9 @@
 		67E103E22B0E6DB20092082B /* Bizzy_BooksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103E12B0E6DB20092082B /* Bizzy_BooksTests.swift */; };
 		67E103EC2B0E6DB20092082B /* Bizzy_BooksUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103EB2B0E6DB20092082B /* Bizzy_BooksUITests.swift */; };
 		67E103EE2B0E6DB20092082B /* Bizzy_BooksUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103ED2B0E6DB20092082B /* Bizzy_BooksUITestsLaunchTests.swift */; };
+		67E103FB2B0E72EF0092082B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */; };
+		67E103FC2B0E72EF0092082B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */; };
+		67E103FD2B0E72EF0092082B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +48,7 @@
 		67E103E72B0E6DB20092082B /* Bizzy-BooksUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Bizzy-BooksUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		67E103EB2B0E6DB20092082B /* Bizzy_BooksUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bizzy_BooksUITests.swift; sourceTree = "<group>"; };
 		67E103ED2B0E6DB20092082B /* Bizzy_BooksUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bizzy_BooksUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +104,7 @@
 				67E103D32B0E6DB20092082B /* Assets.xcassets */,
 				67E103D52B0E6DB20092082B /* Bizzy_Books.entitlements */,
 				67E103D62B0E6DB20092082B /* Preview Content */,
+				67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */,
 			);
 			path = "Bizzy-Books";
 			sourceTree = "<group>";
@@ -217,6 +222,9 @@
 				Base,
 			);
 			mainGroup = 67E103C32B0E6DB10092082B;
+			packageReferences = (
+				67E103FE2B0E735A0092082B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = 67E103CD2B0E6DB10092082B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -235,6 +243,7 @@
 			files = (
 				67E103D82B0E6DB20092082B /* Preview Assets.xcassets in Resources */,
 				67E103D42B0E6DB20092082B /* Assets.xcassets in Resources */,
+				67E103FB2B0E72EF0092082B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -242,6 +251,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				67E103FC2B0E72EF0092082B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +259,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				67E103FD2B0E72EF0092082B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -609,6 +620,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		67E103FE2B0E735A0092082B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.18.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = 67E103C42B0E6DB10092082B /* Project object */;
 }
