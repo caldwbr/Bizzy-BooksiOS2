@@ -10,11 +10,11 @@ import SwiftUI
 import Firebase
 
 struct MainScreenView: View {
+    @StateObject private var session = SessionStore()
     @State private var isFilterActive = false
-    @EnvironmentObject var session: SessionStore
     var body: some View {
         VStack {
-            HeaderHStack(isFilterActive: $isFilterActive)
+            HeaderHStack(isFilterActive: $isFilterActive, session: session)
             FilterByHStack(isFilterActive: $isFilterActive)
             BodyScrollView(isFilterActive: $isFilterActive)
             FooterHStack(isFilterActive: $isFilterActive)
@@ -24,23 +24,24 @@ struct MainScreenView: View {
 
 struct HeaderHStack: View {
     @Binding var isFilterActive: Bool
+    @ObservedObject var session: SessionStore
     var body: some View {
         HStack {
             // Left circle containing user profile picture or Bizzy icon
             CircleAvatarView(imageName: "userProfileImage")
-
+            
             Spacer()
-
+            
             Text("Bizzy Books")
                 .font(.title)
                 .bold()
-
+            
             Spacer()
-
+            
             Button("Logout") {
-                logout()
+                session.signOut()
             }
-
+            
             Button("Settings") {
                 openSettings()
             }
@@ -117,10 +118,6 @@ struct CircleAvatarView: View {
     }
 }
 
-func logout() {
-    session.signOut()
-}
-
 func openSettings() {
     guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else {
                 return
@@ -167,7 +164,7 @@ extension Color {
 
 struct MainScreenView_Previews: PreviewProvider {
     static var previews: some View {
-        MainScreenView()
+        MainScreenView().environmentObject(SessionStore())
     }
 }
 
