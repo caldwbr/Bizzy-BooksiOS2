@@ -5,11 +5,13 @@
 //  Created by Brad Caldwell on 11/22/23.
 //
 
+import Foundation
 import SwiftUI
+import Firebase
 
 struct MainScreenView: View {
     @State private var isFilterActive = false
-
+    @EnvironmentObject var session: SessionStore
     var body: some View {
         VStack {
             HeaderHStack(isFilterActive: $isFilterActive)
@@ -116,7 +118,7 @@ struct CircleAvatarView: View {
 }
 
 func logout() {
-    return
+    session.signOut()
 }
 
 func openSettings() {
