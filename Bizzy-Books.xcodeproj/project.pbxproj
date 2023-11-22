@@ -1,0 +1,614 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		67E103D02B0E6DB10092082B /* Bizzy_BooksApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103CF2B0E6DB10092082B /* Bizzy_BooksApp.swift */; };
+		67E103D22B0E6DB10092082B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103D12B0E6DB10092082B /* ContentView.swift */; };
+		67E103D42B0E6DB20092082B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 67E103D32B0E6DB20092082B /* Assets.xcassets */; };
+		67E103D82B0E6DB20092082B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 67E103D72B0E6DB20092082B /* Preview Assets.xcassets */; };
+		67E103E22B0E6DB20092082B /* Bizzy_BooksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103E12B0E6DB20092082B /* Bizzy_BooksTests.swift */; };
+		67E103EC2B0E6DB20092082B /* Bizzy_BooksUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103EB2B0E6DB20092082B /* Bizzy_BooksUITests.swift */; };
+		67E103EE2B0E6DB20092082B /* Bizzy_BooksUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103ED2B0E6DB20092082B /* Bizzy_BooksUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		67E103DE2B0E6DB20092082B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 67E103C42B0E6DB10092082B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 67E103CB2B0E6DB10092082B;
+			remoteInfo = "Bizzy-Books";
+		};
+		67E103E82B0E6DB20092082B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 67E103C42B0E6DB10092082B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 67E103CB2B0E6DB10092082B;
+			remoteInfo = "Bizzy-Books";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		67E103CC2B0E6DB10092082B /* Bizzy-Books.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Bizzy-Books.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		67E103CF2B0E6DB10092082B /* Bizzy_BooksApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bizzy_BooksApp.swift; sourceTree = "<group>"; };
+		67E103D12B0E6DB10092082B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		67E103D32B0E6DB20092082B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		67E103D52B0E6DB20092082B /* Bizzy_Books.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Bizzy_Books.entitlements; sourceTree = "<group>"; };
+		67E103D72B0E6DB20092082B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		67E103DD2B0E6DB20092082B /* Bizzy-BooksTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Bizzy-BooksTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		67E103E12B0E6DB20092082B /* Bizzy_BooksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bizzy_BooksTests.swift; sourceTree = "<group>"; };
+		67E103E72B0E6DB20092082B /* Bizzy-BooksUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Bizzy-BooksUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		67E103EB2B0E6DB20092082B /* Bizzy_BooksUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bizzy_BooksUITests.swift; sourceTree = "<group>"; };
+		67E103ED2B0E6DB20092082B /* Bizzy_BooksUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bizzy_BooksUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		67E103C92B0E6DB10092082B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		67E103DA2B0E6DB20092082B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		67E103E42B0E6DB20092082B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		67E103C32B0E6DB10092082B = {
+			isa = PBXGroup;
+			children = (
+				67E103CE2B0E6DB10092082B /* Bizzy-Books */,
+				67E103E02B0E6DB20092082B /* Bizzy-BooksTests */,
+				67E103EA2B0E6DB20092082B /* Bizzy-BooksUITests */,
+				67E103CD2B0E6DB10092082B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		67E103CD2B0E6DB10092082B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				67E103CC2B0E6DB10092082B /* Bizzy-Books.app */,
+				67E103DD2B0E6DB20092082B /* Bizzy-BooksTests.xctest */,
+				67E103E72B0E6DB20092082B /* Bizzy-BooksUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		67E103CE2B0E6DB10092082B /* Bizzy-Books */ = {
+			isa = PBXGroup;
+			children = (
+				67E103CF2B0E6DB10092082B /* Bizzy_BooksApp.swift */,
+				67E103D12B0E6DB10092082B /* ContentView.swift */,
+				67E103D32B0E6DB20092082B /* Assets.xcassets */,
+				67E103D52B0E6DB20092082B /* Bizzy_Books.entitlements */,
+				67E103D62B0E6DB20092082B /* Preview Content */,
+			);
+			path = "Bizzy-Books";
+			sourceTree = "<group>";
+		};
+		67E103D62B0E6DB20092082B /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				67E103D72B0E6DB20092082B /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		67E103E02B0E6DB20092082B /* Bizzy-BooksTests */ = {
+			isa = PBXGroup;
+			children = (
+				67E103E12B0E6DB20092082B /* Bizzy_BooksTests.swift */,
+			);
+			path = "Bizzy-BooksTests";
+			sourceTree = "<group>";
+		};
+		67E103EA2B0E6DB20092082B /* Bizzy-BooksUITests */ = {
+			isa = PBXGroup;
+			children = (
+				67E103EB2B0E6DB20092082B /* Bizzy_BooksUITests.swift */,
+				67E103ED2B0E6DB20092082B /* Bizzy_BooksUITestsLaunchTests.swift */,
+			);
+			path = "Bizzy-BooksUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		67E103CB2B0E6DB10092082B /* Bizzy-Books */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 67E103F12B0E6DB20092082B /* Build configuration list for PBXNativeTarget "Bizzy-Books" */;
+			buildPhases = (
+				67E103C82B0E6DB10092082B /* Sources */,
+				67E103C92B0E6DB10092082B /* Frameworks */,
+				67E103CA2B0E6DB10092082B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Bizzy-Books";
+			productName = "Bizzy-Books";
+			productReference = 67E103CC2B0E6DB10092082B /* Bizzy-Books.app */;
+			productType = "com.apple.product-type.application";
+		};
+		67E103DC2B0E6DB20092082B /* Bizzy-BooksTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 67E103F42B0E6DB20092082B /* Build configuration list for PBXNativeTarget "Bizzy-BooksTests" */;
+			buildPhases = (
+				67E103D92B0E6DB20092082B /* Sources */,
+				67E103DA2B0E6DB20092082B /* Frameworks */,
+				67E103DB2B0E6DB20092082B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				67E103DF2B0E6DB20092082B /* PBXTargetDependency */,
+			);
+			name = "Bizzy-BooksTests";
+			productName = "Bizzy-BooksTests";
+			productReference = 67E103DD2B0E6DB20092082B /* Bizzy-BooksTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		67E103E62B0E6DB20092082B /* Bizzy-BooksUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 67E103F72B0E6DB20092082B /* Build configuration list for PBXNativeTarget "Bizzy-BooksUITests" */;
+			buildPhases = (
+				67E103E32B0E6DB20092082B /* Sources */,
+				67E103E42B0E6DB20092082B /* Frameworks */,
+				67E103E52B0E6DB20092082B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				67E103E92B0E6DB20092082B /* PBXTargetDependency */,
+			);
+			name = "Bizzy-BooksUITests";
+			productName = "Bizzy-BooksUITests";
+			productReference = 67E103E72B0E6DB20092082B /* Bizzy-BooksUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		67E103C42B0E6DB10092082B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					67E103CB2B0E6DB10092082B = {
+						CreatedOnToolsVersion = 15.0.1;
+					};
+					67E103DC2B0E6DB20092082B = {
+						CreatedOnToolsVersion = 15.0.1;
+						TestTargetID = 67E103CB2B0E6DB10092082B;
+					};
+					67E103E62B0E6DB20092082B = {
+						CreatedOnToolsVersion = 15.0.1;
+						TestTargetID = 67E103CB2B0E6DB10092082B;
+					};
+				};
+			};
+			buildConfigurationList = 67E103C72B0E6DB10092082B /* Build configuration list for PBXProject "Bizzy-Books" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 67E103C32B0E6DB10092082B;
+			productRefGroup = 67E103CD2B0E6DB10092082B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				67E103CB2B0E6DB10092082B /* Bizzy-Books */,
+				67E103DC2B0E6DB20092082B /* Bizzy-BooksTests */,
+				67E103E62B0E6DB20092082B /* Bizzy-BooksUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		67E103CA2B0E6DB10092082B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				67E103D82B0E6DB20092082B /* Preview Assets.xcassets in Resources */,
+				67E103D42B0E6DB20092082B /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		67E103DB2B0E6DB20092082B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		67E103E52B0E6DB20092082B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		67E103C82B0E6DB10092082B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				67E103D22B0E6DB10092082B /* ContentView.swift in Sources */,
+				67E103D02B0E6DB10092082B /* Bizzy_BooksApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		67E103D92B0E6DB20092082B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				67E103E22B0E6DB20092082B /* Bizzy_BooksTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		67E103E32B0E6DB20092082B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				67E103EE2B0E6DB20092082B /* Bizzy_BooksUITestsLaunchTests.swift in Sources */,
+				67E103EC2B0E6DB20092082B /* Bizzy_BooksUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		67E103DF2B0E6DB20092082B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 67E103CB2B0E6DB10092082B /* Bizzy-Books */;
+			targetProxy = 67E103DE2B0E6DB20092082B /* PBXContainerItemProxy */;
+		};
+		67E103E92B0E6DB20092082B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 67E103CB2B0E6DB10092082B /* Bizzy-Books */;
+			targetProxy = 67E103E82B0E6DB20092082B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		67E103EF2B0E6DB20092082B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		67E103F02B0E6DB20092082B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		67E103F22B0E6DB20092082B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Bizzy-Books/Bizzy_Books.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Bizzy-Books/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-Books";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		67E103F32B0E6DB20092082B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Bizzy-Books/Bizzy_Books.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Bizzy-Books/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-Books";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		67E103F52B0E6DB20092082B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-BooksTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Bizzy-Books.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Bizzy-Books";
+			};
+			name = Debug;
+		};
+		67E103F62B0E6DB20092082B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-BooksTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Bizzy-Books.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Bizzy-Books";
+			};
+			name = Release;
+		};
+		67E103F82B0E6DB20092082B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-BooksUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Bizzy-Books";
+			};
+			name = Debug;
+		};
+		67E103F92B0E6DB20092082B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-BooksUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Bizzy-Books";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		67E103C72B0E6DB10092082B /* Build configuration list for PBXProject "Bizzy-Books" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				67E103EF2B0E6DB20092082B /* Debug */,
+				67E103F02B0E6DB20092082B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		67E103F12B0E6DB20092082B /* Build configuration list for PBXNativeTarget "Bizzy-Books" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				67E103F22B0E6DB20092082B /* Debug */,
+				67E103F32B0E6DB20092082B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		67E103F42B0E6DB20092082B /* Build configuration list for PBXNativeTarget "Bizzy-BooksTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				67E103F52B0E6DB20092082B /* Debug */,
+				67E103F62B0E6DB20092082B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		67E103F72B0E6DB20092082B /* Build configuration list for PBXNativeTarget "Bizzy-BooksUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				67E103F82B0E6DB20092082B /* Debug */,
+				67E103F92B0E6DB20092082B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 67E103C42B0E6DB10092082B /* Project object */;
+}
