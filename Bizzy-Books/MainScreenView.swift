@@ -12,12 +12,14 @@ import Firebase
 struct MainScreenView: View {
     @StateObject private var session = SessionStore()
     @State private var isFilterActive = false
+    @State private var isEditing = false
+    @State private var isEditingSheetPresented = false
     var body: some View {
         VStack {
             HeaderHStack(isFilterActive: $isFilterActive, session: session)
             FilterByHStack(isFilterActive: $isFilterActive)
             BodyScrollView(isFilterActive: $isFilterActive)
-            FooterHStack(isFilterActive: $isFilterActive)
+            FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented)
         }
     }
 }
@@ -74,9 +76,19 @@ struct BodyScrollView: View {
 
 struct FooterHStack: View {
     @Binding var isFilterActive: Bool
+    @Binding var isEditing: Bool
+    @Binding var isEditingSheetPresented: Bool
     var body: some View {
         HStack {
-            Button("Edit") {editBusiness()}.padding()
+            Button("Edit") {
+                editBusiness()
+                isEditing.toggle()
+                isEditingSheetPresented = true
+            }
+            .padding()
+            .sheet(isPresented: $isEditingSheetPresented) {
+                EditBusinessView()
+            }
             
             Spacer()
             

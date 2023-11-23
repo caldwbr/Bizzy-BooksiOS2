@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		679CD9792B0E78B500D085AA /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 679CD9782B0E78B500D085AA /* FirebaseAuth */; };
 		679CD97D2B0E991300D085AA /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679CD97C2B0E991300D085AA /* SessionStore.swift */; };
+		67D58C482B0EC83800740E70 /* EditBusinessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D58C472B0EC83800740E70 /* EditBusinessView.swift */; };
 		67E103D02B0E6DB10092082B /* Bizzy_BooksApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103CF2B0E6DB10092082B /* Bizzy_BooksApp.swift */; };
 		67E103D22B0E6DB10092082B /* MainScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103D12B0E6DB10092082B /* MainScreenView.swift */; };
 		67E103D42B0E6DB20092082B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 67E103D32B0E6DB20092082B /* Assets.xcassets */; };
@@ -40,6 +41,7 @@
 
 /* Begin PBXFileReference section */
 		679CD97C2B0E991300D085AA /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		67D58C472B0EC83800740E70 /* EditBusinessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBusinessView.swift; sourceTree = "<group>"; };
 		67E103CC2B0E6DB10092082B /* Bizzy-Books.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Bizzy-Books.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		67E103CF2B0E6DB10092082B /* Bizzy_BooksApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bizzy_BooksApp.swift; sourceTree = "<group>"; };
 		67E103D12B0E6DB10092082B /* MainScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScreenView.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 				67E103CF2B0E6DB10092082B /* Bizzy_BooksApp.swift */,
 				67E103D12B0E6DB10092082B /* MainScreenView.swift */,
 				679CD97C2B0E991300D085AA /* SessionStore.swift */,
+				67D58C472B0EC83800740E70 /* EditBusinessView.swift */,
 				67E103D32B0E6DB20092082B /* Assets.xcassets */,
 				67E103D52B0E6DB20092082B /* Bizzy_Books.entitlements */,
 				67E103D62B0E6DB20092082B /* Preview Content */,
@@ -288,6 +291,7 @@
 			files = (
 				67E103D22B0E6DB10092082B /* MainScreenView.swift in Sources */,
 				67E103D02B0E6DB10092082B /* Bizzy_BooksApp.swift in Sources */,
+				67D58C482B0EC83800740E70 /* EditBusinessView.swift in Sources */,
 				679CD97D2B0E991300D085AA /* SessionStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -448,6 +452,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Bizzy-Books/Preview Content\"";
+				DEVELOPMENT_TEAM = ALC53N96R3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -485,6 +490,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Bizzy-Books/Preview Content\"";
+				DEVELOPMENT_TEAM = ALC53N96R3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;

@@ -23,6 +23,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct Bizzy_BooksApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var session = SessionStore()
+    
     var body: some Scene {
         WindowGroup {
             MainScreenView()
