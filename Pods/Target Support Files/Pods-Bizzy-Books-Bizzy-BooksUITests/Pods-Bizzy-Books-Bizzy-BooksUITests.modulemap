@@ -1,0 +1,6 @@
+framework module Pods_Bizzy_Books_Bizzy_BooksUITests {
+  umbrella header "Pods-Bizzy-Books-Bizzy-BooksUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}

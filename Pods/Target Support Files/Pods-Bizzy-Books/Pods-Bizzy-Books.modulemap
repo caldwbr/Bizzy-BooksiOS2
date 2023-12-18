@@ -1,0 +1,6 @@
+framework module Pods_Bizzy_Books {
+  umbrella header "Pods-Bizzy-Books-umbrella.h"
+
+  export *
+  module * { export * }
+}

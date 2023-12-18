@@ -8,29 +8,46 @@
 import SwiftUI
 import FirebaseCore
 import Firebase
+import FirebaseAuth
+import FirebaseDatabaseUI
 import Combine
+import FirebaseAuthUI
+import FirebaseEmailAuthUI
 
+//NSObject, ..Responder..
 class AppDelegate: NSObject, UIApplicationDelegate {
-  func application(_ application: UIApplication,
-                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    FirebaseApp.configure()
-
-    return true
-  }
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        FirebaseApp.configure()
+        
+        return true
+    }
+    
 }
 
 @main
 struct Bizzy_BooksApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    @StateObject private var session = SessionStore()
     
     var body: some Scene {
         WindowGroup {
-            MainScreenView()
-                .environmentObject(session)
-                .onAppear {
-                    session.listen()
-                }
+            AuthenticatedView {
+                Image(systemName: "number.circle.fill")
+                    .resizable()
+                    .frame(width: 100, height: 100)
+                    .foregroundColor(Color(.systemPink))
+                    .aspectRatio(contentMode: .fit)
+                    .clipShape(Circle())
+                    .clipped()
+                    .padding(4)
+                    .overlay(Circle().stroke(Color.black, lineWidth: 2))
+                Text("Welcome to Bizzy Books!")
+                    .font(.title)
+                Text("Please log in.")
+            } content: {
+                MainScreenView()
+                Spacer()
+            }
         }
     }
 }

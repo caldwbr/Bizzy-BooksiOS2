@@ -8,15 +8,21 @@
 import Foundation
 import SwiftUI
 import Firebase
+import Combine
+
+class MainScreenViewModel: ObservableObject {
+    init() {
+        
+    }
+}
 
 struct MainScreenView: View {
-    @StateObject private var session = SessionStore()
     @State private var isFilterActive = false
     @State private var isEditing = false
     @State private var isEditingSheetPresented = false
     var body: some View {
         VStack {
-            HeaderHStack(isFilterActive: $isFilterActive, session: session)
+            HeaderHStack(isFilterActive: $isFilterActive)
             FilterByHStack(isFilterActive: $isFilterActive)
             BodyScrollView(isFilterActive: $isFilterActive)
             FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented)
@@ -26,11 +32,10 @@ struct MainScreenView: View {
 
 struct HeaderHStack: View {
     @Binding var isFilterActive: Bool
-    @ObservedObject var session: SessionStore
     var body: some View {
         HStack {
             // Left circle containing user profile picture or Bizzy icon
-            CircleAvatarView(imageName: "userProfileImage")
+            CircleAvatarView(imageName: "bizzyBeeImage")
             
             Spacer()
             
@@ -39,10 +44,6 @@ struct HeaderHStack: View {
                 .bold()
             
             Spacer()
-            
-            Button("Logout") {
-                session.signOut()
-            }
             
             Button("Settings") {
                 openSettings()
@@ -172,11 +173,5 @@ struct AddNewItemView: View {
 
 extension Color {
     static let offWhiteGray = Color(red: 0.95, green: 0.95, blue: 0.95) // Customize the RGB values as needed
-}
-
-struct MainScreenView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainScreenView().environmentObject(SessionStore())
-    }
 }
 
