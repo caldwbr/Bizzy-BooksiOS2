@@ -20,12 +20,13 @@ struct MainScreenView: View {
     @State private var isFilterActive = false
     @State private var isEditing = false
     @State private var isEditingSheetPresented = false
+    @State private var showingAddItemView = false
     var body: some View {
         VStack {
             HeaderHStack(isFilterActive: $isFilterActive)
             FilterByHStack(isFilterActive: $isFilterActive)
             BodyScrollView(isFilterActive: $isFilterActive)
-            FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented)
+            FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView)
         }
     }
 }
@@ -79,6 +80,7 @@ struct FooterHStack: View {
     @Binding var isFilterActive: Bool
     @Binding var isEditing: Bool
     @Binding var isEditingSheetPresented: Bool
+    @Binding var showingAddItemView: Bool
     var body: some View {
         HStack {
             Button("Edit") {
@@ -107,11 +109,16 @@ struct FooterHStack: View {
             
             Spacer()
             
-            NavigationLink(destination: AddNewItemView()) {
+            Button(action: {
+                showingAddItemView = true
+            }) {
                 Image(systemName: "plus")
                     .foregroundColor(.blue)
             }
             .padding()
+            .sheet(isPresented: $showingAddItemView) {
+                AddItemView(viewModel: AddItemViewModel())
+            }
         }
         .padding()
         .background(Color.offWhiteGray)
@@ -160,14 +167,6 @@ struct DocumentGenerationView: View {
     var body: some View {
         // Your document generation view content here
         Text("Document Generation View")
-    }
-}
-
-// Define your AddNewItemView
-struct AddNewItemView: View {
-    var body: some View {
-        // Your add new item view content here
-        Text("Add New Item View")
     }
 }
 
