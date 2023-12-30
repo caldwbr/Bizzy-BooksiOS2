@@ -2,17 +2,44 @@ import SwiftUI
 
 struct AddItemView: View {
     @ObservedObject var viewModel: AddItemViewModel
-
+    @Binding var itemType: ItemType
+    
     var body: some View {
-        ScrollView {
-            SentenceFlowView(items: viewModel.sentenceItems, cell: { item in
-                Text(item.value)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 5).fill(Color.blue))
-            })
-            .border(Color.red)
+        VStack {
+            Text("Add Item")
+                .font(.largeTitle)
+                .padding()
+            Picker("Item Type", selection: $itemType) {
+                ForEach(ItemType.allCases) { itemType in
+                    Text(itemType.rawValue.capitalized).tag(itemType)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
+            .onChange(of: itemType) { oldValue, newValue in
+                viewModel.itemType = newValue
+            }
+            
+            ScrollView { 
+                SentenceFlowView(elements: viewModel.model.sentenceElements, cell: { element in
+                        switch element.type {
+                        case .text(let text, _):
+                            Text(text)
+                                .padding()
+                        case .button(let title, let action, let size):
+                            Button(action: action) {
+                                Text(title)
+                            }
+                            .padding()
+                        case .textField(let placeholder, let currentText, _):
+                            TextField(placeholder, text: Binding.constant(currentText))
+                                .padding()
+                        }
+                })
+                .border(Color.black)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func createSentenceLayout(geometry: GeometryProxy, elements: [SentenceElement]) -> some View {
@@ -43,24 +70,27 @@ struct AddItemView: View {
     
     @ViewBuilder
     private func view(for element: SentenceElement) -> some View {
-        switch element {
-        case .text(let text, let size):
-            Text(text)
-                .frame(width: size.width, height: size.height) // Use size here
-        case .button(let title, let action, let size):
-            Button(title, action: action)
-                .frame(width: size.width, height: size.height) // Use size here
-        case .textField(let placeholder, let text, let size):
-            TextField(placeholder, text: .constant(text))
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: size.width, height: size.height) // Use size here
-        }
+        Text(String(describing: element))
+//        switch element {
+//        case .text(let text, let size):
+//            Text(text)
+//                .frame(width: size.width, height: size.height) // Use size here
+//        case .button(let title, let action, let size):
+//            Button(title, action: action)
+//                .frame(width: size.width, height: size.height) // Use size here
+//        case .textField(let placeholder, let text, let size):
+//            TextField(placeholder, text: .constant(text))
+//                .textFieldStyle(RoundedBorderTextFieldStyle())
+//                .frame(width: size.width, height: size.height) // Use size here
+//        }
     }
 
 }
 
-enum Category {
-    case business, personal, fuel
+extension View {
+    func asAnyView() -> AnyView {
+        AnyView(self)
+    }
 }
 
 /*
@@ -180,4 +210,16 @@ struct AddItemView: View {
                 .foregroundColor(Color.BizzyColor.grey))
         ]
     }
-} */
+} 
+ 
+ 
+ sentenceElements = [
+     .button("Who ▼", action: {/* Action */}, size: CGSize(width: 100, height: 30)),
+     .text(" paid ", size: CGSize(width: 40, height: 30)),
+     .textField("what", "", size: CGSize(width: 100, height: 30)),
+     .text(" to ", size: CGSize(width: 20, height: 30)),
+     .button("whom ▼", action: {/* Action */}, size: CGSize(width: 100, height: 30)),
+     .text(" for ", size: CGSize(width: 30, height: 30)),
+     .button("what tax reason ▼", action: {/* Action */}, size: CGSize(width: 100, height: 30))
+     // Add more elements as needed for the business case
+ ]*/

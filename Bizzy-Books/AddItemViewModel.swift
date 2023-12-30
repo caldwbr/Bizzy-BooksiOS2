@@ -7,21 +7,46 @@
 
 import Foundation
 import Combine
-
+import SwiftUI
+//petrsima@icloud.com
 class AddItemViewModel: ObservableObject {
-    @Published var model = AddItemModel()
-    @Published var selectedType: ItemType = .business
-    @Published var sentenceItems: [Item] = []
     
-    init() {
-        loadItems()
+    //TODO: consider deriving this from itemType instead of caching separately
+    @Published var model: AddItemModel
+    
+
+//    var sentenceElements: [String] {
+//        switch itemType {
+//        case .business:
+//            return  [.button("business", action: {})]
+//        case .personal:
+//            return [.button("personal", action: {})]
+//        case .fuel:
+//            return [.button("fueld", action: {})]
+//        }
+//    }
+    
+    @Published var itemType = ItemType.business {
+        didSet {
+            updateSentenceElements()
+        }
     }
     
-    func loadItems() {
-        sentenceItems = [
-            Item(value: "Example 1"),
-            Item(value: "Example 2")
-        ]
+    private func updateSentenceElements() {
+        switch itemType {
+        case .business:
+            model.sentenceElements = [.button("business", action: {})]
+        case .personal:
+            model.sentenceElements = [.button("personal", action: {})]
+        case .fuel:
+            model.sentenceElements = [.button("fueld", action: {})]
+        }
+    }
+    
+    init() {
+        self.model = AddItemModel()
+        
+        updateSentenceElements()
     }
     
     // Functions to handle user interactions, like updating elements
@@ -35,14 +60,18 @@ class AddItemViewModel: ObservableObject {
     }
 }
 
-struct Item: Identifiable {
-    var id = UUID()
-    var value: String
-}
+//struct SentenceElement: Identifiable {
+//    var id = UUID()
+//    var value: String
+//}
 
-enum ItemType: String, CaseIterable {
+enum ItemType: String, CaseIterable, Identifiable {
     case business = "Business"
     case personal = "Personal"
     case fuel = "Fuel"
+    
+    var id: String { self.rawValue }
+
 }
+
 

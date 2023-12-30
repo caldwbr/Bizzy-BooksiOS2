@@ -21,12 +21,19 @@ struct MainScreenView: View {
     @State private var isEditing = false
     @State private var isEditingSheetPresented = false
     @State private var showingAddItemView = false
+    @State private var selectedItemType: ItemType = .business
+    @State private var addItemViewModel = AddItemViewModel()
     var body: some View {
-        VStack {
-            HeaderHStack(isFilterActive: $isFilterActive)
-            FilterByHStack(isFilterActive: $isFilterActive)
-            BodyScrollView(isFilterActive: $isFilterActive)
-            FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView)
+        Self._printChanges()
+       return VStack {
+//            HeaderHStack(isFilterActive: $isFilterActive)
+//            FilterByHStack(isFilterActive: $isFilterActive)
+//            BodyScrollView(isFilterActive: $isFilterActive)
+           AddItemView(viewModel: addItemViewModel, itemType: $selectedItemType)
+          //  FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView, selectedItemType: $selectedItemType)
+        }
+        .onChange(of: selectedItemType) { oldValue, newValue in
+                print(oldValue, newValue)
         }
     }
 }
@@ -81,8 +88,11 @@ struct FooterHStack: View {
     @Binding var isEditing: Bool
     @Binding var isEditingSheetPresented: Bool
     @Binding var showingAddItemView: Bool
+    @Binding var selectedItemType: ItemType
+    
     var body: some View {
-        HStack {
+        Self._printChanges()
+        return HStack {
             Button("Edit") {
                 editBusiness()
                 isEditing.toggle()
@@ -117,7 +127,7 @@ struct FooterHStack: View {
             }
             .padding()
             .sheet(isPresented: $showingAddItemView) {
-                AddItemView(viewModel: AddItemViewModel())
+                AddItemView(viewModel: AddItemViewModel(), itemType: $selectedItemType)
             }
         }
         .padding()

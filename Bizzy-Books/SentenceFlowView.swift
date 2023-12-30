@@ -32,8 +32,8 @@ func layout(sizes: [CGSize], spacing: CGSize = .init(width: 10, height: 10), con
 }
 
 struct SentenceFlowView<Element: Identifiable, Cell: View>: View {
-    var items: [Element]
-    var cell: (Element) -> Cell
+    var elements: [Element]
+    @ViewBuilder var cell: (Element) -> Cell
     @State private var sizes: [CGSize] = []
     @State private var containerWidth: CGFloat = 0
     
@@ -48,8 +48,8 @@ struct SentenceFlowView<Element: Identifiable, Cell: View>: View {
                 self.containerWidth = value[0].width
             }
             ZStack(alignment: .topLeading) {
-                ForEach(Array(zip(items, items.indices)), id: \.0.id) { (item, index) in
-                    cell(item)
+                ForEach(Array(zip(elements, elements.indices)), id: \.0.id) { (element, index) in
+                    cell(element)
                         .fixedSize()
                         .background(GeometryReader { proxy in
                             Color.clear.preference(key: SizeKey.self, value: [proxy.size])
