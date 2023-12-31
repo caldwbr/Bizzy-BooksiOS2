@@ -31,9 +31,9 @@ func layout(sizes: [CGSize], spacing: CGSize = .init(width: 10, height: 10), con
     return result
 }
 
-struct SentenceFlowView<Element: Identifiable, Cell: View>: View {
-    var elements: [Element]
-    @ViewBuilder var cell: (Element) -> Cell
+struct SentenceFlowView<Cell: View>: View {
+    var elements: [SentenceElement]
+    @ViewBuilder var cell: (SentenceElement) -> Cell
     @State private var sizes: [CGSize] = []
     @State private var containerWidth: CGFloat = 0
     
