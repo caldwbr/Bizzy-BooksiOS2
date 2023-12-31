@@ -26,11 +26,11 @@ struct MainScreenView: View {
     var body: some View {
         Self._printChanges()
        return VStack {
-//            HeaderHStack(isFilterActive: $isFilterActive)
-//            FilterByHStack(isFilterActive: $isFilterActive)
-//            BodyScrollView(isFilterActive: $isFilterActive)
-           AddItemView(viewModel: addItemViewModel, itemType: $selectedItemType)
-          //  FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView, selectedItemType: $selectedItemType)
+            HeaderHStack(isFilterActive: $isFilterActive)
+            FilterByHStack(isFilterActive: $isFilterActive)
+            BodyScrollView(isFilterActive: $isFilterActive)
+           //AddItemView(viewModel: addItemViewModel, itemType: $selectedItemType)
+           FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView, selectedItemType: $selectedItemType, addItemViewModel: $addItemViewModel)
         }
         .onChange(of: selectedItemType) { oldValue, newValue in
                 print(oldValue, newValue)
@@ -89,6 +89,7 @@ struct FooterHStack: View {
     @Binding var isEditingSheetPresented: Bool
     @Binding var showingAddItemView: Bool
     @Binding var selectedItemType: ItemType
+    @Binding var addItemViewModel: AddItemViewModel
     
     var body: some View {
         Self._printChanges()
@@ -127,7 +128,7 @@ struct FooterHStack: View {
             }
             .padding()
             .sheet(isPresented: $showingAddItemView) {
-                AddItemView(viewModel: AddItemViewModel(), itemType: $selectedItemType)
+                AddItemView(viewModel: addItemViewModel, itemType: $selectedItemType)
             }
         }
         .padding()

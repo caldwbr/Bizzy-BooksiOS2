@@ -13,33 +13,25 @@ class AddItemViewModel: ObservableObject {
     
     //TODO: consider deriving this from itemType instead of caching separately
     @Published var model: AddItemModel
-    
-
-//    var sentenceElements: [String] {
-//        switch itemType {
-//        case .business:
-//            return  [.button("business", action: {})]
-//        case .personal:
-//            return [.button("personal", action: {})]
-//        case .fuel:
-//            return [.button("fueld", action: {})]
-//        }
-//    }
-    
     @Published var itemType = ItemType.business {
         didSet {
             updateSentenceElements()
+            print("Yo Color: \(model.sentenceElements[0].semanticType.color)")
         }
     }
     
     private func updateSentenceElements() {
+        model.sentenceElements = [.button("Who ▼", action: {}), .text(" paid "), .textField("what", text: "", size: CGSize()), .text(" to "), .button("whom ▼", action: {})]
         switch itemType {
         case .business:
-            model.sentenceElements = [.button("business", action: {})]
+            model.sentenceElements.append(.text(" for "))
+            model.sentenceElements.append(.button("tax reason ▼", action: {}))
         case .personal:
-            model.sentenceElements = [.button("personal", action: {})]
+            model.sentenceElements.append(.text(" for "))
+            model.sentenceElements.append(.button("personal reason ▼", action: {}))
         case .fuel:
-            model.sentenceElements = [.button("fueld", action: {})]
+            model.sentenceElements.append(.text(" for "))
+            model.sentenceElements.append(.button("fuel reason ▼", action: {}))
         }
     }
     
@@ -59,11 +51,6 @@ class AddItemViewModel: ObservableObject {
         
     }
 }
-
-//struct SentenceElement: Identifiable {
-//    var id = UUID()
-//    var value: String
-//}
 
 enum ItemType: String, CaseIterable, Identifiable {
     case business = "Business"

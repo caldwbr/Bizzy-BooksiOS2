@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct AddItemModel {
     var sentenceElements: [SentenceElement] = []
@@ -41,6 +42,34 @@ struct SentenceElement: Identifiable {
         case occuredWC //Button
         case project //Button
         case odometer //TextField
+        
+        var color: Color {
+            switch self {
+            case .who:
+                return .BizzyColor.whoBlue
+            case .what:
+                return .BizzyColor.whatGreen
+            case .whom:
+                return .BizzyColor.whomPurple
+            case .taxReason:
+                return .BizzyColor.taxReasonMagenta
+            case .personalReason:
+                return .BizzyColor.personalReasonMagenta
+            case .occuredWC:
+                return .BizzyColor.orange
+            case .project:
+                return .BizzyColor.projectBlue
+            case .forHowMany:
+                return .BizzyColor.darkerGreen
+            case .odometer:
+                return .BizzyColor.grey
+            case .paid, .to, .forWhat, .gallonsOfFuelIn:
+                return .black
+            default:
+                return .black
+                // ... other color associations
+            }
+        }
     }
     
     enum ElementType {
