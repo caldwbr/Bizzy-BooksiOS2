@@ -21,17 +21,19 @@ class AddItemViewModel: ObservableObject {
     }
     
     private func updateSentenceElements() {
-        model.sentenceElements = [.button("Who ▼", action: {}), .text(" paid "), .textField("what", text: "", size: CGSize()), .text(" to "), .button("whom ▼", action: {})]
+        model.sentenceElements = [.button("Who ▼", semanticType: .who, action: {}), .text(" paid "), .textField("what", semanticType: .what, text: "", size: CGSize()), .text(" to "), .button("whom ▼", semanticType: .whom, action: {})]
         switch itemType {
         case .business:
             model.sentenceElements.append(.text(" for "))
-            model.sentenceElements.append(.button("tax reason ▼", action: {}))
+            model.sentenceElements.append(.button("tax reason ▼", semanticType: .taxReason, action: {}))
         case .personal:
             model.sentenceElements.append(.text(" for "))
-            model.sentenceElements.append(.button("personal reason ▼", action: {}))
+            model.sentenceElements.append(.button("personal reason ▼", semanticType: .personalReason, action: {}))
         case .fuel:
             model.sentenceElements.append(.text(" for "))
-            model.sentenceElements.append(.button("fuel reason ▼", action: {}))
+            model.sentenceElements.append(.textField("for how many", semanticType: .forHowMany, text: "", size: CGSize()))
+            model.sentenceElements.append(.text(" gallons of fuel in "))
+            model.sentenceElements.append(.button("which vehicle ", semanticType: .whichVehicle, action: {}))
         }
     }
     

@@ -117,12 +117,12 @@ struct SentenceElement: Identifiable {
 }
 
 extension SentenceElement {
-    static func button(_ value: String, action: @escaping () -> Void) -> Self {
-        Self(semanticType: .who, type: .button(value, action: action, size: CGSize()))
+    static func button(_ value: String, semanticType: SemanticType, action: @escaping () -> Void) -> Self {
+        Self(semanticType: semanticType, type: .button(value, action: action, size: CGSize()))
     }
     
-    static func textField(_ placeholder: String, text: String, size: CGSize) -> Self {
-        Self(semanticType: .what, type: .textField(placeholder, text, size: size))
+    static func textField(_ placeholder: String, semanticType: SemanticType, text: String, size: CGSize) -> Self {
+        Self(semanticType: semanticType, type: .textField(placeholder, text, size: size))
     }
     
     static func text(_ value: String) -> Self {

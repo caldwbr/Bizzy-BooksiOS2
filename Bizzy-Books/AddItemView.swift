@@ -31,10 +31,6 @@ struct AddItemView: View {
             Text("Add Item")
                 .font(.largeTitle)
                 .padding()
-            Button(action: {}, label: {
-                Text("TEST BUTTON SUP")
-                    .foregroundColor(.red)
-            })
             Picker("Item Type", selection: $itemType) {
                 ForEach(ItemType.allCases) { itemType in
                     Text(itemType.rawValue.capitalized).tag(itemType)
@@ -48,17 +44,7 @@ struct AddItemView: View {
             
             let layout = FlowLayout(alignment: align.alignment)
             layout {
-                ForEach(0..<20) { ix in
-                    Text("Item \(ix)")
-                        .background(Capsule()
-                            .fill(Color(hue: .init(ix)/10, saturation: 0.8, brightness: 0.8)))
-                }
-            }
-            .animation(.default, value: align)
-            .frame(maxHeight: .infinity)
-            
-            ScrollView {
-                SentenceFlowView(elements: viewModel.model.sentenceElements) { element in
+                ForEach(viewModel.model.sentenceElements) { element in
                     switch element.type {
                     case .text(let text, _):
                         Text(text)
@@ -74,10 +60,36 @@ struct AddItemView: View {
                                 .foregroundColor(element.semanticType.color)
                         })
                     }
+                    
+//                    Text("Item \(ix)")
+//                        .background(Capsule()
+//                            .fill(Color(hue: .init(ix)/10, saturation: 0.8, brightness: 0.8)))
                 }
-                .border(Color.black)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .animation(.default, value: align)
+            .frame(maxHeight: .infinity)
+            
+//            ScrollView {
+//                SentenceFlowView(elements: viewModel.model.sentenceElements) { element in
+//                    switch element.type {
+//                    case .text(let text, _):
+//                        Text(text)
+//                            .padding()
+//                    case .textField(let placeholder, let text, _):
+//                        TextField(placeholder, text: .constant(text))
+//                            .textFieldStyle(RoundedBorderTextFieldStyle())
+//                            .padding()
+//                            .foregroundColor(element.semanticType.color)
+//                    case .button(let title, let action, _):
+//                        Button(action: action, label: {
+//                            Text(title)
+//                                .foregroundColor(element.semanticType.color)
+//                        })
+//                    }
+//                }
+//                .border(Color.black)
+//            }
+//            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
