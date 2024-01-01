@@ -35,7 +35,7 @@ class AddItemViewModel: ObservableObject {
             model.sentenceElements.append(.textField("how many", semanticType: .forHowMany, text: "", size: CGSize()))
             model.sentenceElements.append(.text(" gallons of fuel in "))
             model.sentenceElements.append(.button("which vehicle ▼", semanticType: .whichVehicle, action: {}))
-            model.sentenceElements.append(.textField("Odometer", semanticType: .odometer, text: "", size: CGSize()))
+            model.sentenceElements.append(.textField("odometer", semanticType: .odometer, text: "", size: CGSize()))
         }
     }
     
@@ -56,7 +56,7 @@ class AddItemViewModel: ObservableObject {
     }
 }
 
-enum ItemType: String, CaseIterable, Identifiable {
+enum ItemType: String, CaseIterable, Identifiable, Codable {
     case business = "Business"
     case personal = "Personal"
     case fuel = "Fuel"

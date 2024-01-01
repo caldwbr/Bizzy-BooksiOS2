@@ -28,12 +28,20 @@ struct AddItemView: View {
     @State var currencyValue: String = ""
     @State var gallonsValue: String = ""
     @State var odometerValue: String = ""
+    @State var notesValue: String = ""
     
     var body: some View {
         VStack {
-            Text("Add Item")
+            HStack {
+                Text("Add Item")
+                    .font(.largeTitle)
+                    .padding()
+                Button(action: {}, label: {
+                    Text("Save")
+                })
                 .font(.largeTitle)
                 .padding()
+            }
             Picker("Item Type", selection: $itemType) {
                 ForEach(ItemType.allCases) { itemType in
                     Text(itemType.rawValue.capitalized).tag(itemType)
@@ -44,6 +52,7 @@ struct AddItemView: View {
             .onChange(of: itemType) { oldValue, newValue in
                 viewModel.itemType = newValue
             }
+            TextField("Notes", text: $notesValue).padding()
             
             let layout = FlowLayout(alignment: align.alignment)
             layout {
@@ -56,13 +65,13 @@ struct AddItemView: View {
                         switch element.semanticType {
                         case .what:
                             CurrencyTextField(value: $currencyValue, placeholder: "what")
-                                .padding(.vertical, 11)
+                                .padding(11)
                         case .forHowMany:
                             GallonsTextField(value: $gallonsValue, placeholder: "how many")
-                                .padding(.vertical, 11)
+                                .padding(11)
                         default:
                             OdometerTextField(value: $odometerValue, placeholder: "Odometer")
-                                .padding(.vertical, 11)
+                                .padding(11)
                         }
                     case .button(let title, let action, _):
                         Button(action: action, label: {

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		2EA61BD88899136D237DDB38 /* Pods_Bizzy_Books.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07D3A5F35FDA26D158331EC3 /* Pods_Bizzy_Books.framework */; };
+		670D45BD2B43161D00FF9BB3 /* FirebaseDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670D45BC2B43161D00FF9BB3 /* FirebaseDatabase.swift */; };
+		670D45BF2B43178B00FF9BB3 /* ItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670D45BE2B43178B00FF9BB3 /* ItemModel.swift */; };
 		67416A812B30E5270098C91D /* AuthenticationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67416A802B30E5270098C91D /* AuthenticationViewModel.swift */; };
 		674D4EB52B325BFA001699F2 /* AddItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674D4EB42B325BFA001699F2 /* AddItemModel.swift */; };
 		677B70A52B0F06BC0044216A /* BizzyAuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B70A42B0F06BC0044216A /* BizzyAuthViewController.swift */; };
@@ -61,6 +63,8 @@
 		4563FCE17754DC0A93911CCB /* Pods_Bizzy_BooksTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Bizzy_BooksTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		51EB572154D551BF80CE3100 /* Pods_Bizzy_Books_Bizzy_BooksUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Bizzy_Books_Bizzy_BooksUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DFCE9627AC467AF78D47B9C /* Pods-Bizzy-BooksTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-BooksTests.debug.xcconfig"; path = "Target Support Files/Pods-Bizzy-BooksTests/Pods-Bizzy-BooksTests.debug.xcconfig"; sourceTree = "<group>"; };
+		670D45BC2B43161D00FF9BB3 /* FirebaseDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseDatabase.swift; sourceTree = "<group>"; };
+		670D45BE2B43178B00FF9BB3 /* ItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemModel.swift; sourceTree = "<group>"; };
 		67416A802B30E5270098C91D /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
 		674D4EB42B325BFA001699F2 /* AddItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemModel.swift; sourceTree = "<group>"; };
 		6759408F2B30C2D5002EAF9C /* FirebaseAuth.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = FirebaseAuth.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -171,6 +175,8 @@
 				674D4EB42B325BFA001699F2 /* AddItemModel.swift */,
 				67AB9AF82B35F42800FB81A1 /* SingletonDataManager.swift */,
 				67AB9AFC2B35FDCF00FB81A1 /* SentenceFlowView.swift */,
+				670D45BC2B43161D00FF9BB3 /* FirebaseDatabase.swift */,
+				670D45BE2B43178B00FF9BB3 /* ItemModel.swift */,
 			);
 			path = "Bizzy-Books";
 			sourceTree = "<group>";
@@ -319,7 +325,7 @@
 			mainGroup = 67E103C32B0E6DB10092082B;
 			packageReferences = (
 				67E103FE2B0E735A0092082B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				67D58C4B2B0ED54A00740E70 /* XCRemoteSwiftPackageReference "FirebaseUI-iOS.git" */,
+				67D58C4B2B0ED54A00740E70 /* XCRemoteSwiftPackageReference "FirebaseUI-iOS" */,
 			);
 			productRefGroup = 67E103CD2B0E6DB10092082B /* Products */;
 			projectDirPath = "";
@@ -479,6 +485,7 @@
 				674D4EB52B325BFA001699F2 /* AddItemModel.swift in Sources */,
 				67C709BD2B30F02A00C09CC6 /* AuthenticatedView.swift in Sources */,
 				67C709B72B30EF3400C09CC6 /* SignupView.swift in Sources */,
+				670D45BF2B43178B00FF9BB3 /* ItemModel.swift in Sources */,
 				67D58C482B0EC83800740E70 /* EditBusinessView.swift in Sources */,
 				67416A812B30E5270098C91D /* AuthenticationViewModel.swift in Sources */,
 				67C709B92B30EF6C00C09CC6 /* UserProfileView.swift in Sources */,
@@ -486,6 +493,7 @@
 				67C709C12B31FF4C00C09CC6 /* AddItemViewModel.swift in Sources */,
 				67AB9AFD2B35FDCF00FB81A1 /* SentenceFlowView.swift in Sources */,
 				677B70A72B0F0B3D0044216A /* EmptyView.swift in Sources */,
+				670D45BD2B43161D00FF9BB3 /* FirebaseDatabase.swift in Sources */,
 				677B70A92B1662A50044216A /* Silly.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -877,7 +885,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		67D58C4B2B0ED54A00740E70 /* XCRemoteSwiftPackageReference "FirebaseUI-iOS.git" */ = {
+		67D58C4B2B0ED54A00740E70 /* XCRemoteSwiftPackageReference "FirebaseUI-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/FirebaseUI-iOS.git";
 			requirement = {
