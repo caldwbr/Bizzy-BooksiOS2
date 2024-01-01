@@ -26,14 +26,16 @@ class AddItemViewModel: ObservableObject {
         case .business:
             model.sentenceElements.append(.text(" for "))
             model.sentenceElements.append(.button("tax reason ▼", semanticType: .taxReason, action: {}))
+            model.sentenceElements.append(.button("project ▼", semanticType: .project, action: {}))
         case .personal:
             model.sentenceElements.append(.text(" for "))
             model.sentenceElements.append(.button("personal reason ▼", semanticType: .personalReason, action: {}))
         case .fuel:
             model.sentenceElements.append(.text(" for "))
-            model.sentenceElements.append(.textField("for how many", semanticType: .forHowMany, text: "", size: CGSize()))
+            model.sentenceElements.append(.textField("how many", semanticType: .forHowMany, text: "", size: CGSize()))
             model.sentenceElements.append(.text(" gallons of fuel in "))
-            model.sentenceElements.append(.button("which vehicle ", semanticType: .whichVehicle, action: {}))
+            model.sentenceElements.append(.button("which vehicle ▼", semanticType: .whichVehicle, action: {}))
+            model.sentenceElements.append(.textField("Odometer", semanticType: .odometer, text: "", size: CGSize()))
         }
     }
     
@@ -62,5 +64,4 @@ enum ItemType: String, CaseIterable, Identifiable {
     var id: String { self.rawValue }
 
 }
-
 

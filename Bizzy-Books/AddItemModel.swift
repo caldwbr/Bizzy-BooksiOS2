@@ -63,6 +63,8 @@ struct SentenceElement: Identifiable {
                 return .BizzyColor.darkerGreen
             case .odometer:
                 return .BizzyColor.grey
+            case .whichVehicle:
+                return .BizzyColor.orange
             case .paid, .to, .forWhat, .gallonsOfFuelIn:
                 return .black
             default:
