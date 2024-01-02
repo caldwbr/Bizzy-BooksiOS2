@@ -22,6 +22,7 @@ enum Align: String, CaseIterable, Identifiable {
 }
 
 struct AddItemView: View {
+    
     @ObservedObject var viewModel: AddItemViewModel
     @Binding var itemType: ItemType
     @State var align = Align.center
@@ -29,6 +30,14 @@ struct AddItemView: View {
     @State var gallonsValue: String = ""
     @State var odometerValue: String = ""
     @State var notesValue: String = ""
+    @State var showWhoSearchView = false
+    @Binding var selectedWho: Entity?
+    @State var showWhomSearchView = false
+    @Binding var selectedWhom: Entity?
+    @State var showVehicleSearchView = false
+    @Binding var selectedVehicle: Vehicle?
+    @State var showProjectSearchView = false
+    @Binding var selectedProject: Project?
     
     var body: some View {
         VStack {
@@ -56,29 +65,101 @@ struct AddItemView: View {
             
             let layout = FlowLayout(alignment: align.alignment)
             layout {
-                ForEach(viewModel.model.sentenceElements) { element in
-                    switch element.type {
-                    case .text(let text, _):
-                        Text(text)
+                ForEach(viewModel.model.sentenceElements.indices, id: \.self) { index in
+                    let element = viewModel.model.sentenceElements[index]
+                    switch element.semanticType {
+                    case .text:
+                        Text(element.value)
                             .padding()
-                    case .textField(let placeholder, let text, _):
-                        switch element.semanticType {
-                        case .what:
-                            CurrencyTextField(value: $currencyValue, placeholder: "what")
-                                .padding(11)
-                        case .forHowMany:
-                            GallonsTextField(value: $gallonsValue, placeholder: "how many")
-                                .padding(11)
-                        default:
-                            OdometerTextField(value: $odometerValue, placeholder: "Odometer")
-                                .padding(11)
-                        }
-                    case .button(let title, let action, _):
-                        Button(action: action, label: {
-                            Text(title)
+                    case .who:
+                        Button(action: {
+                            showWhoSearchView = true
+                        }, label: {
+                            Text(element.value)
                                 .padding()
                                 .foregroundColor(element.semanticType.color)
                         })
+                    case .what:
+                        CurrencyTextField(value: $currencyValue, placeholder: "what")
+                            .foregroundColor(element.semanticType.color)
+                            .padding(11)
+                    case .whom:
+                        Button(action: {
+                            showWhomSearchView = true
+                        }, label: {
+                            Text(element.value)
+                                .padding()
+                                .foregroundColor(element.semanticType.color)
+                        })
+                    case .taxReason:
+                        Picker(element.value, selection: Binding(
+                            get: { viewModel.selectedTaxReasonIndex },
+                            set: { newIndex in
+                                viewModel.selectedTaxReasonIndex = newIndex
+                                let newReason = TaxReason.allCases[newIndex]
+                                viewModel.updateSelectedTaxReason(newReason: newReason)
+                            }
+                        )) {
+                            ForEach(TaxReason.allCases.indices, id: \.self) { index in
+                                Text(TaxReason.allCases[index].rawValue).tag(index)
+                            }
+                        }
+                        .accentColor(element.semanticType.color)
+                        .padding(9)
+                    case .personalReason:
+                        Picker(element.value, selection: Binding(
+                            get: { viewModel.selectedPersonalReasonIndex },
+                            set: { newIndex in
+                                viewModel.selectedPersonalReasonIndex = newIndex
+                                let newReason = PersonalReason.allCases[newIndex]
+                                viewModel.updateSelectedPersonalReason(newReason: newReason)
+                            }
+                        )) {
+                            ForEach(PersonalReason.allCases.indices, id: \.self) { index in
+                                Text(PersonalReason.allCases[index].rawValue).tag(index)
+                            }
+                        }
+                        .accentColor(element.semanticType.color)
+                        .padding(9)
+                    case .whichVehicle:
+                        Button(action: {
+                            showVehicleSearchView = true
+                        }, label: {
+                            Text(element.value)
+                                .padding()
+                                .foregroundColor(element.semanticType.color)
+                        })
+                    case .workersComp:
+                        Picker(element.value, selection: Binding(
+                            get: { viewModel.selectedWorkersCompReasonIndex },
+                            set: { newIndex in
+                                viewModel.selectedWorkersCompReasonIndex = newIndex
+                                let newReason = WorkersComp.allCases[newIndex]
+                                viewModel.updateSelectedWorkersComp(newReason: newReason)
+                            }
+                        )) {
+                            ForEach(WorkersComp.allCases.indices, id: \.self) { index in
+                                Text(WorkersComp.allCases[index].rawValue).tag(index)
+                            }
+                        }
+                        .accentColor(element.semanticType.color)
+                        .padding(9)
+                    case .project:
+                        Button(action: {
+                            showProjectSearchView = true
+                        }, label: {
+                            Text(element.value)
+                                .padding()
+                                .foregroundColor(element.semanticType.color)
+                        })
+                    case .forHowMany:
+                        GallonsTextField(value: $gallonsValue, placeholder: "how many")
+                            .foregroundColor(element.semanticType.color)
+                            .padding(11)
+                    case .odometer:
+                        OdometerTextField(value: $odometerValue, placeholder: "odometer")
+                            .foregroundColor(element.semanticType.color)
+                            .padding(11)
                     }
                 }
             }
@@ -151,7 +232,7 @@ struct CurrencyTextField: View {
     private let maxDigits = 10
     var placeholder: String
 
-    init(value: Binding<String>, placeholder: String = "Amount") {
+    init(value: Binding<String>, placeholder: String = "what") {
         self._value = value
         self.placeholder = placeholder
         self.formatter = NumberFormatter()
@@ -195,7 +276,7 @@ struct GallonsTextField: View {
     private let maxDigits = 10
     var placeholder: String
 
-    init(value: Binding<String>, placeholder: String = "Gallons") {
+    init(value: Binding<String>, placeholder: String = "how many") {
         self._value = value
         self.placeholder = placeholder
         self.formatter = NumberFormatter()
@@ -238,7 +319,7 @@ struct OdometerTextField: View {
     private let maxDigits = 10
     var placeholder: String
 
-    init(value: Binding<String>, placeholder: String = "Odometer") {
+    init(value: Binding<String>, placeholder: String = "odometer") {
         self._value = value
         self.placeholder = placeholder
         self.formatter = NumberFormatter()
@@ -270,5 +351,21 @@ struct OdometerTextField: View {
                 value = formattedString
             }
         }
+    }
+}
+
+struct WhoSearchView: View {
+    @Binding var selectedWho: Entity?
+    
+    var body: some View {
+        Text("Hi")
+    }
+}
+
+struct WhomSearchView: View {
+    @Binding var selectedWhom: Entity?
+    
+    var body: some View {
+        Text("Hi")
     }
 }

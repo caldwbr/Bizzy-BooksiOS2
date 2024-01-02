@@ -23,6 +23,10 @@ struct MainScreenView: View {
     @State private var showingAddItemView = false
     @State private var selectedItemType: ItemType = .business
     @State private var addItemViewModel = AddItemViewModel()
+    @State private var selectedWho: Entity?
+    @State private var selectedWhom: Entity?
+    @State private var selectedVehicle: Vehicle?
+    @State private var selectedProject: Project?
     var body: some View {
         Self._printChanges()
        return VStack {
@@ -30,7 +34,7 @@ struct MainScreenView: View {
             FilterByHStack(isFilterActive: $isFilterActive)
             BodyScrollView(isFilterActive: $isFilterActive)
            //AddItemView(viewModel: addItemViewModel, itemType: $selectedItemType)
-           FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView, selectedItemType: $selectedItemType, addItemViewModel: $addItemViewModel)
+           FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView, selectedItemType: $selectedItemType, addItemViewModel: $addItemViewModel, selectedWho: $selectedWho, selectedWhom: $selectedWhom, selectedVehicle: $selectedVehicle, selectedProject: $selectedProject)
         }
         .onChange(of: selectedItemType) { oldValue, newValue in
                 print(oldValue, newValue)
@@ -90,6 +94,10 @@ struct FooterHStack: View {
     @Binding var showingAddItemView: Bool
     @Binding var selectedItemType: ItemType
     @Binding var addItemViewModel: AddItemViewModel
+    @Binding var selectedWho: Entity?
+    @Binding var selectedWhom: Entity?
+    @Binding var selectedVehicle: Vehicle?
+    @Binding var selectedProject: Project?
     
     var body: some View {
         Self._printChanges()
@@ -128,7 +136,14 @@ struct FooterHStack: View {
             }
             .padding()
             .sheet(isPresented: $showingAddItemView) {
-                AddItemView(viewModel: addItemViewModel, itemType: $selectedItemType)
+                AddItemView(
+                    viewModel: addItemViewModel,
+                    itemType: $selectedItemType,
+                    selectedWho: $selectedWho,
+                    selectedWhom: $selectedWhom,
+                    selectedVehicle: $selectedVehicle,
+                    selectedProject: $selectedProject
+                )
             }
         }
         .padding()

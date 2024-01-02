@@ -13,7 +13,7 @@ struct Item: Identifiable, Codable {
     var latitude: Double? //nil if off
     var longitude: Double? //nil if off
     var itemType: ItemType //.business, .personal, .fuel
-    var notes: String
+    var notes: String?
     var who: String
     var whoID: String
     var what: Int
@@ -44,7 +44,17 @@ struct Entity: Identifiable, Codable {
     var address, phone, email, ein, ssn: String?
 }
 
+struct Project: Identifiable, Codable {
+    var id: String = UUID().uuidString
+    var timeStamp: TimeInterval = Date().timeIntervalSince1970
+    var name: String
+    var notes: String?
+    var customer: Entity? //Probe this for name, address, phone, email for document generation.
+    var jobsiteAddress: String?
+}
+
 enum PersonalReason: String, Codable, CaseIterable {
+    case placeholder = "personal reason"
     case food = "Food"
     case fun = "Fun"
     case pet = "Pet"
@@ -58,10 +68,15 @@ enum PersonalReason: String, Codable, CaseIterable {
     case medical = "Medical"
     case travel = "Travel"
     case clothes = "Clothes"
-    case other = "Other" // 15 Reasons Why
+    case other = "Other" // 1+15 Reasons Why
+    
+    static var displayCases: [PersonalReason] {
+            return [.placeholder] + allCases.filter { $0 != .placeholder }
+        }
 }
 
 enum TaxReason: String, Codable, CaseIterable {
+    case placeholder = "tax reason"
     case income = "Income"
     case supplies = "Supplies"
     case labor = "Labor"
@@ -84,11 +99,20 @@ enum TaxReason: String, Codable, CaseIterable {
     case mortgInt = "Mortgage Int"
     case otherInt = "Other Interest"
     case repairs = "Repairs"
-    case pension = "Pension" //23 Reasons Why
+    case pension = "Pension" //1+23 Reasons Why
+    
+    static var displayCases: [TaxReason] {
+        return [.placeholder] + allCases.filter { $0 != .placeholder }
+    }
 }
 
 enum WorkersComp: String, Codable, CaseIterable {
+    case placeholder = "workers comp"
     case wcNA = "WC N/A"
     case wcIncurred = "WC Incurred"
     case subHasWC = "Sub Has WC"
+    
+    static var displayCases: [WorkersComp] {
+        return [.placeholder] + allCases.filter { $0 != .placeholder }
+    }
 }

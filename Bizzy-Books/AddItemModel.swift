@@ -28,20 +28,10 @@ struct AddItemModel {
 struct SentenceElement: Identifiable {
     
     enum SemanticType {
-        case who //Button
-        case paid //Text
-        case what //Numeric TextField
-        case to //Text
-        case whom //Button
-        case forWhat //Text
-        case taxReason //Button
-        case personalReason //Button
-        case forHowMany //Numeric TextField
-        case gallonsOfFuelIn //Text
-        case whichVehicle //Button
-        case occuredWC //Button
-        case project //Button
-        case odometer //TextField
+        case who, whom, whichVehicle, project //Button
+        case text //paid, toW, forWhat, gallonsOfFuelIn
+        case what, forHowMany, odometer //Numeric TextField
+        case taxReason, personalReason, workersComp //picker
         
         var color: Color {
             switch self {
@@ -55,7 +45,7 @@ struct SentenceElement: Identifiable {
                 return .BizzyColor.taxReasonMagenta
             case .personalReason:
                 return .BizzyColor.personalReasonMagenta
-            case .occuredWC:
+            case .workersComp:
                 return .BizzyColor.orange
             case .project:
                 return .BizzyColor.projectBlue
@@ -65,11 +55,8 @@ struct SentenceElement: Identifiable {
                 return .BizzyColor.grey
             case .whichVehicle:
                 return .BizzyColor.orange
-            case .paid, .to, .forWhat, .gallonsOfFuelIn:
+            case .text:
                 return .black
-            default:
-                return .black
-                // ... other color associations
             }
         }
     }
@@ -77,11 +64,12 @@ struct SentenceElement: Identifiable {
     enum ElementType {
         case text(String, size: CGSize)
         case button(String, action: () -> Void, size: CGSize)
-        case textField(String, String, size: CGSize) // Placeholder and current text
+        case textField(String, String, size: CGSize)
+        case picker([String], Int, CGSize) //Array of options and selected index
     }
     
     let semanticType: SemanticType
-    let type: ElementType
+    var type: ElementType
     
     var id: String {
         switch type {
@@ -91,6 +79,9 @@ struct SentenceElement: Identifiable {
             return "button-\(title)"
         case .textField(let placeholder, _, _):
             return "textField-\(placeholder)"
+        case .picker(let options, let selectedIndex, _):
+            let optionsString = options.joined(separator: "-")
+            return "picker-\(semanticType)-\(optionsString)-\(selectedIndex)"
         }
     }
     
@@ -98,7 +89,8 @@ struct SentenceElement: Identifiable {
         switch type {
         case .text(_, let size),
              .button(_, _, let size),
-             .textField(_, _, let size):
+             .textField(_, _, let size),
+             .picker(_, _, let size):
             return size
         }
     }
@@ -109,6 +101,8 @@ struct SentenceElement: Identifiable {
              .button(let text, _, _),
              .textField(_, let text, _):
             return text
+        case .picker(let options, let selectedIndex, _):
+            return options[selectedIndex]
         }
     }
     
@@ -119,15 +113,20 @@ struct SentenceElement: Identifiable {
 }
 
 extension SentenceElement {
-    static func button(_ value: String, semanticType: SemanticType, action: @escaping () -> Void) -> Self {
-        Self(semanticType: semanticType, type: .button(value, action: action, size: CGSize()))
+    static func button(_ value: String, semanticType: SemanticType, action: @escaping () -> Void, size: CGSize) -> Self {
+        Self(semanticType: semanticType, type: .button(value, action: action, size: size))
     }
     
     static func textField(_ placeholder: String, semanticType: SemanticType, text: String, size: CGSize) -> Self {
         Self(semanticType: semanticType, type: .textField(placeholder, text, size: size))
     }
     
-    static func text(_ value: String) -> Self {
-        Self(semanticType: .forWhat, type: .text(value, size: CGSize()))
+    static func text(_ value: String, size: CGSize) -> Self {
+        Self(semanticType: .text, type: .text(value, size: size))
+    }
+    
+    static func picker(_ options: [String], semanticType: SemanticType, selectedIndex: Int = 0, size: CGSize) -> Self {
+        Self(semanticType: semanticType, type: .picker(options, selectedIndex, size))
     }
 }
+
