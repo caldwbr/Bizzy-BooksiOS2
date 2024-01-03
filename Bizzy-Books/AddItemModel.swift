@@ -8,27 +8,22 @@
 import Foundation
 import SwiftUI
 
-struct AddItemModel {
-    var sentenceElements: [SentenceElement] = []
-    
-    var elements: [SentenceElement] {
-        return sentenceElements
-    }
-
-    mutating func updateElement(at index: Int, with newElement: SentenceElement) {
-        // Ensure the index is valid
-        guard sentenceElements.indices.contains(index) else { return }
-        sentenceElements[index] = newElement
-        // Update the element for the specified category
-    }
-
-    // Add logic to calculate minimum widths based on content, if needed
-}
 
 struct SentenceElement: Identifiable {
+    var id = UUID()
+    var semanticType: SemanticType
+    var type: ElementType
+    var associatedData: Any?
+    
+    enum ElementType {
+        case text(String, size: CGSize)
+        case button(String, action: () -> Void, size: CGSize)
+        case textField(String, String, size: CGSize)
+        case picker([String], Int, CGSize) //Array options selected index
+    }
     
     enum SemanticType {
-        case who, whom, whichVehicle, project //Button
+        case who(Entity?), whom(Entity?), vehicle(Vehicle?), project(Project?) //Button
         case text //paid, toW, forWhat, gallonsOfFuelIn
         case what, forHowMany, odometer //Numeric TextField
         case taxReason, personalReason, workersComp //picker
@@ -53,7 +48,7 @@ struct SentenceElement: Identifiable {
                 return .BizzyColor.darkerGreen
             case .odometer:
                 return .BizzyColor.grey
-            case .whichVehicle:
+            case .vehicle:
                 return .BizzyColor.orange
             case .text:
                 return .black
@@ -61,29 +56,6 @@ struct SentenceElement: Identifiable {
         }
     }
     
-    enum ElementType {
-        case text(String, size: CGSize)
-        case button(String, action: () -> Void, size: CGSize)
-        case textField(String, String, size: CGSize)
-        case picker([String], Int, CGSize) //Array of options and selected index
-    }
-    
-    let semanticType: SemanticType
-    var type: ElementType
-    
-    var id: String {
-        switch type {
-        case .text(let text, _):
-            return "text-\(text)"
-        case .button(let title, _, _):
-            return "button-\(title)"
-        case .textField(let placeholder, _, _):
-            return "textField-\(placeholder)"
-        case .picker(let options, let selectedIndex, _):
-            let optionsString = options.joined(separator: "-")
-            return "picker-\(semanticType)-\(optionsString)-\(selectedIndex)"
-        }
-    }
     
     var size: CGSize {
         switch type {

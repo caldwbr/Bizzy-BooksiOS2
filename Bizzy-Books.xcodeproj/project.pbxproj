@@ -15,6 +15,14 @@
 		677B70A52B0F06BC0044216A /* BizzyAuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B70A42B0F06BC0044216A /* BizzyAuthViewController.swift */; };
 		677B70A72B0F0B3D0044216A /* EmptyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B70A62B0F0B3D0044216A /* EmptyView.swift */; };
 		677B70A92B1662A50044216A /* Silly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B70A82B1662A50044216A /* Silly.swift */; };
+		678FBB7D2B43C53900A38561 /* AddWhoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB7C2B43C53900A38561 /* AddWhoView.swift */; };
+		678FBB7F2B44D8EA00A38561 /* SentenceElementProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB7E2B44D8EA00A38561 /* SentenceElementProtocol.swift */; };
+		678FBB812B44F2A100A38561 /* AddWhomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB802B44F2A100A38561 /* AddWhomView.swift */; };
+		678FBB832B45002500A38561 /* VMSVWhoWhomVehProj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */; };
+		678FBB852B45008000A38561 /* TFCurrencyGallonsOdo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */; };
+		678FBB872B4500FD00A38561 /* LayoutFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB862B4500FD00A38561 /* LayoutFlow.swift */; };
+		678FBB892B45039800A38561 /* AddVehicleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB882B45039800A38561 /* AddVehicleView.swift */; };
+		678FBB8B2B4503A800A38561 /* AddProjectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB8A2B4503A800A38561 /* AddProjectView.swift */; };
 		67AB9AF92B35F42800FB81A1 /* SingletonDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67AB9AF82B35F42800FB81A1 /* SingletonDataManager.swift */; };
 		67AB9AFD2B35FDCF00FB81A1 /* SentenceFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67AB9AFC2B35FDCF00FB81A1 /* SentenceFlowView.swift */; };
 		67C709B52B30EED400C09CC6 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67C709B42B30EED400C09CC6 /* LoginView.swift */; };
@@ -71,6 +79,14 @@
 		677B70A42B0F06BC0044216A /* BizzyAuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BizzyAuthViewController.swift; sourceTree = "<group>"; };
 		677B70A62B0F0B3D0044216A /* EmptyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyView.swift; sourceTree = "<group>"; };
 		677B70A82B1662A50044216A /* Silly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Silly.swift; sourceTree = "<group>"; };
+		678FBB7C2B43C53900A38561 /* AddWhoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWhoView.swift; sourceTree = "<group>"; };
+		678FBB7E2B44D8EA00A38561 /* SentenceElementProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceElementProtocol.swift; sourceTree = "<group>"; };
+		678FBB802B44F2A100A38561 /* AddWhomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWhomView.swift; sourceTree = "<group>"; };
+		678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VMSVWhoWhomVehProj.swift; sourceTree = "<group>"; };
+		678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TFCurrencyGallonsOdo.swift; sourceTree = "<group>"; };
+		678FBB862B4500FD00A38561 /* LayoutFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutFlow.swift; sourceTree = "<group>"; };
+		678FBB882B45039800A38561 /* AddVehicleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddVehicleView.swift; sourceTree = "<group>"; };
+		678FBB8A2B4503A800A38561 /* AddProjectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddProjectView.swift; sourceTree = "<group>"; };
 		67AB9AF82B35F42800FB81A1 /* SingletonDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingletonDataManager.swift; sourceTree = "<group>"; };
 		67AB9AFC2B35FDCF00FB81A1 /* SentenceFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceFlowView.swift; sourceTree = "<group>"; };
 		67C709B42B30EED400C09CC6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -177,6 +193,14 @@
 				67AB9AFC2B35FDCF00FB81A1 /* SentenceFlowView.swift */,
 				670D45BC2B43161D00FF9BB3 /* FirebaseDatabase.swift */,
 				670D45BE2B43178B00FF9BB3 /* ItemModel.swift */,
+				678FBB7C2B43C53900A38561 /* AddWhoView.swift */,
+				678FBB7E2B44D8EA00A38561 /* SentenceElementProtocol.swift */,
+				678FBB802B44F2A100A38561 /* AddWhomView.swift */,
+				678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */,
+				678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */,
+				678FBB862B4500FD00A38561 /* LayoutFlow.swift */,
+				678FBB882B45039800A38561 /* AddVehicleView.swift */,
+				678FBB8A2B4503A800A38561 /* AddProjectView.swift */,
 			);
 			path = "Bizzy-Books";
 			sourceTree = "<group>";
@@ -485,15 +509,23 @@
 				674D4EB52B325BFA001699F2 /* AddItemModel.swift in Sources */,
 				67C709BD2B30F02A00C09CC6 /* AuthenticatedView.swift in Sources */,
 				67C709B72B30EF3400C09CC6 /* SignupView.swift in Sources */,
+				678FBB8B2B4503A800A38561 /* AddProjectView.swift in Sources */,
 				670D45BF2B43178B00FF9BB3 /* ItemModel.swift in Sources */,
+				678FBB7D2B43C53900A38561 /* AddWhoView.swift in Sources */,
 				67D58C482B0EC83800740E70 /* EditBusinessView.swift in Sources */,
+				678FBB812B44F2A100A38561 /* AddWhomView.swift in Sources */,
 				67416A812B30E5270098C91D /* AuthenticationViewModel.swift in Sources */,
 				67C709B92B30EF6C00C09CC6 /* UserProfileView.swift in Sources */,
+				678FBB7F2B44D8EA00A38561 /* SentenceElementProtocol.swift in Sources */,
+				678FBB892B45039800A38561 /* AddVehicleView.swift in Sources */,
+				678FBB872B4500FD00A38561 /* LayoutFlow.swift in Sources */,
+				678FBB852B45008000A38561 /* TFCurrencyGallonsOdo.swift in Sources */,
 				67C709C32B32075900C09CC6 /* ColorExtensions.swift in Sources */,
 				67C709C12B31FF4C00C09CC6 /* AddItemViewModel.swift in Sources */,
 				67AB9AFD2B35FDCF00FB81A1 /* SentenceFlowView.swift in Sources */,
 				677B70A72B0F0B3D0044216A /* EmptyView.swift in Sources */,
 				670D45BD2B43161D00FF9BB3 /* FirebaseDatabase.swift in Sources */,
+				678FBB832B45002500A38561 /* VMSVWhoWhomVehProj.swift in Sources */,
 				677B70A92B1662A50044216A /* Silly.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -667,6 +699,8 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSContactsUsageDescription = "We need access to your contacts to autofill information.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need access to your location for geo-tagging feature.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -718,6 +752,8 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSContactsUsageDescription = "We need access to your contacts to autofill information.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need access to your location for geo-tagging feature.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

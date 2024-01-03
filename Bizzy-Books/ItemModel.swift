@@ -35,6 +35,10 @@ struct Vehicle: Identifiable, Codable {
     var timeStamp: TimeInterval = Date().timeIntervalSince1970
     var year, make, model: String
     var color, picd, vin, licPlateNo: String?
+    
+    var name: String {
+        [year, make, model].joined(separator: " ")
+    }
 }
 
 struct Entity: Identifiable, Codable {

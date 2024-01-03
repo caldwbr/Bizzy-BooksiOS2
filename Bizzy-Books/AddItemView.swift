@@ -1,26 +1,5 @@
 import SwiftUI
 
-enum Align: String, CaseIterable, Identifiable {
-    case top, bottom, center, firstTextBaseline, lastTextBaseline
-
-    var id: Self { self }
-
-    var alignment: VerticalAlignment {
-        switch self {
-        case .top:
-            return .top
-        case .bottom:
-            return .bottom
-        case .center:
-            return .center
-        case .firstTextBaseline:
-            return .firstTextBaseline
-        case .lastTextBaseline:
-            return .lastTextBaseline
-        }
-    }
-}
-
 struct AddItemView: View {
     
     @ObservedObject var viewModel: AddItemViewModel
@@ -31,13 +10,77 @@ struct AddItemView: View {
     @State var odometerValue: String = ""
     @State var notesValue: String = ""
     @State var showWhoSearchView = false
-    @Binding var selectedWho: Entity?
+    @Binding var selectedWho: String
+    @Binding var selectedWhoUID: String?
     @State var showWhomSearchView = false
-    @Binding var selectedWhom: Entity?
+    @Binding var selectedWhom: String
+    @Binding var selectedWhomUID: String?
     @State var showVehicleSearchView = false
-    @Binding var selectedVehicle: Vehicle?
+    @Binding var selectedVehicle: String
+    @Binding var selectedVehicleUID: String?
     @State var showProjectSearchView = false
-    @Binding var selectedProject: Project?
+    @Binding var selectedProject: String
+    @Binding var selectedProjectUID: String?
+    @ObservedObject var whoViewModel: WhoViewModel
+    @ObservedObject var whomViewModel: WhomViewModel
+    @ObservedObject var projectViewModel: ProjectViewModel
+    @ObservedObject var vehicleViewModel: VehicleViewModel
+    @State var displaySentence: [(String?, String)]
+    @State var whichSentence: Int
+    @State var showWorkersCompToggle = false
+    @State var incursWorkersComp = false
+    @Binding var selectedTaxReason: String
+    @Binding var selectedTaxReasonUID: String?
+    @Binding var selectedPersonalReason: String
+    @Binding var selectedPersonalReasonUID: String?
+    
+    init(viewModel: AddItemViewModel,
+         itemType: Binding<ItemType>,
+         selectedWho: Binding<String>,
+         selectedWhoUID: Binding<String?>,
+         selectedWhom: Binding<String>,
+         selectedWhomUID: Binding<String?>,
+         selectedVehicle: Binding<String>,
+         selectedVehicleUID: Binding<String?>,
+         selectedProject: Binding<String>,
+         selectedProjectUID: Binding<String?>,
+         whoViewModel: WhoViewModel,
+         whomViewModel: WhomViewModel,
+         projectViewModel: ProjectViewModel,
+         vehicleViewModel: VehicleViewModel,
+         displaySentence: [(String?, String)] = Sentences.one,
+         whichSentence: Int = 1,
+         showWorkersCompToggle: Bool = false,
+         incursWorkersComp: Bool = false,
+         selectedTaxReason: Binding<String>,
+         selectedTaxReasonUID: Binding<String?>,
+         selectedPersonalReason: Binding<String>,
+         selectedPersonalReasonUID: Binding<String?>) {
+
+        self._viewModel = ObservedObject(wrappedValue: viewModel)
+        self._itemType = itemType
+        self._selectedWho = selectedWho
+        self._selectedWhoUID = selectedWhoUID
+        self._selectedWhom = selectedWhom
+        self._selectedWhomUID = selectedWhomUID
+        self._selectedVehicle = selectedVehicle
+        self._selectedVehicleUID = selectedVehicleUID
+        self._selectedProject = selectedProject
+        self._selectedProjectUID = selectedProjectUID
+        self._whoViewModel = ObservedObject(wrappedValue: whoViewModel)
+        self._whomViewModel = ObservedObject(wrappedValue: whomViewModel)
+        self._projectViewModel = ObservedObject(wrappedValue: projectViewModel)
+        self._vehicleViewModel = ObservedObject(wrappedValue: vehicleViewModel)
+        self._displaySentence = State(initialValue: Sentences.one)
+        self._whichSentence = State(initialValue: 1)
+        self._showWorkersCompToggle = State(initialValue: showWorkersCompToggle)
+        self._incursWorkersComp = State(initialValue: incursWorkersComp)
+        self._selectedTaxReason = selectedTaxReason
+        self._selectedTaxReasonUID = selectedPersonalReasonUID
+        self._selectedPersonalReason = selectedPersonalReason
+        self._selectedPersonalReasonUID = selectedPersonalReasonUID
+    }
+
     
     var body: some View {
         VStack {
@@ -45,6 +88,7 @@ struct AddItemView: View {
                 Text("Add Item")
                     .font(.largeTitle)
                     .padding()
+                Spacer()
                 Button(action: {}, label: {
                     Text("Save")
                 })
@@ -59,313 +103,138 @@ struct AddItemView: View {
             .pickerStyle(SegmentedPickerStyle())
             .padding()
             .onChange(of: itemType) { oldValue, newValue in
-                viewModel.itemType = newValue
+                switch newValue {
+                case .business:
+                    whichSentence = 1
+                    displaySentence = Sentences.one
+                case .personal:
+                    whichSentence = 2
+                    displaySentence = Sentences.two
+                case .fuel:
+                    whichSentence = 3
+                    displaySentence = Sentences.three
+                }
+            }
+            if showWorkersCompToggle {
+                Toggle(isOn: $incursWorkersComp) {
+                    Text("Incurs workers comp? (leave off if sub has w.c.)")
+                }
+                .padding()
+                .foregroundColor(Color.BizzyColor.orange)
             }
             TextField("Notes", text: $notesValue).padding()
-            
             let layout = FlowLayout(alignment: align.alignment)
             layout {
-                ForEach(viewModel.model.sentenceElements.indices, id: \.self) { index in
-                    let element = viewModel.model.sentenceElements[index]
-                    switch element.semanticType {
-                    case .text:
-                        Text(element.value)
-                            .padding()
-                    case .who:
-                        Button(action: {
-                            showWhoSearchView = true
-                        }, label: {
-                            Text(element.value)
-                                .padding()
-                                .foregroundColor(element.semanticType.color)
-                        })
-                    case .what:
-                        CurrencyTextField(value: $currencyValue, placeholder: "what")
-                            .foregroundColor(element.semanticType.color)
-                            .padding(11)
-                    case .whom:
-                        Button(action: {
-                            showWhomSearchView = true
-                        }, label: {
-                            Text(element.value)
-                                .padding()
-                                .foregroundColor(element.semanticType.color)
-                        })
-                    case .taxReason:
-                        Picker(element.value, selection: Binding(
-                            get: { viewModel.selectedTaxReasonIndex },
-                            set: { newIndex in
-                                viewModel.selectedTaxReasonIndex = newIndex
-                                let newReason = TaxReason.allCases[newIndex]
-                                viewModel.updateSelectedTaxReason(newReason: newReason)
-                            }
-                        )) {
-                            ForEach(TaxReason.allCases.indices, id: \.self) { index in
-                                Text(TaxReason.allCases[index].rawValue).tag(index)
-                            }
+                Button(action: { //0=Who
+                    showWhoSearchView = true
+                }, label: {
+                    Text(displaySentence[0].1)
+                        .padding()
+                        .foregroundColor(WhoSE.color)
+                })
+                .sheet(isPresented: $showWhoSearchView) {
+                    WhoSearchView(selectedWho: $selectedWho, selectedWhoUID: $selectedWhoUID, onSelection: { selectedWho, selectedWhoUID in
+                        displaySentence[0].0 = selectedWhoUID
+                        displaySentence[0].1 = selectedWho
+                    }, whoViewModel: whoViewModel)
+                }
+                Text(displaySentence[1].1).padding() //1=Paid
+                CurrencyTextField(value: $currencyValue,  placeholder: "what") //2=What
+                    .foregroundColor(WhatSE.color)
+                    .padding(11)
+                Text(displaySentence[3].1).padding() //3=ToW
+                Button(action: { //4=Whom
+                    showWhomSearchView = true
+                }, label: {
+                    Text(displaySentence[4].1)
+                        .padding()
+                        .foregroundColor(WhomSE.color)
+                })
+                .sheet(isPresented: $showWhomSearchView) {
+                    WhomSearchView(selectedWhom: $selectedWhom, selectedWhomUID: $selectedWhomUID, onSelection: { selected, selectedUID in
+                        displaySentence[4].0 = selectedUID
+                        displaySentence[4].1 = selected
+                    }, whomViewModel: whomViewModel)
+                }
+                switch whichSentence {
+                case 1: //Business
+                    Text(displaySentence[5].1).padding() //5=forW, below, 6=TaxReason
+                    Picker(displaySentence[6].1, selection: $selectedTaxReasonUID) {
+                        ForEach(TaxReason.allCases.indices, id: \.self) { index in
+                            Text(TaxReason.allCases[index].rawValue).tag(index)
                         }
-                        .accentColor(element.semanticType.color)
-                        .padding(9)
-                    case .personalReason:
-                        Picker(element.value, selection: Binding(
-                            get: { viewModel.selectedPersonalReasonIndex },
-                            set: { newIndex in
-                                viewModel.selectedPersonalReasonIndex = newIndex
-                                let newReason = PersonalReason.allCases[newIndex]
-                                viewModel.updateSelectedPersonalReason(newReason: newReason)
-                            }
-                        )) {
-                            ForEach(PersonalReason.allCases.indices, id: \.self) { index in
-                                Text(PersonalReason.allCases[index].rawValue).tag(index)
-                            }
-                        }
-                        .accentColor(element.semanticType.color)
-                        .padding(9)
-                    case .whichVehicle:
-                        Button(action: {
-                            showVehicleSearchView = true
-                        }, label: {
-                            Text(element.value)
-                                .padding()
-                                .foregroundColor(element.semanticType.color)
-                        })
-                    case .workersComp:
-                        Picker(element.value, selection: Binding(
-                            get: { viewModel.selectedWorkersCompReasonIndex },
-                            set: { newIndex in
-                                viewModel.selectedWorkersCompReasonIndex = newIndex
-                                let newReason = WorkersComp.allCases[newIndex]
-                                viewModel.updateSelectedWorkersComp(newReason: newReason)
-                            }
-                        )) {
-                            ForEach(WorkersComp.allCases.indices, id: \.self) { index in
-                                Text(WorkersComp.allCases[index].rawValue).tag(index)
-                            }
-                        }
-                        .accentColor(element.semanticType.color)
-                        .padding(9)
-                    case .project:
-                        Button(action: {
-                            showProjectSearchView = true
-                        }, label: {
-                            Text(element.value)
-                                .padding()
-                                .foregroundColor(element.semanticType.color)
-                        })
-                    case .forHowMany:
-                        GallonsTextField(value: $gallonsValue, placeholder: "how many")
-                            .foregroundColor(element.semanticType.color)
-                            .padding(11)
-                    case .odometer:
-                        OdometerTextField(value: $odometerValue, placeholder: "odometer")
-                            .foregroundColor(element.semanticType.color)
-                            .padding(11)
                     }
+                    .onChange(of: Int(selectedTaxReasonUID!)!) { newIndex, _ in
+                        let newReason = TaxReason.allCases[newIndex].rawValue
+                        displaySentence[6] = (String(newIndex), newReason)
+                        if newReason == "Workers Comp" {
+                            showWorkersCompToggle = true
+                        } else {
+                            showWorkersCompToggle = false
+                        }
+                    }
+                    .accentColor(TaxReasonSE.color)
+                    .padding(9)
+                    Button(action: { //7=Project
+                        showProjectSearchView = true
+                    }, label: {
+                        Text(displaySentence[7].1)
+                            .padding()
+                            .foregroundColor(ProjectSE.color)
+                    })
+                    .sheet(isPresented: $showProjectSearchView) {
+                        ProjectSearchView(selectedProject: $selectedProject, selectedProjectUID: $selectedProjectUID, onSelection: { selectedProject, selectedProjectUID in
+                            displaySentence[7].0 = selectedProjectUID
+                            displaySentence[7].1 = selectedProject
+                        }, projectViewModel: projectViewModel)
+                    }
+                case 2:
+                    Text(displaySentence[5].1).padding() //5=forW, below, 6=PersonalReason
+                    Picker(displaySentence[6].1, selection: Binding(
+                        get: { viewModel.selectedPersonalReasonIndex },
+                        set: { newIndex in
+                            viewModel.selectedPersonalReasonIndex = newIndex
+                            let newReason = PersonalReason.allCases[newIndex]
+                            viewModel.updateSelectedPersonalReason(newReason: newReason)
+                        }
+                    )) {
+                        ForEach(PersonalReason.allCases.indices, id: \.self) { index in
+                            Text(PersonalReason.allCases[index].rawValue).tag(index)
+                        }
+                    }
+                    .accentColor(PersonalReasonSE.color)
+                    .padding(9)
+                default: //case 3:
+                    Text(displaySentence[5].1).padding() //5=forH, below, 6=HowMany
+                    GallonsTextField(value: $gallonsValue, placeholder: displaySentence[6].1)
+                        .foregroundColor(HowManySE.color)
+                        .padding(11)
+                    Text(displaySentence[7].1).padding() //7=GallonsOfFuelIn, 8=Vehicle
+                    Button(action: {
+                        showVehicleSearchView = true
+                    }, label: {
+                        Text(displaySentence[8].1)
+                            .padding()
+                            .foregroundColor(VehicleSE.color)
+                    })
+                    .sheet(isPresented: $showVehicleSearchView) {
+                        VehicleSearchView(selectedVehicle: $selectedVehicle, selectedVehicleUID: $selectedVehicleUID, onSelection: { selectedVehicle, selectedVehicleUID in
+                            displaySentence[8].0 = selectedVehicleUID
+                            displaySentence[8].1 = selectedVehicle
+                        }, vehicleViewModel: vehicleViewModel)
+                    }
+                    OdometerTextField(value: $odometerValue, placeholder: displaySentence[9].1)
+                        .foregroundColor(OdometerSE.color)
+                        .padding(11)
                 }
             }
             .animation(.default, value: align)
-            .frame(maxHeight: .infinity)
+            .frame(maxHeight: 300)
         }
-    }
-
-}
-
-struct FlowLayout: Layout {
-    var alignment: VerticalAlignment
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let containerWidth = proposal.replacingUnspecifiedDimensions().width
-        let dimensions = subviews.map { $0.dimensions(in: .unspecified) }
-        return layout(dimensions: dimensions, containerWidth: containerWidth, alignment: alignment).size
-    }
-    
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let dimensions = subviews.map { $0.dimensions(in: .unspecified) }
-        let offsets = layout(dimensions: dimensions, containerWidth: bounds.width, alignment: alignment).offsets
-        for (offset, subview) in zip(offsets, subviews) {
-            subview.place(at: CGPoint(x: offset.x + bounds.minX, y: offset.y + bounds.minY), proposal: .unspecified)
+        .padding()
+        .onAppear {
+            Sentences.clearValues()
         }
     }
 }
 
-func layout(dimensions: [ViewDimensions], spacing: CGFloat = 10, containerWidth: CGFloat, alignment: VerticalAlignment) -> (offsets: [CGPoint], size: CGSize) {
-    var result: [CGRect] = []
-    var currentPosition: CGPoint = .zero
-    var currentLine: [CGRect] = []
-    var maxLineHeight: CGFloat = 0
-    
-    func flushLine() {
-        currentPosition.x = 0
-        let union = currentLine.union
-        result.append(contentsOf: currentLine.map { rect in
-            var copy = rect
-            copy.origin.y += currentPosition.y - union.minY
-            return copy
-        })
-        
-        currentPosition.y += union.height + spacing
-        currentLine.removeAll()
-    }
-    
-    for dim in dimensions {
-        if currentPosition.x + dim.width > containerWidth {
-            flushLine()
-        }
-        
-        currentLine.append(CGRect(x: currentPosition.x, y: dim[alignment], width: dim.width, height: dim.height))
-        currentPosition.x += dim.width
-        currentPosition.x += spacing
-    }
-    flushLine()
-    
-    return (result.map { $0.origin }, result.union.size)
-}
-
-extension Sequence where Element == CGRect {
-    var union: CGRect {
-        reduce(.null, { $0.union($1) })
-    }
-}
-
-struct CurrencyTextField: View {
-    @Binding var value: String
-    private let formatter: NumberFormatter
-    private let maxDigits = 10
-    var placeholder: String
-
-    init(value: Binding<String>, placeholder: String = "what") {
-        self._value = value
-        self.placeholder = placeholder
-        self.formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencySymbol = "$"
-        formatter.maximumFractionDigits = 2
-        formatter.minimumFractionDigits = 2
-    }
-
-    var body: some View {
-        ZStack(alignment: .leading) {
-            if value.isEmpty {
-                Text(placeholder)
-                    .foregroundColor(Color.BizzyColor.whatGreen)
-                    .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
-            }
-            TextField("", text: $value)
-                .foregroundColor(Color.BizzyColor.whatGreen)
-                .keyboardType(.decimalPad)
-                .onChange(of: value) { newValue in
-                    formatCurrencyInput(newValue)
-                }
-                .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
-        }
-    }
-
-    private func formatCurrencyInput(_ input: String) {
-        let numericString = input.filter { "0123456789".contains($0) }
-        if let intValue = Int(numericString), intValue < Int(pow(10.0, Double(maxDigits))) {
-            let centsValue = Double(intValue) / 100.0
-            if let formattedString = formatter.string(from: NSNumber(value: centsValue)) {
-                value = formattedString
-            }
-        }
-    }
-}
-
-struct GallonsTextField: View {
-    @Binding var value: String
-    private let formatter: NumberFormatter
-    private let maxDigits = 10
-    var placeholder: String
-
-    init(value: Binding<String>, placeholder: String = "how many") {
-        self._value = value
-        self.placeholder = placeholder
-        self.formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 3
-        formatter.minimumFractionDigits = 3
-    }
-
-    var body: some View {
-        ZStack(alignment: .leading) {
-            if value.isEmpty {
-                Text(placeholder)
-                    .foregroundColor(Color.BizzyColor.darkerGreen)
-                    .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
-            }
-            TextField("", text: $value)
-                .foregroundColor(Color.BizzyColor.darkerGreen)
-                .keyboardType(.decimalPad)
-                .onChange(of: value) { newValue in
-                    formatGallonsInput(newValue)
-                }
-                .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
-        }
-    }
-
-    private func formatGallonsInput(_ input: String) {
-        let numericString = input.filter { "0123456789".contains($0) }
-        if let intValue = Int(numericString), intValue < Int(pow(10.0, Double(maxDigits))) {
-            let gallonsValue = Double(intValue) / 1000.0 // Starting with three decimal points
-            if let formattedString = formatter.string(from: NSNumber(value: gallonsValue)) {
-                value = formattedString
-            }
-        }
-    }
-}
-
-struct OdometerTextField: View {
-    @Binding var value: String
-    private let formatter: NumberFormatter
-    private let maxDigits = 10
-    var placeholder: String
-
-    init(value: Binding<String>, placeholder: String = "odometer") {
-        self._value = value
-        self.placeholder = placeholder
-        self.formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 0 // No fractional part
-    }
-
-    var body: some View {
-        ZStack(alignment: .leading) {
-            if value.isEmpty {
-                Text(placeholder)
-                    .foregroundColor(Color.BizzyColor.grey)
-                    .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
-            }
-            TextField("", text: $value)
-                .foregroundColor(Color.BizzyColor.grey)
-                .keyboardType(.numberPad)
-                .onChange(of: value) { newValue in
-                    formatOdometerInput(newValue)
-                }
-                .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
-        }
-    }
-
-    private func formatOdometerInput(_ input: String) {
-        let numericString = input.filter { "0123456789".contains($0) }
-        if let intValue = Int(numericString), intValue < Int(pow(10.0, Double(maxDigits))) {
-            if let formattedString = formatter.string(from: NSNumber(value: intValue)) {
-                value = formattedString
-            }
-        }
-    }
-}
-
-struct WhoSearchView: View {
-    @Binding var selectedWho: Entity?
-    
-    var body: some View {
-        Text("Hi")
-    }
-}
-
-struct WhomSearchView: View {
-    @Binding var selectedWhom: Entity?
-    
-    var body: some View {
-        Text("Hi")
-    }
-}

@@ -23,18 +23,52 @@ struct MainScreenView: View {
     @State private var showingAddItemView = false
     @State private var selectedItemType: ItemType = .business
     @State private var addItemViewModel = AddItemViewModel()
-    @State private var selectedWho: Entity?
-    @State private var selectedWhom: Entity?
-    @State private var selectedVehicle: Vehicle?
-    @State private var selectedProject: Project?
+    @State private var whoViewModel = WhoViewModel()
+    @State private var whomViewModel = WhomViewModel()
+    @State private var projectViewModel = ProjectViewModel()
+    @State private var vehicleViewModel = VehicleViewModel()
+    @State private var selectedWho: String = WhoSE.tuple.1
+    @State private var selectedWhoUID: String? = nil
+    @State private var selectedWhom: String = WhomSE.tuple.1
+    @State private var selectedWhomUID: String? = nil
+    @State private var selectedVehicle: String = VehicleSE.tuple.1
+    @State private var selectedVehicleUID: String? = nil
+    @State private var selectedProject: String = WhoSE.tuple.1
+    @State private var selectedProjectUID: String? = nil
+    @State private var selectedTaxReason: String = TaxReasonSE.tuple.1
+    @State private var selectedTaxReasonUID: String? = TaxReasonSE.tuple.0
+    @State private var selectedPersonalReason: String = PersonalReasonSE.tuple.1
+    @State private var selectedPersonalReasonUID: String? = PersonalReasonSE.tuple.0
     var body: some View {
         Self._printChanges()
        return VStack {
             HeaderHStack(isFilterActive: $isFilterActive)
             FilterByHStack(isFilterActive: $isFilterActive)
             BodyScrollView(isFilterActive: $isFilterActive)
-           //AddItemView(viewModel: addItemViewModel, itemType: $selectedItemType)
-           FooterHStack(isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView, selectedItemType: $selectedItemType, addItemViewModel: $addItemViewModel, selectedWho: $selectedWho, selectedWhom: $selectedWhom, selectedVehicle: $selectedVehicle, selectedProject: $selectedProject)
+            FooterHStack(
+                isFilterActive: $isFilterActive,
+                isEditing: $isEditing,
+                isEditingSheetPresented: $isEditingSheetPresented,
+                showingAddItemView: $showingAddItemView,
+                selectedItemType: $selectedItemType,
+                addItemViewModel: $addItemViewModel,
+                selectedWho: $selectedWho,
+                selectedWhoUID: $selectedWhoUID,
+                selectedWhom: $selectedWhom,
+                selectedWhomUID: $selectedWhomUID,
+                selectedVehicle: $selectedVehicle,
+                selectedVehicleUID: $selectedVehicleUID,
+                selectedProject: $selectedProject,
+                selectedProjectUID: $selectedProjectUID,
+                whoViewModel: $whoViewModel,
+                whomViewModel: $whomViewModel,
+                projectViewModel: $projectViewModel, 
+                vehicleViewModel: $vehicleViewModel,
+                selectedTaxReason: $selectedTaxReason,
+                selectedTaxReasonUID: $selectedTaxReasonUID,
+                selectedPersonalReason: $selectedPersonalReason,
+                selectedPersonalReasonUID: $selectedPersonalReasonUID
+            )
         }
         .onChange(of: selectedItemType) { oldValue, newValue in
                 print(oldValue, newValue)
@@ -94,10 +128,22 @@ struct FooterHStack: View {
     @Binding var showingAddItemView: Bool
     @Binding var selectedItemType: ItemType
     @Binding var addItemViewModel: AddItemViewModel
-    @Binding var selectedWho: Entity?
-    @Binding var selectedWhom: Entity?
-    @Binding var selectedVehicle: Vehicle?
-    @Binding var selectedProject: Project?
+    @Binding var selectedWho: String
+    @Binding var selectedWhoUID: String?
+    @Binding var selectedWhom: String
+    @Binding var selectedWhomUID: String?
+    @Binding var selectedVehicle: String
+    @Binding var selectedVehicleUID: String?
+    @Binding var selectedProject: String
+    @Binding var selectedProjectUID: String?
+    @Binding var whoViewModel: WhoViewModel
+    @Binding var whomViewModel: WhomViewModel
+    @Binding var projectViewModel: ProjectViewModel
+    @Binding var vehicleViewModel: VehicleViewModel
+    @Binding var selectedTaxReason: String
+    @Binding var selectedTaxReasonUID: String?
+    @Binding var selectedPersonalReason: String
+    @Binding var selectedPersonalReasonUID: String?
     
     var body: some View {
         Self._printChanges()
@@ -136,14 +182,7 @@ struct FooterHStack: View {
             }
             .padding()
             .sheet(isPresented: $showingAddItemView) {
-                AddItemView(
-                    viewModel: addItemViewModel,
-                    itemType: $selectedItemType,
-                    selectedWho: $selectedWho,
-                    selectedWhom: $selectedWhom,
-                    selectedVehicle: $selectedVehicle,
-                    selectedProject: $selectedProject
-                )
+                AddItemView(viewModel: addItemViewModel, itemType: $selectedItemType, selectedWho: $selectedWho, selectedWhoUID: $selectedWhoUID, selectedWhom: $selectedWhom, selectedWhomUID: $selectedWhomUID, selectedVehicle: $selectedVehicle, selectedVehicleUID: $selectedVehicleUID, selectedProject: $selectedProject, selectedProjectUID: $selectedProjectUID, whoViewModel: whoViewModel, whomViewModel: whomViewModel, projectViewModel: projectViewModel, vehicleViewModel: vehicleViewModel, selectedTaxReason: $selectedTaxReason, selectedTaxReasonUID: $selectedTaxReasonUID, selectedPersonalReason: $selectedPersonalReason, selectedPersonalReasonUID: $selectedPersonalReasonUID)
             }
         }
         .padding()
