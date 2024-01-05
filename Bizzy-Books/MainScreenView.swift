@@ -1,20 +1,93 @@
-//
-//  ContentView.swift
-//  Bizzy-Books
-//
-//  Created by Brad Caldwell on 11/22/23.
-//
-
 import Foundation
 import SwiftUI
 import Firebase
 import Combine
 
 class MainScreenViewModel: ObservableObject {
+    @Published var items: [Item] = []
+    @Published var entities: [Entity] = []
+    @Published var projects: [Project] = []
+    @Published var vehicles: [Vehicle] = []
+    @Published var userEntity: Entity? // Replace YourEntityType with your actual data model.
+
+    @Published private var uid: String = ""
+    @Published private var userRef: DatabaseReference!
+
+    @Published private var itemsRef: DatabaseReference!
+    @Published private var entitiesRef: DatabaseReference!
+    @Published private var projectsRef: DatabaseReference!
+    @Published private var vehiclesRef: DatabaseReference!
+
+    private var db = Firestore.firestore()
+
     init() {
-        
+        configureFirebaseReferences()
+        fetchDataFromFirebase()
+        checkAndCreateYouEntity()
+    }
+
+    private func configureFirebaseReferences() {
+        uid = Auth.auth().currentUser?.uid ?? ""
+        userRef = Database.database().reference().child("users").child(uid)
+
+        // Access the data for the specific user.
+        itemsRef = userRef.child("items")
+        entitiesRef = userRef.child("entities")
+        projectsRef = userRef.child("projects")
+        vehiclesRef = userRef.child("vehicles")
+    }
+
+    private func fetchDataFromFirebase() {
+        // Use Firebase's observe methods to read data from the references.
+        itemsRef.observe(.value) { snapshot in
+            // Parse and populate the 'items' array from the snapshot.
+            // Ensure you decode the snapshot data into 'Item' objects.
+        }
+
+        entitiesRef.observe(.value) { snapshot in
+            // Parse and populate the 'entities' array from the snapshot.
+            // Ensure you decode the snapshot data into 'Entity' objects.
+        }
+
+        projectsRef.observe(.value) { snapshot in
+            // Parse and populate the 'projects' array from the snapshot.
+            // Ensure you decode the snapshot data into 'Project' objects.
+        }
+
+        vehiclesRef.observe(.value) { snapshot in
+            // Parse and populate the 'vehicles' array from the snapshot.
+            // Ensure you decode the snapshot data into 'Vehicle' objects.
+        }
+    }
+
+    private func checkAndCreateYouEntity() {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            return // User is not logged in, so we can't create the entity.
+        }
+
+        let youEntityRef = Database.database().reference().child("users").child(uid).child("entities").child(uid)
+
+        youEntityRef.observeSingleEvent(of: .value) { snapshot in
+            if snapshot.exists() {
+                // "you" entity already exists, retrieve it if needed.
+            } else {
+                // "you" entity does not exist, create it and upload to the Realtime Database.
+                let newEntity = Entity(id: uid, name: "You")
+                let newEntityData = try? JSONEncoder().encode(newEntity)
+
+                youEntityRef.setValue(newEntityData) { error, _ in
+                    if let error = error {
+                        print("Error creating/updating entity: \(error)")
+                    } else {
+                        self.userEntity = newEntity
+                    }
+                }
+            }
+        }
     }
 }
+
+
 
 struct MainScreenView: View {
     @State private var isFilterActive = false
@@ -22,7 +95,7 @@ struct MainScreenView: View {
     @State private var isEditingSheetPresented = false
     @State private var showingAddItemView = false
     @State private var selectedItemType: ItemType = .business
-    @State private var addItemViewModel = AddItemViewModel()
+    @ObservedObject var addItemViewModel = AddItemViewModel()
     @State private var whoViewModel = WhoViewModel()
     @State private var whomViewModel = WhomViewModel()
     @State private var projectViewModel = ProjectViewModel()
@@ -51,7 +124,7 @@ struct MainScreenView: View {
                 isEditingSheetPresented: $isEditingSheetPresented,
                 showingAddItemView: $showingAddItemView,
                 selectedItemType: $selectedItemType,
-                addItemViewModel: $addItemViewModel,
+                addItemViewModel: addItemViewModel,
                 selectedWho: $selectedWho,
                 selectedWhoUID: $selectedWhoUID,
                 selectedWhom: $selectedWhom,
@@ -127,7 +200,7 @@ struct FooterHStack: View {
     @Binding var isEditingSheetPresented: Bool
     @Binding var showingAddItemView: Bool
     @Binding var selectedItemType: ItemType
-    @Binding var addItemViewModel: AddItemViewModel
+    @ObservedObject var addItemViewModel: AddItemViewModel
     @Binding var selectedWho: String
     @Binding var selectedWhoUID: String?
     @Binding var selectedWhom: String

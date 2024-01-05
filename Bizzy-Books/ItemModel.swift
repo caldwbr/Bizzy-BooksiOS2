@@ -45,7 +45,7 @@ struct Entity: Identifiable, Codable {
     var id: String = UUID().uuidString
     var timeStamp: TimeInterval = Date().timeIntervalSince1970
     var name: String
-    var address, phone, email, ein, ssn: String?
+    var businessName, street, city, state, zip, phone, email, ein, ssn: String?
 }
 
 struct Project: Identifiable, Codable {
@@ -54,7 +54,7 @@ struct Project: Identifiable, Codable {
     var name: String
     var notes: String?
     var customer: Entity? //Probe this for name, address, phone, email for document generation.
-    var jobsiteAddress: String?
+    var jobsiteStreet, jobsiteCity, jobsiteState, jobsiteZip: String?
 }
 
 enum PersonalReason: String, Codable, CaseIterable {

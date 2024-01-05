@@ -44,6 +44,7 @@ struct WhoSearchView: View {
                         .onTapGesture {
                             self.selectedWho = entity.name
                             self.searchQuery = entity.name
+                            self.selectedWhoUID = entity.id
                         }
                 }
                 .listStyle(PlainListStyle())
@@ -52,7 +53,7 @@ struct WhoSearchView: View {
                     presentationMode.wrappedValue.dismiss()
                     onSelection(selectedWho, selectedWhoUID!)
                 }
-                .disabled(selectedWho == nil)
+                .disabled(selectedWhoUID == nil)
                 .padding()
             }
             .navigationBarTitle("Who")
@@ -72,6 +73,7 @@ class WhoViewModel: ObservableObject {
         // Load your entities here
         // For example:
         whoEntities = [
+            Entity(name: "Steve Caldwell"),
             Entity(name: "Entity 1"),
             Entity(name: "Entity 2"),
             Entity(name: "Entity 3")
@@ -156,6 +158,7 @@ struct WhomSearchView: View {
                         .onTapGesture {
                             self.selectedWhom = entity.name
                             self.searchQuery = entity.name
+                            self.selectedWhomUID = entity.id
                         }
                 }
                 .listStyle(PlainListStyle())
@@ -173,8 +176,8 @@ struct WhomSearchView: View {
 }
 
 class VehicleViewModel: ObservableObject {
-    @Published var vehicles: [Entity] = []
-    @Published var filteredVehicles: [Entity] = []
+    @Published var vehicles: [Vehicle] = []
+    @Published var filteredVehicles: [Vehicle] = []
     
     init() {
         loadVehicles()
@@ -184,9 +187,9 @@ class VehicleViewModel: ObservableObject {
         // Load your entities here
         // For example:
         vehicles = [
-            Entity(name: "Entity 1"),
-            Entity(name: "Entity 2"),
-            Entity(name: "Entity 3")
+            Vehicle(year: "2012", make: "Toyota", model: "Prius"),
+            Vehicle(year: "2015", make: "Toyota", model: "Prius"),
+            Vehicle(year: "2018", make: "Toyota", model: "Prius")
         ]
         filteredVehicles = vehicles
     }
@@ -238,6 +241,7 @@ struct VehicleSearchView: View {
                         .onTapGesture {
                             self.selectedVehicle = vehicle.name
                             self.searchQuery = vehicle.name
+                            self.selectedVehicleUID = vehicle.id
                         }
                 }
                 .listStyle(PlainListStyle())
@@ -255,8 +259,8 @@ struct VehicleSearchView: View {
 }
 
 class ProjectViewModel: ObservableObject {
-    @Published var projects: [Entity] = []
-    @Published var filteredProjects: [Entity] = []
+    @Published var projects: [Project] = []
+    @Published var filteredProjects: [Project] = []
     
     init() {
         loadProjects()
@@ -266,9 +270,9 @@ class ProjectViewModel: ObservableObject {
         // Load your entities here
         // For example:
         projects = [
-            Entity(name: "Entity 1"),
-            Entity(name: "Entity 2"),
-            Entity(name: "Entity 3")
+            Project(name: "Entity 1"),
+            Project(name: "Entity 2"),
+            Project(name: "Entity 3")
         ]
         filteredProjects = projects
     }
@@ -320,6 +324,7 @@ struct ProjectSearchView: View {
                         .onTapGesture {
                             self.selectedProject = project.name
                             self.searchQuery = project.name
+                            self.selectedProjectUID = project.id
                         }
                 }
                 .listStyle(PlainListStyle())
