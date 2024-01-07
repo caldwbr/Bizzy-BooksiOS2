@@ -8,6 +8,6 @@
 import Foundation
 import FirebaseDatabase
 
-let dbRef = Database.database().reference()
+//let dbRef = Database.database().reference()
 
 

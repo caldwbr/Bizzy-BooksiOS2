@@ -9,10 +9,10 @@ import SwiftUI
 
 struct AddProjectView: View {
     @State private var projectName = ""
-    @State private var customer: Entity
+    @State private var customer: Entity? = nil
     @State private var customerName = ""
     @State private var customerUID: String? = nil
-    @State private var suggestedCustomers: [Entity] = [Entity(id: "yo", name: "S T C")]
+    @State private var suggestedCustomers: [Entity] = []
     @State private var email = ""
     @State private var phone = ""
     @State private var street = ""
@@ -51,8 +51,8 @@ struct AddProjectView: View {
     func searchCustomers(for query: String) -> [Entity] {
         var matchingCustomers: [Entity] = []
         
-        if customer.name.contains(query.lowercased()) {
-            matchingCustomers.append(customer)
+        if ((customer?.name.contains(query.lowercased())) != nil) {
+            matchingCustomers.append(customer!)
         }
         return matchingCustomers
     }

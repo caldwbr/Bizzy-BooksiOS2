@@ -46,8 +46,3 @@ struct EditBusinessView: View {
     }
 }
 
-struct EditBusinessView_Previews: PreviewProvider {
-    static var previews: some View {
-        EditBusinessView()
-    }
-}

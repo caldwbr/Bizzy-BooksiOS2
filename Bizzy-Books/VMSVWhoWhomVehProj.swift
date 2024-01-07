@@ -7,15 +7,13 @@
 
 import Foundation
 import SwiftUI
+import Observation
 
 struct WhoSearchView: View {
-    @Binding var selectedWho: String
-    @Binding var selectedWhoUID: String?
+    @Bindable var model: Model
     @Environment(\.presentationMode) var presentationMode
-    var onSelection: (String, String) -> Void
     @State private var searchQuery = ""
     @State private var showingAddWhoView = false
-    @ObservedObject var whoViewModel: WhoViewModel
     
     var body: some View {
         NavigationView {
@@ -25,7 +23,7 @@ struct WhoSearchView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
                         .onChange(of: searchQuery) { newValue, _ in
-                            whoViewModel.searchEntities(query: newValue)
+                            model.whoSearchEntities(query: newValue)
                         }
 
                     Button(action: {
@@ -39,21 +37,20 @@ struct WhoSearchView: View {
                     }
                 }
 
-                List(whoViewModel.filteredWhoEntities, id: \.id) { entity in // Assuming Entity conforms to Identifiable
+                List(model.filteredWhoEntities, id: \.id) { entity in // Assuming Entity conforms to Identifiable
                     Text(entity.name)
                         .onTapGesture {
-                            self.selectedWho = entity.name
+                            model.selectedWho = entity.name
                             self.searchQuery = entity.name
-                            self.selectedWhoUID = entity.id
+                            model.selectedWhoUID = entity.id
                         }
                 }
                 .listStyle(PlainListStyle())
                 
                 Button("Select") {
                     presentationMode.wrappedValue.dismiss()
-                    onSelection(selectedWho, selectedWhoUID!)
                 }
-                .disabled(selectedWhoUID == nil)
+                .disabled(model.selectedWhoUID.isEmpty)
                 .padding()
             }
             .navigationBarTitle("Who")
@@ -61,75 +58,11 @@ struct WhoSearchView: View {
     }
 }
 
-class WhoViewModel: ObservableObject {
-    @Published var whoEntities: [Entity] = []
-    @Published var filteredWhoEntities: [Entity] = []
-    
-    init() {
-        loadWhoEntities()
-    }
-
-    private func loadWhoEntities() {
-        // Load your entities here
-        // For example:
-        whoEntities = [
-            Entity(name: "Steve Caldwell"),
-            Entity(name: "Entity 1"),
-            Entity(name: "Entity 2"),
-            Entity(name: "Entity 3")
-        ]
-        filteredWhoEntities = whoEntities
-    }
-    
-    func searchEntities(query: String) {
-        if query.isEmpty {
-            filteredWhoEntities = whoEntities
-        } else {
-            filteredWhoEntities = whoEntities.filter { entity in
-                entity.name.lowercased().contains(query.lowercased())
-            }
-        }
-    }
-}
-
-class WhomViewModel: ObservableObject {
-    @Published var whomEntities: [Entity] = []
-    @Published var filteredWhomEntities: [Entity] = []
-    
-    init() {
-        loadWhomEntities()
-    }
-
-    private func loadWhomEntities() {
-        // Load your entities here
-        // For example:
-        whomEntities = [
-            Entity(name: "Entity 1"),
-            Entity(name: "Entity 2"),
-            Entity(name: "Entity 3")
-        ]
-        filteredWhomEntities = whomEntities
-    }
-    
-    func searchEntities(query: String) {
-        if query.isEmpty {
-            filteredWhomEntities = whomEntities
-        } else {
-            filteredWhomEntities = whomEntities.filter { entity in
-                entity.name.lowercased().contains(query.lowercased())
-            }
-        }
-    }
-}
-
 struct WhomSearchView: View {
-    @Binding var selectedWhom: String
-    @Binding var selectedWhomUID: String?
+    @Bindable var model: Model
     @Environment(\.presentationMode) var presentationMode
-    var onSelection: (String, String) -> Void
     @State private var searchQuery = ""
     @State private var showingAddWhomView = false
-    @ObservedObject var whomViewModel: WhomViewModel
     
     var body: some View {
         NavigationView {
@@ -139,7 +72,7 @@ struct WhomSearchView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
                         .onChange(of: searchQuery) { newValue, _ in
-                            whomViewModel.searchEntities(query: newValue)
+                            model.whomSearchEntities(query: newValue)
                         }
 
                     Button(action: {
@@ -153,21 +86,20 @@ struct WhomSearchView: View {
                     }
                 }
 
-                List(whomViewModel.filteredWhomEntities, id: \.id) { entity in // Assuming Entity conforms to Identifiable
+                List(model.filteredWhomEntities, id: \.id) { entity in // Assuming Entity conforms to Identifiable
                     Text(entity.name)
                         .onTapGesture {
-                            self.selectedWhom = entity.name
+                            model.selectedWhom = entity.name
                             self.searchQuery = entity.name
-                            self.selectedWhomUID = entity.id
+                            model.selectedWhomUID = entity.id
                         }
                 }
                 .listStyle(PlainListStyle())
                 
                 Button("Select") {
                     presentationMode.wrappedValue.dismiss()
-                    onSelection(selectedWhom, selectedWhomUID!)
                 }
-                .disabled(selectedWhomUID == nil)
+                .disabled(model.selectedWhomUID.isEmpty)
                 .padding()
             }
             .navigationBarTitle("Who")
@@ -175,44 +107,11 @@ struct WhomSearchView: View {
     }
 }
 
-class VehicleViewModel: ObservableObject {
-    @Published var vehicles: [Vehicle] = []
-    @Published var filteredVehicles: [Vehicle] = []
-    
-    init() {
-        loadVehicles()
-    }
-
-    private func loadVehicles() {
-        // Load your entities here
-        // For example:
-        vehicles = [
-            Vehicle(year: "2012", make: "Toyota", model: "Prius"),
-            Vehicle(year: "2015", make: "Toyota", model: "Prius"),
-            Vehicle(year: "2018", make: "Toyota", model: "Prius")
-        ]
-        filteredVehicles = vehicles
-    }
-    
-    func searchVehicles(query: String) {
-        if query.isEmpty {
-            filteredVehicles = vehicles
-        } else {
-            filteredVehicles = vehicles.filter { vehicle in
-                vehicle.name.lowercased().contains(query.lowercased())
-            }
-        }
-    }
-}
-
 struct VehicleSearchView: View {
-    @Binding var selectedVehicle: String
-    @Binding var selectedVehicleUID: String?
+    @Bindable var model: Model
     @Environment(\.presentationMode) var presentationMode
-    var onSelection: (String, String) -> Void
     @State private var searchQuery = ""
     @State private var showingAddVehicleView = false
-    @ObservedObject var vehicleViewModel: VehicleViewModel
     
     var body: some View {
         NavigationView {
@@ -222,7 +121,7 @@ struct VehicleSearchView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
                         .onChange(of: searchQuery) { newValue, _ in
-                            vehicleViewModel.searchVehicles(query: newValue)
+                            model.searchVehicles(query: newValue)
                         }
 
                     Button(action: {
@@ -236,21 +135,20 @@ struct VehicleSearchView: View {
                     }
                 }
 
-                List(vehicleViewModel.filteredVehicles, id: \.id) { vehicle in // Assuming Entity conforms to Identifiable
+                List(model.filteredVehicles, id: \.id) { vehicle in // Assuming Entity conforms to Identifiable
                     Text(vehicle.name)
                         .onTapGesture {
-                            self.selectedVehicle = vehicle.name
+                            model.selectedVehicle = vehicle.name
                             self.searchQuery = vehicle.name
-                            self.selectedVehicleUID = vehicle.id
+                            model.selectedVehicleUID = vehicle.id
                         }
                 }
                 .listStyle(PlainListStyle())
                 
                 Button("Select") {
                     presentationMode.wrappedValue.dismiss()
-                    onSelection(selectedVehicle, selectedVehicleUID!)
                 }
-                .disabled(selectedVehicleUID == nil)
+                .disabled(model.selectedVehicleUID.isEmpty)
                 .padding()
             }
             .navigationBarTitle("Vehicle")
@@ -258,44 +156,13 @@ struct VehicleSearchView: View {
     }
 }
 
-class ProjectViewModel: ObservableObject {
-    @Published var projects: [Project] = []
-    @Published var filteredProjects: [Project] = []
-    
-    init() {
-        loadProjects()
-    }
 
-    private func loadProjects() {
-        // Load your entities here
-        // For example:
-        projects = [
-            Project(name: "Entity 1"),
-            Project(name: "Entity 2"),
-            Project(name: "Entity 3")
-        ]
-        filteredProjects = projects
-    }
-    
-    func searchProjects(query: String) {
-        if query.isEmpty {
-            filteredProjects = projects
-        } else {
-            filteredProjects = projects.filter { project in
-                project.name.lowercased().contains(query.lowercased())
-            }
-        }
-    }
-}
 
 struct ProjectSearchView: View {
-    @Binding var selectedProject: String
-    @Binding var selectedProjectUID: String?
+    @Bindable var model: Model
     @Environment(\.presentationMode) var presentationMode
-    var onSelection: (String, String) -> Void
     @State private var searchQuery = ""
     @State private var showingAddProjectView = false
-    @ObservedObject var projectViewModel: ProjectViewModel
     
     var body: some View {
         NavigationView {
@@ -305,7 +172,7 @@ struct ProjectSearchView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
                         .onChange(of: searchQuery) { newValue, _ in
-                            projectViewModel.searchProjects(query: newValue)
+                            model.searchProjects(query: newValue)
                         }
 
                     Button(action: {
@@ -319,21 +186,20 @@ struct ProjectSearchView: View {
                     }
                 }
 
-                List(projectViewModel.filteredProjects, id: \.id) { project in // Assuming Entity conforms to Identifiable
+                List(model.filteredProjects, id: \.id) { project in // Assuming Entity conforms to Identifiable
                     Text(project.name)
                         .onTapGesture {
-                            self.selectedProject = project.name
+                            model.selectedProject = project.name
                             self.searchQuery = project.name
-                            self.selectedProjectUID = project.id
+                            model.selectedProjectUID = project.id
                         }
                 }
                 .listStyle(PlainListStyle())
                 
                 Button("Select") {
                     presentationMode.wrappedValue.dismiss()
-                    onSelection(selectedProject, selectedProjectUID!)
                 }
-                .disabled(selectedProjectUID == nil)
+                .disabled(model.selectedProjectUID.isEmpty)
                 .padding()
             }
             .navigationBarTitle("Project")

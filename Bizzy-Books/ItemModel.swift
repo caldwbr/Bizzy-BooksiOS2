@@ -19,15 +19,207 @@ struct Item: Identifiable, Codable {
     var what: Int
     var whom: String
     var whomID: String
-    var personalReason: PersonalReason?
-    var taxReason: TaxReason?
+    var personalReasonInt: Int
+    var taxReasonInt: Int
     var vehicleName: String?
     var vehicleID: String?
-    var workersComp: WorkersComp?
+    var workersComp: Bool
     var projectName: String? //nil for overhead
     var projectID: String? //nil for overhead
     var howMany: Int? //thousandths of gallons of fuel
     var odometer: Int? //miles
+    
+    func toDictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        
+        dictionary["id"] = id
+        dictionary["timeStamp"] = timeStamp
+        dictionary["latitude"] = latitude
+        dictionary["longitude"] = longitude
+        dictionary["itemType"] = itemType.rawValue
+        dictionary["notes"] = notes
+        dictionary["who"] = who
+        dictionary["whoID"] = whoID
+        dictionary["what"] = what
+        dictionary["whom"] = whom
+        dictionary["whomID"] = whomID
+        dictionary["personalReasonInt"] = personalReasonInt
+        dictionary["taxReasonInt"] = taxReasonInt
+        dictionary["vehicleName"] = vehicleName
+        dictionary["vehicleID"] = vehicleID
+        dictionary["workersComp"] = workersComp
+        dictionary["projectName"] = projectName
+        dictionary["projectID"] = projectID
+        dictionary["howMany"] = howMany
+        dictionary["odometer"] = odometer
+        
+        return dictionary
+    }
+    
+    init(fromDictionary dictionary: [String: Any]) {
+        id = dictionary["id"] as? String ?? ""
+        timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
+        latitude = dictionary["latitude"] as? Double
+        longitude = dictionary["longitude"] as? Double
+        if let itemTypeString = dictionary["itemType"] as? String, let itemType = ItemType(rawValue: itemTypeString) {
+            self.itemType = itemType
+        } else {
+            self.itemType = .business
+        }
+        notes = dictionary["notes"] as? String
+        who = dictionary["who"] as? String ?? ""
+        whoID = dictionary["whoID"] as? String ?? ""
+        what = dictionary["what"] as? Int ?? 0
+        whom = dictionary["whom"] as? String ?? ""
+        whomID = dictionary["whomID"] as? String ?? ""
+        personalReasonInt = dictionary["personalReasonInt"] as? Int ?? 0
+        taxReasonInt = dictionary["taxReasonInt"] as? Int ?? 0
+        vehicleName = dictionary["vehicleName"] as? String
+        vehicleID = dictionary["vehicleID"] as? String
+        workersComp = dictionary["workersComp"] as? Bool ?? false
+        projectName = dictionary["projectName"] as? String
+        projectID = dictionary["projectID"] as? String
+        howMany = dictionary["howMany"] as? Int
+        odometer = dictionary["odometer"] as? Int
+    }
+    
+    // Initializer that matches the parameter list
+    init(latitude: Double, longitude: Double, itemType: ItemType, notes: String?, who: String, whoID: String, what: Int, whom: String, whomID: String, personalReasonInt: Int, taxReasonInt: Int, vehicleName: String?, vehicleID: String?, workersComp: Bool, projectName: String?, projectID: String?, howMany: Int?, odometer: Int?) {
+        self.latitude = latitude
+        self.longitude = longitude
+        self.itemType = itemType
+        self.notes = notes
+        self.who = who
+        self.whoID = whoID
+        self.what = what
+        self.whom = whom
+        self.whomID = whomID
+        self.personalReasonInt = personalReasonInt
+        self.taxReasonInt = taxReasonInt
+        self.vehicleName = vehicleName
+        self.vehicleID = vehicleID
+        self.workersComp = workersComp
+        self.projectName = projectName
+        self.projectID = projectID
+        self.howMany = howMany
+        self.odometer = odometer
+    }
+}
+
+struct Entity: Identifiable, Codable {
+    var id: String = UUID().uuidString
+    var timeStamp: TimeInterval = Date().timeIntervalSince1970
+    var name: String
+    var businessName, street, city, state, zip, phone, email, ein, ssn: String?
+    
+    func toDictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        
+        dictionary["id"] = id
+        dictionary["timeStamp"] = timeStamp
+        dictionary["name"] = name
+        dictionary["businessName"] = businessName
+        dictionary["street"] = street
+        dictionary["city"] = city
+        dictionary["state"] = state
+        dictionary["zip"] = zip
+        dictionary["phone"] = phone
+        dictionary["email"] = email
+        dictionary["ein"] = ein
+        dictionary["ssn"] = ssn
+        
+        return dictionary
+    }
+    
+    init(fromDictionary dictionary: [String: Any]) {
+        id = dictionary["id"] as? String ?? ""
+        timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
+        name = dictionary["name"] as? String ?? ""
+        businessName = dictionary["businessName"] as? String ?? ""
+        street = dictionary["street"] as? String ?? ""
+        city = dictionary["city"] as? String ?? ""
+        state = dictionary["state"] as? String ?? ""
+        zip = dictionary["zip"] as? String ?? ""
+        phone = dictionary["phone"] as? String ?? ""
+        email = dictionary["email"] as? String ?? ""
+        ein = dictionary["ein"] as? String ?? ""
+        ssn = dictionary["ssn"] as? String ?? ""
+    }
+    
+    // Initializer that matches the parameter list
+    init(name: String, businessName: String?, street: String?, city: String?, state: String?, zip: String?, phone: String?, email: String?, ein: String?, ssn: String?) {
+        self.name = name
+        self.businessName = businessName
+        self.street = street
+        self.city = city
+        self.state = state
+        self.zip = zip
+        self.phone = phone
+        self.email = email
+        self.ein = ein
+        self.ssn = ssn
+    }
+    
+    init(name: String) {
+        self.name = name
+    }
+}
+
+struct Project: Identifiable, Codable {
+    var id: String = UUID().uuidString
+    var timeStamp: TimeInterval = Date().timeIntervalSince1970
+    var name: String
+    var notes: String?
+    var customer: Entity? //Probe this for name, address, phone, email for document generation.
+    var jobsiteStreet, jobsiteCity, jobsiteState, jobsiteZip: String?
+    
+    func toDictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        
+        dictionary["id"] = id
+        dictionary["timeStamp"] = timeStamp
+        dictionary["name"] = name
+        dictionary["notes"] = notes
+        if let customer = customer {
+            dictionary["customer"] = customer.toDictionary()
+        }
+        dictionary["jobsiteStreet"] = jobsiteStreet
+        dictionary["jobsiteCity"] = jobsiteCity
+        dictionary["jobsiteState"] = jobsiteState
+        dictionary["jobsiteZip"] = jobsiteZip
+        
+        return dictionary
+    }
+    
+    init(fromDictionary dictionary: [String: Any]) {
+        id = dictionary["id"] as? String ?? ""
+        timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
+        name = dictionary["name"] as? String ?? ""
+        notes = dictionary["notes"] as? String
+        if let customerDictionary = dictionary["customer"] as? [String: Any] {
+            customer = Entity(fromDictionary: customerDictionary)
+        } else {
+            customer = nil
+        }
+        jobsiteStreet = dictionary["jobsiteStreet"] as? String ?? ""
+        jobsiteCity = dictionary["jobsiteCity"] as? String ?? ""
+        jobsiteState = dictionary["jobsiteState"] as? String ?? ""
+        jobsiteZip = dictionary["jobsiteZip"] as? String ?? ""
+    }
+    
+    init(name: String, notes: String?, customer: Entity?, jobsiteStreet: String?, jobsiteCity: String?, jobsiteState: String?, jobsiteZip: String?) {
+        self.name = name
+        self.notes = notes
+        self.customer = customer
+        self.jobsiteStreet = jobsiteStreet
+        self.jobsiteCity = jobsiteCity
+        self.jobsiteState = jobsiteState
+        self.jobsiteZip = jobsiteZip
+    }
+    
+    init(name: String) {
+        self.name = name
+    }
 }
 
 struct Vehicle: Identifiable, Codable {
@@ -39,84 +231,45 @@ struct Vehicle: Identifiable, Codable {
     var name: String {
         [year, make, model].joined(separator: " ")
     }
-}
-
-struct Entity: Identifiable, Codable {
-    var id: String = UUID().uuidString
-    var timeStamp: TimeInterval = Date().timeIntervalSince1970
-    var name: String
-    var businessName, street, city, state, zip, phone, email, ein, ssn: String?
-}
-
-struct Project: Identifiable, Codable {
-    var id: String = UUID().uuidString
-    var timeStamp: TimeInterval = Date().timeIntervalSince1970
-    var name: String
-    var notes: String?
-    var customer: Entity? //Probe this for name, address, phone, email for document generation.
-    var jobsiteStreet, jobsiteCity, jobsiteState, jobsiteZip: String?
-}
-
-enum PersonalReason: String, Codable, CaseIterable {
-    case placeholder = "personal reason"
-    case food = "Food"
-    case fun = "Fun"
-    case pet = "Pet"
-    case utilities = "Utilities"
-    case phone = "Phone"
-    case internet = "Internet"
-    case office = "Office"
-    case insurance = "Insurance"
-    case house = "House"
-    case yard = "Yard"
-    case medical = "Medical"
-    case travel = "Travel"
-    case clothes = "Clothes"
-    case other = "Other" // 1+15 Reasons Why
     
-    static var displayCases: [PersonalReason] {
-            return [.placeholder] + allCases.filter { $0 != .placeholder }
-        }
-}
-
-enum TaxReason: String, Codable, CaseIterable {
-    case placeholder = "tax reason"
-    case income = "Income"
-    case supplies = "Supplies"
-    case labor = "Labor"
-    case vehicle = "Vehicle"
-    case proHelp = "Pro Help"
-    case insWCGL = "Ins (WC+GL)"
-    case taxLic = "Tax+License"
-    case travel = "Travel"
-    case meals = "Meals"
-    case office = "Office"
-    case advertising = "Advertising"
-    case machineRent = "Machine Rent"
-    case propRent = "Property Rent"
-    case empBen = "Employee Benefit"
-    case depr = "Depreciation"
-    case depl = "Depletion"
-    case utilities = "Utilities"
-    case commissions = "Commissions"
-    case wages = "Wages"
-    case mortgInt = "Mortgage Int"
-    case otherInt = "Other Interest"
-    case repairs = "Repairs"
-    case pension = "Pension" //1+23 Reasons Why
+    func toDictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        
+        dictionary["id"] = id
+        dictionary["timeStamp"] = timeStamp
+        dictionary["year"] = year
+        dictionary["make"] = make
+        dictionary["model"] = model
+        dictionary["color"] = color
+        dictionary["picd"] = picd
+        dictionary["vin"] = vin
+        dictionary["licPlateNo"] = licPlateNo
+        
+        return dictionary
+    }
     
-    static var displayCases: [TaxReason] {
-        return [.placeholder] + allCases.filter { $0 != .placeholder }
+    init(fromDictionary dictionary: [String: Any]) {
+        id = dictionary["id"] as? String ?? ""
+        timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
+        year = dictionary["year"] as? String ?? ""
+        make = dictionary["make"] as? String ?? ""
+        model = dictionary["model"] as? String ?? ""
+        color = dictionary["color"] as? String
+        picd = dictionary["picd"] as? String
+        vin = dictionary["vin"] as? String
+        licPlateNo = dictionary["licPlateNo"] as? String
+    }
+    
+    // Initializer that matches the parameter list
+    init(year: String, make: String, model: String, color: String?, picd: String?, vin: String?, licPlateNo: String?) {
+        self.year = year
+        self.make = make
+        self.model = model
+        self.color = color
+        self.picd = picd
+        self.vin = vin
+        self.licPlateNo = licPlateNo
     }
 }
 
-enum WorkersComp: String, Codable, CaseIterable {
-    case placeholder = "workers comp"
-    case wcNA = "WC N/A"
-    case wcIncurred = "WC Incurred"
-    case subHasWC = "Sub Has WC"
-    
-    static var displayCases: [WorkersComp] {
-        return [.placeholder] + allCases.filter { $0 != .placeholder }
-    }
-}
+

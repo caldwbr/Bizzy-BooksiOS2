@@ -28,14 +28,14 @@ private enum FocusableField: Hashable {
 }
 
 struct SignupView: View {
-  @EnvironmentObject var viewModel: AuthenticationViewModel
+    @Bindable var model: Model
   @Environment(\.dismiss) var dismiss
 
   @FocusState private var focus: FocusableField?
 
   private func signUpWithEmailPassword() {
     Task {
-      if await viewModel.signUpWithEmailPassword() == true {
+      if await model.signUpWithEmailPassword() == true {
         dismiss()
       }
     }
@@ -54,7 +54,7 @@ struct SignupView: View {
 
       HStack {
         Image(systemName: "at")
-        TextField("Email", text: $viewModel.email)
+        TextField("Email", text: $model.authEmail)
           .textInputAutocapitalization(.never)
           .disableAutocorrection(true)
           .focused($focus, equals: .email)
@@ -69,7 +69,7 @@ struct SignupView: View {
 
       HStack {
         Image(systemName: "lock")
-        SecureField("Password", text: $viewModel.password)
+        SecureField("Password", text: $model.authPassword)
           .focused($focus, equals: .password)
           .submitLabel(.next)
           .onSubmit {
@@ -82,7 +82,7 @@ struct SignupView: View {
 
       HStack {
         Image(systemName: "lock")
-        SecureField("Confirm password", text: $viewModel.confirmPassword)
+          SecureField("Confirm password", text: $model.authConfirmPassword)
           .focused($focus, equals: .confirmPassword)
           .submitLabel(.go)
           .onSubmit {
@@ -94,15 +94,15 @@ struct SignupView: View {
       .padding(.bottom, 8)
 
 
-      if !viewModel.errorMessage.isEmpty {
+      if !model.errorMessage.isEmpty {
         VStack {
-          Text(viewModel.errorMessage)
+          Text(model.errorMessage)
             .foregroundColor(Color(UIColor.systemRed))
         }
       }
 
       Button(action: signUpWithEmailPassword) {
-        if viewModel.authenticationState != .authenticating {
+        if model.authenticationState != .authenticating {
           Text("Sign up")
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity)
@@ -114,13 +114,13 @@ struct SignupView: View {
             .frame(maxWidth: .infinity)
         }
       }
-      .disabled(!viewModel.isValid)
+      .disabled(!model.isValid)
       .frame(maxWidth: .infinity)
       .buttonStyle(.borderedProminent)
 
       HStack {
         Text("Already have an account?")
-        Button(action: { viewModel.switchFlow() }) {
+        Button(action: { model.switchFlow() }) {
           Text("Log in")
             .fontWeight(.semibold)
             .foregroundColor(.blue)
@@ -131,16 +131,5 @@ struct SignupView: View {
     }
     .listStyle(.plain)
     .padding()
-  }
-}
-
-struct SignupView_Previews: PreviewProvider {
-  static var previews: some View {
-    Group {
-      SignupView()
-      SignupView()
-        .preferredColorScheme(.dark)
-    }
-    .environmentObject(AuthenticationViewModel())
   }
 }

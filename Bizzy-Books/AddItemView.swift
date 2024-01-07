@@ -1,24 +1,23 @@
 import SwiftUI
 
+@MainActor
 struct AddItemView: View {
-    @StateObject private var viewModel = ViewModel()
-    @ObservedObject var whoViewModel: WhoViewModel
-    @ObservedObject var whomViewModel: WhomViewModel
-    @ObservedObject var projectViewModel: ProjectViewModel
-    @ObservedObject var vehicleViewModel: VehicleViewModel
+    @Bindable var model: Model
     
-    var body: some View { yeView }
-    
-    var yeView: some View {
+    var body: some View {
+        
         VStack {
             addItemHeader
             typePicker
             notesTextField
-            if viewModel.showWorkersCompToggle {
+            if model.showWorkersCompToggle {
                 wcToggle
             }
             yeSentence
         }
+        .onAppear(perform: {
+            model.clearButtonsTFsAndPickers()
+        })
         .padding()
     }
     
@@ -38,7 +37,7 @@ struct AddItemView: View {
     
     var saveButton: some View {
         Button(action: {
-            let newItem = viewModel.createNewItemWithLocation()
+//            let newItem = model.createItemFromScratch(latitude: <#T##Double#>, longitude: <#T##Double#>, itemType: <#T##ItemType#>, notes: <#T##String?#>, who: <#T##String#>, whoID: <#T##String#>, what: <#T##Int#>, whom: <#T##String#>, whomID: <#T##String#>, personalReasonInt: <#T##Int#>, taxReasonInt: <#T##Int#>, vehicleName: <#T##String?#>, vehicleID: <#T##String?#>, workersComp: <#T##Bool#>, projectName: <#T##String?#>, projectID: <#T##String?#>, howMany: <#T##Int?#>, odometer: <#T##Int?#>)
         }, label: {
             Text("Save")
         })
@@ -47,34 +46,21 @@ struct AddItemView: View {
     }
     
     var typePicker: some View {
-        Picker("Item Type", selection: $viewModel.itemType) {
+        Picker("Item Type", selection: $model.itemType) {
             ForEach(ItemType.allCases) { itemType in
                 Text(itemType.rawValue.capitalized).tag(itemType)
             }
         }
         .pickerStyle(SegmentedPickerStyle())
         .padding()
-        .onChange(of: viewModel.itemType) { oldValue, newValue in
-            switch newValue {
-            case .business:
-                viewModel.whichSentence = 1
-                viewModel.displaySentence = Sentences.one
-            case .personal:
-                viewModel.whichSentence = 2
-                viewModel.displaySentence = Sentences.two
-            case .fuel:
-                viewModel.whichSentence = 3
-                viewModel.displaySentence = Sentences.three
-            }
-        }
     }
     
     var notesTextField: some View {
-        TextField("Notes", text: $viewModel.notesValue).padding()
+        TextField("Notes", text: $model.notesValue).padding()
     }
     
     var wcToggle: some View {
-        Toggle(isOn: $viewModel.incursWorkersComp) {
+        Toggle(isOn: $model.incursWorkersComp) {
             Text("Incurs workers comp? (leave off if sub has w.c.)")
         }
         .padding()
@@ -82,158 +68,130 @@ struct AddItemView: View {
     }
     
     var yeSentence: some View {
-        FlowLayout(alignment: viewModel.align.alignment) {
+        FlowLayout(alignment: model.align.alignment) {
             who; paid; what; toW; whom
-            switch viewModel.whichSentence {
-            case 1: forW; taxReason; project
-            case 2: forWP; personalReason
-            default: forH; howMany; gallonsOfFuelIn; vehicle; odometer
+            switch model.itemType {
+            case .business: forW; taxReason; project
+            case .personal: forW; personalReason
+            case .fuel: forW; howMany; gallonsOfFuelIn; vehicle; odometer
             }
         }
-        .animation(.default, value: viewModel.align)
+        .animation(.default, value: model.align)
         .frame(maxHeight: 300)
     }
     
     var who: some View {
         Button(action: { //0=Who
-            viewModel.showWhoSearchView = true
+            model.showWhoSearchView = true
         }, label: {
-            Text(viewModel.displaySentence[0].1)
+            Text(model.selectedWho)
                 .padding()
-                .foregroundColor(WhoSE.color)
+                .foregroundColor(Color.BizzyColor.whoBlue)
         })
-        .sheet(isPresented: $viewModel.showWhoSearchView) {
-            WhoSearchView(selectedWho: $viewModel.selectedWho, selectedWhoUID: $viewModel.selectedWhoUID, onSelection: { selectedWho, selectedWhoUID in
-                viewModel.displaySentence[0].0 = selectedWhoUID
-                viewModel.displaySentence[0].1 = selectedWho
-            }, whoViewModel: whoViewModel)
+        .sheet(isPresented: $model.showWhoSearchView) {
+            WhoSearchView(model: model)
         }
     }
     
     var paid: some View {
-        Text(viewModel.displaySentence[1].1).padding() //1=Paid
+        Text("paid").padding() //1=Paid
     }
     
     var what: some View {
-        CurrencyTextField(value: $viewModel.currencyValue,  placeholder: "what") //2=What
-            .foregroundColor(WhatSE.color)
+        CurrencyTextField(value: $model.whatValue,  placeholder: model.whatPlaceholder) //2=What
+            .foregroundColor(Color.BizzyColor.whatGreen)
             .padding(11)
     }
     
     var toW: some View {
-        Text(viewModel.displaySentence[3].1).padding() //3=ToW
+        Text("to").padding() //3=ToW
     }
     
     var whom: some View {
         Button(action: { //4=Whom
-            viewModel.showWhomSearchView = true
+            model.showWhomSearchView = true
         }, label: {
-            Text(viewModel.displaySentence[4].1)
+            Text(model.selectedWhom)
                 .padding()
-                .foregroundColor(WhomSE.color)
+                .foregroundColor(Color.BizzyColor.whomPurple)
         })
-        .sheet(isPresented: $viewModel.showWhomSearchView) {
-            WhomSearchView(selectedWhom: $viewModel.selectedWhom, selectedWhomUID: $viewModel.selectedWhomUID, onSelection: { selected, selectedUID in
-                viewModel.displaySentence[4].0 = selectedUID
-                viewModel.displaySentence[4].1 = selected
-            }, whomViewModel: whomViewModel)
+        .sheet(isPresented: $model.showWhomSearchView) {
+            WhomSearchView(model: model)
         }
     }
     
     var forW: some View {
-        Text(viewModel.displaySentence[5].1).padding() //5=forW, below, 6=TaxReason
+        Text("for").padding() //5=forW, below, 6=TaxReason
     }
     
     var taxReason: some View {
-        Picker(viewModel.displaySentence[6].1, selection: $viewModel.selectedTaxReasonUID) {
-            ForEach(TaxReason.allCases.indices, id: \.self) { index in
-                Text(TaxReason.allCases[index].rawValue).tag(index)
+        Picker(model.taxReasonArray[0], selection: $model.taxReasonIndex) {
+            ForEach(0..<model.taxReasonArray.count, id: \.self) { index in
+                Text(model.taxReasonArray[index])
             }
         }
-        .onChange(of: Int(viewModel.selectedTaxReasonUID!)!) { newIndex, _ in
-            let newReason = TaxReason.allCases[newIndex].rawValue
-            viewModel.displaySentence[6] = (String(newIndex), newReason)
-            if newReason == "Workers Comp" {
-                viewModel.showWorkersCompToggle = true
+        .onChange(of: model.taxReasonIndex) { newIndex, _ in
+            if newIndex == 3 {
+                model.showWorkersCompToggle = true
             } else {
-                viewModel.showWorkersCompToggle = false
+                model.showWorkersCompToggle = false
             }
         }
-        .accentColor(TaxReasonSE.color)
+        .accentColor(Color.BizzyColor.taxReasonMagenta)
         .padding(9)
     }
     
     var project: some View {
         Button(action: { //7=Project
-            viewModel.showProjectSearchView = true
+            model.showProjectSearchView = true
         }, label: {
-            Text(viewModel.displaySentence[7].1)
+            Text(model.selectedProject)
                 .padding()
-                .foregroundColor(ProjectSE.color)
+                .foregroundColor(Color.BizzyColor.projectBlue)
         })
-        .sheet(isPresented: $viewModel.showProjectSearchView) {
-            ProjectSearchView(selectedProject: $viewModel.selectedProject, selectedProjectUID: $viewModel.selectedProjectUID, onSelection: { selectedProject, selectedProjectUID in
-                viewModel.displaySentence[7].0 = selectedProjectUID
-                viewModel.displaySentence[7].1 = selectedProject
-            }, projectViewModel: projectViewModel)
+        .sheet(isPresented: $model.showProjectSearchView) {
+            ProjectSearchView(model: model)
         }
-    }
-    
-    var forWP: some View {
-        Text(viewModel.displaySentence[5].1).padding() //5=forW, below, 6=PersonalReason
     }
     
     var personalReason: some View {
-        Picker(viewModel.displaySentence[6].1, selection: Binding(
-            get: { viewModel.selectedPersonalReasonIndex },
-            set: { newIndex in
-                viewModel.selectedPersonalReasonIndex = newIndex
-                let newReason = PersonalReason.allCases[newIndex]
-                viewModel.updateSelectedPersonalReason(newReason: newReason)
-            }
-        )) {
-            ForEach(PersonalReason.allCases.indices, id: \.self) { index in
-                Text(PersonalReason.allCases[index].rawValue).tag(index)
+        Picker(model.personalReasonArray[0], selection: $model.personalReasonIndex) {
+            ForEach(0..<model.personalReasonArray.count, id: \.self) { index in
+                Text(model.personalReasonArray[index])
             }
         }
-        .accentColor(PersonalReasonSE.color)
+        .accentColor(Color.BizzyColor.personalReasonMagenta)
         .padding(9)
     }
     
-    var forH: some View {
-        Text(viewModel.displaySentence[5].1).padding() //5=forH, below, 6=HowMany
-    }
-    
     var howMany: some View {
-        GallonsTextField(value: $viewModel.gallonsValue, placeholder: viewModel.displaySentence[6].1)
-            .foregroundColor(HowManySE.color)
+        GallonsTextField(value: $model.howManyValue, placeholder: model.howManyPlaceholder)
+            .foregroundColor(Color.BizzyColor.orange)
             .padding(11)
     }
     
     var gallonsOfFuelIn: some View {
-        Text(viewModel.displaySentence[7].1).padding() //7=GallonsOfFuelIn, 8=Vehicle
+        Text("gallons of fuel in").padding() //7=GallonsOfFuelIn, 8=Vehicle
     }
     
     var vehicle: some View {
         Button(action: {
-            viewModel.showVehicleSearchView = true
+            model.showVehicleSearchView = true
         }, label: {
-            Text(viewModel.displaySentence[8].1)
+            Text(model.selectedVehicle)
                 .padding()
-                .foregroundColor(VehicleSE.color)
+                .foregroundColor(Color.BizzyColor.taxReasonMagenta)
         })
-        .sheet(isPresented: $viewModel.showVehicleSearchView) {
-            VehicleSearchView(selectedVehicle: $viewModel.selectedVehicle, selectedVehicleUID: $viewModel.selectedVehicleUID, onSelection: { selectedVehicle, selectedVehicleUID in
-                viewModel.displaySentence[8].0 = selectedVehicleUID
-                viewModel.displaySentence[8].1 = selectedVehicle
-            }, vehicleViewModel: vehicleViewModel)
+        .sheet(isPresented: $model.showVehicleSearchView) {
+            VehicleSearchView(model: model)
         }
     }
     
     var odometer: some View {
-        OdometerTextField(value: $viewModel.odometerValue, placeholder: viewModel.displaySentence[9].1)
-            .foregroundColor(OdometerSE.color)
+        OdometerTextField(value: $model.odometerValue, placeholder: model.odometerPlaceholder)
+            .foregroundColor(Color.BizzyColor.grey)
             .padding(11)
     }
+    
 }
 

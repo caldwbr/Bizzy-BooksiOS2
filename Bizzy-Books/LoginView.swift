@@ -27,14 +27,14 @@ private enum FocusableField: Hashable {
 }
 
 struct LoginView: View {
-  @EnvironmentObject var viewModel: AuthenticationViewModel
+    @Bindable var model: Model
   @Environment(\.dismiss) var dismiss
 
   @FocusState private var focus: FocusableField?
 
   private func signInWithEmailPassword() {
     Task {
-      if await viewModel.signInWithEmailPassword() == true {
+      if await model.signInWithEmailPassword() == true {
         dismiss()
       }
     }
@@ -53,7 +53,7 @@ struct LoginView: View {
 
       HStack {
         Image(systemName: "at")
-        TextField("Email", text: $viewModel.email)
+        TextField("Email", text: $model.authEmail)
           .textInputAutocapitalization(.never)
           .disableAutocorrection(true)
           .focused($focus, equals: .email)
@@ -68,7 +68,7 @@ struct LoginView: View {
 
       HStack {
         Image(systemName: "lock")
-        SecureField("Password", text: $viewModel.password)
+        SecureField("Password", text: $model.authPassword)
           .focused($focus, equals: .password)
           .submitLabel(.go)
           .onSubmit {
@@ -79,15 +79,15 @@ struct LoginView: View {
       .background(Divider(), alignment: .bottom)
       .padding(.bottom, 8)
 
-      if !viewModel.errorMessage.isEmpty {
+      if !model.errorMessage.isEmpty {
         VStack {
-          Text(viewModel.errorMessage)
+          Text(model.errorMessage)
             .foregroundColor(Color(UIColor.systemRed))
         }
       }
 
       Button(action: signInWithEmailPassword) {
-        if viewModel.authenticationState != .authenticating {
+        if model.authenticationState != .authenticating {
           Text("Login")
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity)
@@ -99,13 +99,13 @@ struct LoginView: View {
             .frame(maxWidth: .infinity)
         }
       }
-      .disabled(!viewModel.isValid)
+      .disabled(!model.isValid)
       .frame(maxWidth: .infinity)
       .buttonStyle(.borderedProminent)
 
       HStack {
         Text("Don't have an account yet?")
-        Button(action: { viewModel.switchFlow() }) {
+        Button(action: { model.switchFlow() }) {
           Text("Sign up")
             .fontWeight(.semibold)
             .foregroundColor(.blue)
@@ -119,13 +119,4 @@ struct LoginView: View {
   }
 }
 
-struct LoginView_Previews: PreviewProvider {
-  static var previews: some View {
-    Group {
-      LoginView()
-      LoginView()
-        .preferredColorScheme(.dark)
-    }
-    .environmentObject(AuthenticationViewModel())
-  }
-}
+

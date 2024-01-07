@@ -10,13 +10,10 @@
 		2EA61BD88899136D237DDB38 /* Pods_Bizzy_Books.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07D3A5F35FDA26D158331EC3 /* Pods_Bizzy_Books.framework */; };
 		670D45BD2B43161D00FF9BB3 /* FirebaseDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670D45BC2B43161D00FF9BB3 /* FirebaseDatabase.swift */; };
 		670D45BF2B43178B00FF9BB3 /* ItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670D45BE2B43178B00FF9BB3 /* ItemModel.swift */; };
-		67416A812B30E5270098C91D /* AuthenticationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67416A802B30E5270098C91D /* AuthenticationViewModel.swift */; };
+		673CF3AF2B48952E00506736 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673CF3AE2B48952E00506736 /* Model.swift */; };
 		674D4EB52B325BFA001699F2 /* AddItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674D4EB42B325BFA001699F2 /* AddItemModel.swift */; };
-		677B70A52B0F06BC0044216A /* BizzyAuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B70A42B0F06BC0044216A /* BizzyAuthViewController.swift */; };
 		677B70A72B0F0B3D0044216A /* EmptyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B70A62B0F0B3D0044216A /* EmptyView.swift */; };
-		677B70A92B1662A50044216A /* Silly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B70A82B1662A50044216A /* Silly.swift */; };
 		678FBB7D2B43C53900A38561 /* AddWhoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB7C2B43C53900A38561 /* AddWhoView.swift */; };
-		678FBB7F2B44D8EA00A38561 /* SentenceElementProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB7E2B44D8EA00A38561 /* SentenceElementProtocol.swift */; };
 		678FBB812B44F2A100A38561 /* AddWhomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB802B44F2A100A38561 /* AddWhomView.swift */; };
 		678FBB832B45002500A38561 /* VMSVWhoWhomVehProj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */; };
 		678FBB852B45008000A38561 /* TFCurrencyGallonsOdo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */; };
@@ -31,7 +28,6 @@
 		67C709BB2B30F00400C09CC6 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67C709BA2B30F00400C09CC6 /* AuthenticationView.swift */; };
 		67C709BD2B30F02A00C09CC6 /* AuthenticatedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67C709BC2B30F02A00C09CC6 /* AuthenticatedView.swift */; };
 		67C709BF2B31F99000C09CC6 /* AddItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67C709BE2B31F99000C09CC6 /* AddItemView.swift */; };
-		67C709C12B31FF4C00C09CC6 /* AddItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67C709C02B31FF4C00C09CC6 /* AddItemViewModel.swift */; };
 		67C709C32B32075900C09CC6 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67C709C22B32075900C09CC6 /* ColorExtensions.swift */; };
 		67D58C482B0EC83800740E70 /* EditBusinessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D58C472B0EC83800740E70 /* EditBusinessView.swift */; };
 		67E103D02B0E6DB10092082B /* Bizzy_BooksApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E103CF2B0E6DB10092082B /* Bizzy_BooksApp.swift */; };
@@ -73,14 +69,11 @@
 		5DFCE9627AC467AF78D47B9C /* Pods-Bizzy-BooksTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-BooksTests.debug.xcconfig"; path = "Target Support Files/Pods-Bizzy-BooksTests/Pods-Bizzy-BooksTests.debug.xcconfig"; sourceTree = "<group>"; };
 		670D45BC2B43161D00FF9BB3 /* FirebaseDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseDatabase.swift; sourceTree = "<group>"; };
 		670D45BE2B43178B00FF9BB3 /* ItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemModel.swift; sourceTree = "<group>"; };
-		67416A802B30E5270098C91D /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
+		673CF3AE2B48952E00506736 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		674D4EB42B325BFA001699F2 /* AddItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemModel.swift; sourceTree = "<group>"; };
 		6759408F2B30C2D5002EAF9C /* FirebaseAuth.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = FirebaseAuth.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		677B70A42B0F06BC0044216A /* BizzyAuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BizzyAuthViewController.swift; sourceTree = "<group>"; };
 		677B70A62B0F0B3D0044216A /* EmptyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyView.swift; sourceTree = "<group>"; };
-		677B70A82B1662A50044216A /* Silly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Silly.swift; sourceTree = "<group>"; };
 		678FBB7C2B43C53900A38561 /* AddWhoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWhoView.swift; sourceTree = "<group>"; };
-		678FBB7E2B44D8EA00A38561 /* SentenceElementProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceElementProtocol.swift; sourceTree = "<group>"; };
 		678FBB802B44F2A100A38561 /* AddWhomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWhomView.swift; sourceTree = "<group>"; };
 		678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VMSVWhoWhomVehProj.swift; sourceTree = "<group>"; };
 		678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TFCurrencyGallonsOdo.swift; sourceTree = "<group>"; };
@@ -95,7 +88,6 @@
 		67C709BA2B30F00400C09CC6 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		67C709BC2B30F02A00C09CC6 /* AuthenticatedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticatedView.swift; sourceTree = "<group>"; };
 		67C709BE2B31F99000C09CC6 /* AddItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemView.swift; sourceTree = "<group>"; };
-		67C709C02B31FF4C00C09CC6 /* AddItemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemViewModel.swift; sourceTree = "<group>"; };
 		67C709C22B32075900C09CC6 /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		67D58C472B0EC83800740E70 /* EditBusinessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBusinessView.swift; sourceTree = "<group>"; };
 		67E103CC2B0E6DB10092082B /* Bizzy-Books.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Bizzy-Books.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -169,7 +161,6 @@
 		67E103CE2B0E6DB10092082B /* Bizzy-Books */ = {
 			isa = PBXGroup;
 			children = (
-				67416A802B30E5270098C91D /* AuthenticationViewModel.swift */,
 				67C709BA2B30F00400C09CC6 /* AuthenticationView.swift */,
 				67C709BC2B30F02A00C09CC6 /* AuthenticatedView.swift */,
 				67C709B82B30EF6C00C09CC6 /* UserProfileView.swift */,
@@ -178,15 +169,12 @@
 				67E103CF2B0E6DB10092082B /* Bizzy_BooksApp.swift */,
 				67E103D12B0E6DB10092082B /* MainScreenView.swift */,
 				67D58C472B0EC83800740E70 /* EditBusinessView.swift */,
-				677B70A42B0F06BC0044216A /* BizzyAuthViewController.swift */,
 				677B70A62B0F0B3D0044216A /* EmptyView.swift */,
 				67E103D32B0E6DB20092082B /* Assets.xcassets */,
 				67E103D52B0E6DB20092082B /* Bizzy_Books.entitlements */,
 				67E103D62B0E6DB20092082B /* Preview Content */,
 				67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */,
-				677B70A82B1662A50044216A /* Silly.swift */,
 				67C709BE2B31F99000C09CC6 /* AddItemView.swift */,
-				67C709C02B31FF4C00C09CC6 /* AddItemViewModel.swift */,
 				67C709C22B32075900C09CC6 /* ColorExtensions.swift */,
 				674D4EB42B325BFA001699F2 /* AddItemModel.swift */,
 				67AB9AF82B35F42800FB81A1 /* SingletonDataManager.swift */,
@@ -194,13 +182,13 @@
 				670D45BC2B43161D00FF9BB3 /* FirebaseDatabase.swift */,
 				670D45BE2B43178B00FF9BB3 /* ItemModel.swift */,
 				678FBB7C2B43C53900A38561 /* AddWhoView.swift */,
-				678FBB7E2B44D8EA00A38561 /* SentenceElementProtocol.swift */,
 				678FBB802B44F2A100A38561 /* AddWhomView.swift */,
 				678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */,
 				678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */,
 				678FBB862B4500FD00A38561 /* LayoutFlow.swift */,
 				678FBB882B45039800A38561 /* AddVehicleView.swift */,
 				678FBB8A2B4503A800A38561 /* AddProjectView.swift */,
+				673CF3AE2B48952E00506736 /* Model.swift */,
 			);
 			path = "Bizzy-Books";
 			sourceTree = "<group>";
@@ -503,7 +491,6 @@
 				67E103D22B0E6DB10092082B /* MainScreenView.swift in Sources */,
 				67E103D02B0E6DB10092082B /* Bizzy_BooksApp.swift in Sources */,
 				67C709BB2B30F00400C09CC6 /* AuthenticationView.swift in Sources */,
-				677B70A52B0F06BC0044216A /* BizzyAuthViewController.swift in Sources */,
 				67C709BF2B31F99000C09CC6 /* AddItemView.swift in Sources */,
 				67C709B52B30EED400C09CC6 /* LoginView.swift in Sources */,
 				674D4EB52B325BFA001699F2 /* AddItemModel.swift in Sources */,
@@ -514,19 +501,16 @@
 				678FBB7D2B43C53900A38561 /* AddWhoView.swift in Sources */,
 				67D58C482B0EC83800740E70 /* EditBusinessView.swift in Sources */,
 				678FBB812B44F2A100A38561 /* AddWhomView.swift in Sources */,
-				67416A812B30E5270098C91D /* AuthenticationViewModel.swift in Sources */,
 				67C709B92B30EF6C00C09CC6 /* UserProfileView.swift in Sources */,
-				678FBB7F2B44D8EA00A38561 /* SentenceElementProtocol.swift in Sources */,
 				678FBB892B45039800A38561 /* AddVehicleView.swift in Sources */,
 				678FBB872B4500FD00A38561 /* LayoutFlow.swift in Sources */,
 				678FBB852B45008000A38561 /* TFCurrencyGallonsOdo.swift in Sources */,
 				67C709C32B32075900C09CC6 /* ColorExtensions.swift in Sources */,
-				67C709C12B31FF4C00C09CC6 /* AddItemViewModel.swift in Sources */,
 				67AB9AFD2B35FDCF00FB81A1 /* SentenceFlowView.swift in Sources */,
 				677B70A72B0F0B3D0044216A /* EmptyView.swift in Sources */,
+				673CF3AF2B48952E00506736 /* Model.swift in Sources */,
 				670D45BD2B43161D00FF9BB3 /* FirebaseDatabase.swift in Sources */,
 				678FBB832B45002500A38561 /* VMSVWhoWhomVehProj.swift in Sources */,
-				677B70A92B1662A50044216A /* Silly.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

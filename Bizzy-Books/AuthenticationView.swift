@@ -19,27 +19,20 @@
 
 import SwiftUI
 import Combine
+import Observation
 
+@MainActor
 struct AuthenticationView: View {
-  @EnvironmentObject var viewModel: AuthenticationViewModel
-
-  var body: some View {
-    VStack {
-      switch viewModel.flow {
-      case .login:
-        LoginView()
-          .environmentObject(viewModel)
-      case .signUp:
-        SignupView()
-          .environmentObject(viewModel)
-      }
+    @Bindable var model: Model
+    
+    var body: some View {
+        VStack {
+            switch model.flow {
+            case .login:
+                LoginView(model: model)
+            case .signUp:
+                SignupView(model: model)
+            }
+        }
     }
-  }
-}
-
-struct AuthenticationView_Previews: PreviewProvider {
-  static var previews: some View {
-    AuthenticationView()
-      .environmentObject(AuthenticationViewModel())
-  }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AddVehicleView: View {
-    @State private var vehicle: Vehicle
+    @State private var vehicle: Vehicle? = nil
     @State private var vehicleName = ""
     @State private var vehicleUID: String? = nil
     @State private var year = ""

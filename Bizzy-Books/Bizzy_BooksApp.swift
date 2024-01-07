@@ -28,10 +28,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct Bizzy_BooksApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    
+    @State var model = Model()
     var body: some Scene {
         WindowGroup {
-            AuthenticatedView {
+            AuthenticatedView() {
                 Image(systemName: "number.circle.fill")
                     .resizable()
                     .frame(width: 100, height: 100)
@@ -48,6 +48,7 @@ struct Bizzy_BooksApp: App {
                 MainScreenView()
                 Spacer()
             }
+            .environment(model)
         }
     }
 }

@@ -21,20 +21,22 @@ import SwiftUI
 //import FirebaseAnalyticsSwift
 
 struct UserProfileView: View {
-  @EnvironmentObject var viewModel: AuthenticationViewModel
+    let model: Model
   @Environment(\.dismiss) var dismiss
   @State var presentingConfirmationDialog = false
 
   private func deleteAccount() {
     Task {
-      if await viewModel.deleteAccount() == true {
+      if await model.deleteAccount() == true {
         dismiss()
       }
     }
   }
 
+    
+    @MainActor
   private func signOut() {
-    viewModel.signOut()
+    model.signOut()
   }
 
   var body: some View {
@@ -60,10 +62,12 @@ struct UserProfileView: View {
       }
       .listRowBackground(Color(UIColor.systemGroupedBackground))
       Section("Email") {
-        Text(viewModel.displayName)
+        Text(model.displayName)
       }
       Section {
-        Button(role: .cancel, action: signOut) {
+          Button(role: .cancel) {
+              signOut()
+          } label: {
           HStack {
             Spacer()
             Text("Sign out")
@@ -91,11 +95,3 @@ struct UserProfileView: View {
   }
 }
 
-struct UserProfileView_Previews: PreviewProvider {
-  static var previews: some View {
-    NavigationView {
-      UserProfileView()
-        .environmentObject(AuthenticationViewModel())
-    }
-  }
-}
