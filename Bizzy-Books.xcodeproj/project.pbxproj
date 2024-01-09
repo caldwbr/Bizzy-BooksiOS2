@@ -11,6 +11,7 @@
 		670D45BD2B43161D00FF9BB3 /* FirebaseDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670D45BC2B43161D00FF9BB3 /* FirebaseDatabase.swift */; };
 		670D45BF2B43178B00FF9BB3 /* ItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670D45BE2B43178B00FF9BB3 /* ItemModel.swift */; };
 		673CF3AF2B48952E00506736 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673CF3AE2B48952E00506736 /* Model.swift */; };
+		673CF3B12B4B497600506736 /* AddCustomerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673CF3B02B4B497600506736 /* AddCustomerView.swift */; };
 		674D4EB52B325BFA001699F2 /* AddItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674D4EB42B325BFA001699F2 /* AddItemModel.swift */; };
 		677B70A72B0F0B3D0044216A /* EmptyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B70A62B0F0B3D0044216A /* EmptyView.swift */; };
 		678FBB7D2B43C53900A38561 /* AddWhoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB7C2B43C53900A38561 /* AddWhoView.swift */; };
@@ -70,6 +71,7 @@
 		670D45BC2B43161D00FF9BB3 /* FirebaseDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseDatabase.swift; sourceTree = "<group>"; };
 		670D45BE2B43178B00FF9BB3 /* ItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemModel.swift; sourceTree = "<group>"; };
 		673CF3AE2B48952E00506736 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		673CF3B02B4B497600506736 /* AddCustomerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCustomerView.swift; sourceTree = "<group>"; };
 		674D4EB42B325BFA001699F2 /* AddItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemModel.swift; sourceTree = "<group>"; };
 		6759408F2B30C2D5002EAF9C /* FirebaseAuth.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = FirebaseAuth.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		677B70A62B0F0B3D0044216A /* EmptyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyView.swift; sourceTree = "<group>"; };
@@ -183,12 +185,13 @@
 				670D45BE2B43178B00FF9BB3 /* ItemModel.swift */,
 				678FBB7C2B43C53900A38561 /* AddWhoView.swift */,
 				678FBB802B44F2A100A38561 /* AddWhomView.swift */,
+				673CF3B02B4B497600506736 /* AddCustomerView.swift */,
 				678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */,
 				678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */,
 				678FBB862B4500FD00A38561 /* LayoutFlow.swift */,
 				678FBB882B45039800A38561 /* AddVehicleView.swift */,
-				678FBB8A2B4503A800A38561 /* AddProjectView.swift */,
 				673CF3AE2B48952E00506736 /* Model.swift */,
+				678FBB8A2B4503A800A38561 /* AddProjectView.swift */,
 			);
 			path = "Bizzy-Books";
 			sourceTree = "<group>";
@@ -487,6 +490,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				673CF3B12B4B497600506736 /* AddCustomerView.swift in Sources */,
 				67AB9AF92B35F42800FB81A1 /* SingletonDataManager.swift in Sources */,
 				67E103D22B0E6DB10092082B /* MainScreenView.swift in Sources */,
 				67E103D02B0E6DB10092082B /* Bizzy_BooksApp.swift in Sources */,

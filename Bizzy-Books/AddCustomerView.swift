@@ -1,14 +1,15 @@
-//  AddWhoView.swift
+//
+//  AddCustomerView.swift
 //  Bizzy-Books
 //
-//  Created by Brad Caldwell on 1/1/24.
+//  Created by Brad Caldwell on 1/7/24.
 //
 
 import SwiftUI
 import Contacts
 import FirebaseDatabase
 
-struct AddWhomView: View {
+struct AddCustomerView: View {
     @Bindable var model: Model
     @State private var name = ""
     @State private var suggestedContacts = [CNContact]()
@@ -25,7 +26,7 @@ struct AddWhomView: View {
     
     var body: some View {
         Form {
-            Section(header: Text("Add Whom Entity")) {
+            Section(header: Text("Add Customer Entity")) {
                 TextField("Name", text: $name)
                     .onChange(of: name) { newName, _ in
                         searchContacts(for: newName) { matchingContacts in
@@ -48,12 +49,12 @@ struct AddWhomView: View {
                 TextField("EIN", text: $ein)
                 TextField("SSN", text: $ssn)
             }
-            
+
             Section {
                 Button(action: {
                     let newEntity = Entity(
                         name: name,
-                        businessName: businessName, // Provide values for other parameters if needed
+                        businessName: businessName,
                         street: street,
                         city: city,
                         state: state,
@@ -63,19 +64,21 @@ struct AddWhomView: View {
                         ein: ein,
                         ssn: ssn
                     )
-                    model.selectedWhom = newEntity.name
-                    model.selectedWhomUID = newEntity.id
+                    model.selectedWho = newEntity.name
+                    model.selectedWhoUID = newEntity.id
+                    model.customerName = newEntity.name
+                    model.customerUID = newEntity.id
                     let newEntityDict = newEntity.toDictionary() // Convert the Entity to a dictionary
                     Database.database().reference().child("users").child(model.uid).child("entities").child(newEntity.id).setValue(newEntityDict) // Save the Entity to Firebase
                 }, label: {
-                    Text("Save Whom")
+                    Text("Save Customer")
                 })
                 .disabled(name.isEmpty)
                 .font(.largeTitle)
                 .padding()
             }
         }
-        .navigationBarTitle("Add Entity")
+        .navigationBarTitle("Add Customer")
         .onAppear{
             requestContactsPermission { granted in
                 contactsPermissionGranted = granted
@@ -116,11 +119,11 @@ struct AddWhomView: View {
                 try store.enumerateContacts(with: fetchRequest) { (contact, stop) in
                     // Check if the contact's name contains the query string
                     if contact.givenName.lowercased().contains(query.lowercased()) ||
-                        contact.familyName.lowercased().contains(query.lowercased()) {
+                       contact.familyName.lowercased().contains(query.lowercased()) {
                         matchingContacts.append(contact)
                     }
                 }
-                
+
                 // Return the matching contacts on the main thread
                 DispatchQueue.main.async {
                     completion(matchingContacts)
@@ -161,4 +164,6 @@ struct AddWhomView: View {
             print("Error fetching contacts: \(error)")
         }
     }
+    
 }
+

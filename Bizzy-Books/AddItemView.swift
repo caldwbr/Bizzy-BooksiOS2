@@ -1,4 +1,6 @@
 import SwiftUI
+import Firebase
+import FirebaseDatabase
 
 @MainActor
 struct AddItemView: View {
@@ -37,10 +39,15 @@ struct AddItemView: View {
     
     var saveButton: some View {
         Button(action: {
-//            let newItem = model.createItemFromScratch(latitude: <#T##Double#>, longitude: <#T##Double#>, itemType: <#T##ItemType#>, notes: <#T##String?#>, who: <#T##String#>, whoID: <#T##String#>, what: <#T##Int#>, whom: <#T##String#>, whomID: <#T##String#>, personalReasonInt: <#T##Int#>, taxReasonInt: <#T##Int#>, vehicleName: <#T##String?#>, vehicleID: <#T##String?#>, workersComp: <#T##Bool#>, projectName: <#T##String?#>, projectID: <#T##String?#>, howMany: <#T##Int?#>, odometer: <#T##Int?#>)
+            let newItem = Item(latitude: model.latitude ?? 0.0, longitude: model.longitude ?? 0.0, itemType: model.itemType, notes: model.notesValue, who: model.selectedWho, whoID: model.selectedWhoUID, what: model.whatInt, whom: model.selectedWhom, whomID: model.selectedWhomUID, personalReasonInt: model.personalReasonIndex, taxReasonInt: model.taxReasonIndex, vehicleName: model.selectedVehicle, vehicleID: model.selectedVehicleUID, workersComp: model.incursWorkersComp, projectName: model.selectedProject, projectID: model.selectedProjectUID, howMany: model.howManyInt, odometer: model.odometerInt)
+            let newItemID = newItem.id
+            print("New Item Id: ", newItem.id)
+            let newItemDict = newItem.toDictionary()
+            Database.database().reference().child("users").child(model.uid).child("items").child(newItemID).setValue(newItemDict)
         }, label: {
             Text("Save")
         })
+        .disabled(model.selectedWhoUID.isEmpty || model.selectedWhomUID.isEmpty || (model.itemType == .business && model.taxReasonIndex == 0) || (model.itemType == .business && model.selectedProjectUID.isEmpty) || (model.itemType == .personal && model.personalReasonIndex == 0) || (model.itemType == .fuel && model.howManyInt == 0) || (model.itemType == .fuel && model.selectedVehicleUID.isEmpty) || (model.itemType == .fuel && model.odometerInt == 0) )
         .font(.largeTitle)
         .padding()
     }

@@ -11,6 +11,7 @@ import Firebase
 import FirebaseDatabase
 import FirebaseAuth
 import SwiftUI
+import Contacts
 
 @MainActor
 @Observable class Model {
@@ -18,48 +19,159 @@ import SwiftUI
     var authEmail = ""
     var authPassword = ""
     var authConfirmPassword = ""
-
+    
     var flow: AuthenticationFlow = .login
-
+    
     var isValid  = false
     var authenticationState: AuthenticationState = .unauthenticated
     var errorMessage = ""
     var user: User? = nil
     var displayName = ""
-
+    
     private var authStateHandler: AuthStateDidChangeListenerHandle? = nil
-
+    
     func registerAuthStateHandler() {
-      if authStateHandler == nil {
-        authStateHandler = Auth.auth().addStateDidChangeListener { auth, user in
-          self.user = user
-          self.authenticationState = user == nil ? .unauthenticated : .authenticated
-          self.displayName = user?.email ?? ""
+        if authStateHandler == nil {
+            authStateHandler = Auth.auth().addStateDidChangeListener { auth, user in
+                self.user = user
+                self.authenticationState = user == nil ? .unauthenticated : .authenticated
+                self.displayName = user?.email ?? ""
+            }
         }
-      }
     }
-
+    
     func switchFlow() {
-      flow = flow == .login ? .signUp : .login
-      errorMessage = ""
+        flow = flow == .login ? .signUp : .login
+        errorMessage = ""
     }
-
+    
     func wait() async {
-      do {
-        print("Wait")
-        try await Task.sleep(nanoseconds: 1_000_000_000)
-        print("Done")
-      }
-      catch {
-        print(error.localizedDescription)
-      }
+        do {
+            print("Wait")
+            try await Task.sleep(nanoseconds: 1_000_000_000)
+            print("Done")
+        }
+        catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func reset() {
+        flow = .login
+        authEmail = ""
+        authPassword = ""
+        authConfirmPassword = ""
+    }
+    
+    var fieldName = ""
+    var fieldBusinessName = ""
+    var fieldEmail = ""
+    var fieldPhone = ""
+    var fieldStreet = ""
+    var fieldCity = ""
+    var fieldState = ""
+    var fieldZip = ""
+    var fieldEIN = ""
+    var fieldSSN = ""
+    var fieldIsSearchEnabled = true
+    var contacts: [CNContact] = []
+    var predicate: NSPredicate = NSPredicate(value: false)
+        
+    let contactStore = CNContactStore()
+    var suggestedContacts: [CNContact] = []
+    let keys = [CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactGivenNameKey, CNContactFamilyNameKey]
+    let keysToFetch: [CNKeyDescriptor] = [
+            CNContactPhoneNumbersKey as CNKeyDescriptor,
+            CNContactEmailAddressesKey as CNKeyDescriptor,
+            CNContactPostalAddressesKey as CNKeyDescriptor,
+            CNContactGivenNameKey as CNKeyDescriptor,
+            CNContactFamilyNameKey as CNKeyDescriptor,
+            // Add other keys you need here
+        ]
+    
+    func requestContactsPermission(completion: @escaping (Bool) -> Void) {
+        contactStore.requestAccess(for: .contacts) { granted, error in
+            DispatchQueue.main.async {
+                completion(granted)
+            }
+        }
+    }
+    
+    func contactPredicate(forName name: String) -> NSPredicate {
+        return CNContact.predicateForContacts(matchingName: name)
+    }
+    
+    func searchContacts(name: String, completion: @escaping ([CNContact]?) -> Void) {
+        contactStore.requestAccess(for: .contacts) { (granted, error) in
+            if granted {
+                let predicate = CNContact.predicateForContacts(matchingName: name)
+                if let fetchedContacts = try? self.contactStore.unifiedContacts(matching: predicate, keysToFetch: self.keys as [CNKeyDescriptor]) {
+                    DispatchQueue.main.async {
+                        completion(fetchedContacts)
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        completion(nil)
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
+            }
+        }
+    }
+    
+    func fillInContactDetails(for contact: CNContact) {
+        // Populate fields from the clicked contact directly
+        fieldName = contact.givenName + " " + contact.familyName
+        fieldEmail = contact.emailAddresses.first?.value as String? ?? ""
+        fieldPhone = contact.phoneNumbers.first?.value.stringValue ?? ""
+        
+        // Fetch and set address details
+        if let postalAddress = contact.postalAddresses.first?.value {
+            fieldStreet = "\(postalAddress.street)"
+            fieldCity = "\(postalAddress.city)"
+            fieldState = "\(postalAddress.state)"
+            fieldZip = "\(postalAddress.postalCode)"
+        }
     }
 
-    func reset() {
-      flow = .login
-      authEmail = ""
-      authPassword = ""
-      authConfirmPassword = ""
+    
+    func clearFields() {
+        fieldIsSearchEnabled = true
+        fieldName = ""
+        fieldBusinessName = ""
+        fieldEmail = ""
+        fieldPhone = ""
+        fieldStreet = ""
+        fieldCity = ""
+        fieldState = ""
+        fieldZip = ""
+        fieldEIN = ""
+        fieldSSN = ""
+        suggestedContacts.removeAll()
+        contacts.removeAll()
+        predicate = NSPredicate(value: false)
+    }
+    
+    func saveWhoEntity() {
+        let newEntity = Entity(
+            name: fieldName,
+            businessName: fieldBusinessName,
+            street: fieldStreet,
+            city: fieldCity,
+            state: fieldState,
+            zip: fieldZip,
+            phone: fieldPhone,
+            email: fieldEmail,
+            ein: fieldEIN,
+            ssn: fieldSSN
+        )
+        selectedWho = newEntity.name
+        selectedWhoUID = newEntity.id
+        let newEntityDict = newEntity.toDictionary() // Convert the Entity to a dictionary
+        Database.database().reference().child("users").child(uid).child("entities").child(newEntity.id).setValue(newEntityDict) // Save the Entity to Firebase
     }
     
     //Previously MainScreenViewModel
@@ -74,73 +186,83 @@ import SwiftUI
     var entitiesRef: DatabaseReference? = nil
     var projectsRef: DatabaseReference? = nil
     var vehiclesRef: DatabaseReference? = nil
-    //var db:
-
+    var customerName = ""
+    var customerUID = ""
+    var youEntity: YouEntity? = nil
+    var youBusinessEntity: YouBusinessEntity? = nil
+    
     func configureFirebaseReferences() {
         uid = Auth.auth().currentUser?.uid ?? ""
         userRef = Database.database().reference().child("users").child(uid)
-        itemsRef = userRef!.child("items")
-        entitiesRef = userRef!.child("entities")
-        projectsRef = userRef!.child("projects")
-        vehiclesRef = userRef!.child("vehicles")
+        itemsRef = Database.database().reference().child("users").child(uid).child("items")
+        entitiesRef = Database.database().reference().child("users").child(uid).child("entities")
+        projectsRef = Database.database().reference().child("users").child(uid).child("projects")
+        vehiclesRef = Database.database().reference().child("users").child(uid).child("vehicles")
     }
-
+    
     func fetchDataFromFirebase() {
         // Use Firebase's observe methods to read data from the references.
         itemsRef!.observe(.value) { snapshot in
             // Parse and populate the 'items' array from the snapshot.
             // Ensure you decode the snapshot data into 'Item' objects.
         }
-
+        
         entitiesRef!.observe(.value) { snapshot in
             // Parse and populate the 'entities' array from the snapshot.
             // Ensure you decode the snapshot data into 'Entity' objects.
         }
-
+        
         projectsRef!.observe(.value) { snapshot in
             // Parse and populate the 'projects' array from the snapshot.
             // Ensure you decode the snapshot data into 'Project' objects.
         }
-
+        
         vehiclesRef!.observe(.value) { snapshot in
             // Parse and populate the 'vehicles' array from the snapshot.
             // Ensure you decode the snapshot data into 'Vehicle' objects.
         }
     }
-
+    
     func checkAndCreateYouEntity() {
         guard let uid = Auth.auth().currentUser?.uid else {
             return // User is not logged in, so we can't create the entity.
         }
-
-        let youEntityRef = Database.database().reference().child("users").child(uid).child("entities").child(uid)
-        let db = Database.database().reference()
-        let example = db.child("users").child(uid)
-        let entityish = example.child("entities")
-        let meID = UUID().uuidString
-        let meUsey: [String: Any] = ["name": "You", "id": meID]
-        let me = Entity(name: "You").toDictionary()
-        entityish.setValue(me)
         
-        //entityish.setValue(meUsey)
-        /*
+        let youEntityRef = Database.database().reference().child("users").child(uid).child("youentity")
+        let youBusinessEntityRef = Database.database().reference().child("users").child(uid).child("youbusinessentity")
         youEntityRef.observeSingleEvent(of: .value) { snapshot in
             if snapshot.exists() {
-                // "you" entity already exists, retrieve it if needed.
+                if let youEntityRefDictionary = snapshot.value as? [String: Any] {
+                    self.youEntity = YouEntity(fromDictionary: youEntityRefDictionary)
+                } else {
+                    self.youEntity = YouEntity(uid: uid)
+                }
             } else {
-                // "you" entity does not exist, create it and upload to the Realtime Database.
-                let newEntity = Entity(id: uid, name: "You")
-                let newEntityData = newEntity.toDictionary
-
-                youEntityRef.setValue(newEntityData) { error, _ in
-                    if let error = error {
-                        print("Error creating/updating entity: \(error)")
-                    } else {
-                        self.userEntity = newEntity
-                    }
+                self.youEntity = YouEntity(uid: uid)
+                if let youEntityDict = self.youEntity?.toDictionary() {
+                    youEntityRef.setValue(youEntityDict)
                 }
             }
-        } */
+        }
+        
+        //Load youBusinessEntity
+        youBusinessEntityRef.observeSingleEvent(of: .value) { snapshot in
+            if snapshot.exists() {
+                if let youBusinessEntityRefDictionary = snapshot.value as? [String: Any] {
+                    self.youBusinessEntity = YouBusinessEntity(fromDictionary: youBusinessEntityRefDictionary)
+                    print("YOOO")
+                    print(self.youBusinessEntity?.name ?? "Suppy")
+                } else {
+                    self.youBusinessEntity = YouBusinessEntity()
+                    let youBusinessEntityDict = self.youBusinessEntity?.toDictionary()
+                }
+            } else {
+                self.youBusinessEntity = YouBusinessEntity()
+                if let youBusinessEntityDict = self.youBusinessEntity?.toDictionary() {
+                    youBusinessEntityRef.setValue(youBusinessEntityDict)
+                }
+            }
+        }
     }
     
     //Previously AddItemViewModel
@@ -167,6 +289,8 @@ import SwiftUI
     var showProjectSearchView = false
     var showWorkersCompToggle = false
     var incursWorkersComp = false
+    var latitude: Double? = nil
+    var longitude: Double? = nil
     
     //Previously @Binding in AddItemView
     var selectedWho = ""
@@ -182,132 +306,6 @@ import SwiftUI
     var selectedProjectUID = ""
     var projectPlaceholder = "project ▼"
     
-    func createItemFromScratch(
-        latitude: Double,
-        longitude: Double,
-        itemType: ItemType,
-        notes: String?,
-        who: String,
-        whoID: String,
-        what: Int,
-        whom: String,
-        whomID: String,
-        personalReasonInt: Int,
-        taxReasonInt: Int,
-        vehicleName: String?,
-        vehicleID: String?,
-        workersComp: Bool,
-        projectName: String?,
-        projectID: String?,
-        howMany: Int?,
-        odometer: Int?
-    ) -> Item {
-        // Create a new 'Item' with the provided parameters.
-        let newItem = Item(
-            latitude: latitude,
-            longitude: longitude,
-            itemType: itemType,
-            notes: notes,
-            who: who,
-            whoID: whoID,
-            what: what,
-            whom: whom,
-            whomID: whomID,
-            personalReasonInt: personalReasonInt,
-            taxReasonInt: taxReasonInt,
-            vehicleName: vehicleName,
-            vehicleID: vehicleID,
-            workersComp: workersComp,
-            projectName: projectName,
-            projectID: projectID,
-            howMany: howMany,
-            odometer: odometer
-        )
-
-        // Return the newly created 'Item'.
-        return newItem
-    }
-    
-    func createEntityFromScratch(
-        
-        name: String,
-        businessName: String?,
-        street: String?,
-        city: String?,
-        state: String?,
-        zip: String?,
-        phone: String?,
-        email: String?,
-        ein: String?,
-        ssn: String?
-    ) -> Entity {
-        // Create a new 'Entity' with the provided parameters.
-        let newEntity = Entity(
-            name: name,
-            businessName: businessName,
-            street: street,
-            city: city,
-            state: state,
-            zip: zip,
-            phone: phone,
-            email: email,
-            ein: ein,
-            ssn: ssn
-        )
-
-        // Return the newly created 'Entity'.
-        return newEntity
-    }
-
-    func createVehicleFromScratch(
-        year: String,
-        make: String,
-        model: String,
-        color: String?,
-        picd: String?,
-        vin: String?,
-        licPlateNo: String?
-    ) -> Vehicle {
-        // Create a new 'Vehicle' with the provided parameters.
-        let newVehicle = Vehicle(
-            year: year,
-            make: make,
-            model: model,
-            color: color,
-            picd: picd,
-            vin: vin,
-            licPlateNo: licPlateNo
-        )
-
-        // Return the newly created 'Vehicle'.
-        return newVehicle
-    }
-
-    func createProjectFromScratch(
-        name: String,
-        notes: String?,
-        customer: Entity?,
-        jobsiteStreet: String?,
-        jobsiteCity: String?,
-        jobsiteState: String?,
-        jobsiteZip: String?
-    ) -> Project {
-        // Create a new 'Project' with the provided parameters.
-        let newProject = Project(
-            name: name,
-            notes: notes,
-            customer: customer,
-            jobsiteStreet: jobsiteStreet,
-            jobsiteCity: jobsiteCity,
-            jobsiteState: jobsiteState,
-            jobsiteZip: jobsiteZip
-        )
-
-        // Return the newly created 'Project'.
-        return newProject
-    }
-
-    
     func sizeForElementContent(_ content: String, semanticType: SentenceElement.SemanticType) -> CGSize {
         // Calculate the size based on content and type
         // This is a placeholder - you'll need to implement actual size calculation
@@ -315,7 +313,7 @@ import SwiftUI
         let height: CGFloat = 30 // Example: fixed height
         return CGSize(width: width, height: height)
     }
-
+    
     //Formerly ProjectViewModel
     var filteredProjects: [Project] = []
     
@@ -341,16 +339,16 @@ import SwiftUI
     
     //Formerly VehicleViewModel
     var filteredVehicles: [Vehicle] = []
-
+    
     func loadVehicles() {
         // Load your entities here
         // For example:
-//        vehicles = [
-//            Vehicle(year: "2012", make: "Toyota", model: "Prius"),
-//            Vehicle(year: "2015", make: "Toyota", model: "Prius"),
-//            Vehicle(year: "2018", make: "Toyota", model: "Prius")
-//        ]
-//        filteredVehicles = vehicles
+        //        vehicles = [
+        //            Vehicle(year: "2012", make: "Toyota", model: "Prius"),
+        //            Vehicle(year: "2015", make: "Toyota", model: "Prius"),
+        //            Vehicle(year: "2018", make: "Toyota", model: "Prius")
+        //        ]
+        //        filteredVehicles = vehicles
     }
     
     func searchVehicles(query: String) {
@@ -366,17 +364,17 @@ import SwiftUI
     //Formerly WhoViewModel
     var whoEntities: [Entity] = []
     var filteredWhoEntities: [Entity] = []
-
+    
     func loadWhoEntities() {
         // Load your entities here
         // For example:
-//        whoEntities = [
-//            Entity(name: "Steve Caldwell"),
-//            Entity(name: "Entity 1"),
-//            Entity(name: "Entity 2"),
-//            Entity(name: "Entity 3")
-//        ]
-//        filteredWhoEntities = whoEntities
+        //        whoEntities = [
+        //            Entity(name: "Steve Caldwell"),
+        //            Entity(name: "Entity 1"),
+        //            Entity(name: "Entity 2"),
+        //            Entity(name: "Entity 3")
+        //        ]
+        //        filteredWhoEntities = whoEntities
     }
     
     func whoSearchEntities(query: String) {
@@ -392,16 +390,16 @@ import SwiftUI
     //Formerly WhomViewModel
     var whomEntities: [Entity] = []
     var filteredWhomEntities: [Entity] = []
-
+    
     func loadWhomEntities() {
         // Load your entities here
         // For example:
-//        whomEntities = [
-//            Entity(name: "Entity 1"),
-//            Entity(name: "Entity 2"),
-//            Entity(name: "Entity 3")
-//        ]
-//        filteredWhomEntities = whomEntities
+        //        whomEntities = [
+        //            Entity(name: "Entity 1"),
+        //            Entity(name: "Entity 2"),
+        //            Entity(name: "Entity 3")
+        //        ]
+        //        filteredWhomEntities = whomEntities
     }
     
     func whomSearchEntities(query: String) {
@@ -439,66 +437,66 @@ import SwiftUI
 
 
 enum AuthenticationState {
-  case unauthenticated
-  case authenticating
-  case authenticated
+    case unauthenticated
+    case authenticating
+    case authenticated
 }
 
 enum AuthenticationFlow: Hashable {
-  case login
-  case signUp
+    case login
+    case signUp
 }
 
 // MARK: - Email and Password Authentication
 
 extension Model {
-  func signInWithEmailPassword() async -> Bool {
-    authenticationState = .authenticating
-    do {
-      try await Auth.auth().signIn(withEmail: self.authEmail, password: self.authPassword)
-      return true
+    func signInWithEmailPassword() async -> Bool {
+        authenticationState = .authenticating
+        do {
+            try await Auth.auth().signIn(withEmail: self.authEmail, password: self.authPassword)
+            return true
+        }
+        catch  {
+            print(error)
+            errorMessage = error.localizedDescription
+            authenticationState = .unauthenticated
+            return false
+        }
     }
-    catch  {
-      print(error)
-      errorMessage = error.localizedDescription
-      authenticationState = .unauthenticated
-      return false
+    
+    func signUpWithEmailPassword() async -> Bool {
+        authenticationState = .authenticating
+        do  {
+            try await Auth.auth().createUser(withEmail: authEmail, password: authPassword)
+            return true
+        }
+        catch {
+            print(error)
+            errorMessage = error.localizedDescription
+            authenticationState = .unauthenticated
+            return false
+        }
     }
-  }
-
-  func signUpWithEmailPassword() async -> Bool {
-    authenticationState = .authenticating
-    do  {
-      try await Auth.auth().createUser(withEmail: authEmail, password: authPassword)
-      return true
+    
+    func signOut() {
+        do {
+            try Auth.auth().signOut()
+        }
+        catch {
+            print(error)
+            errorMessage = error.localizedDescription
+        }
     }
-    catch {
-      print(error)
-      errorMessage = error.localizedDescription
-      authenticationState = .unauthenticated
-      return false
+    
+    func deleteAccount() async -> Bool {
+        do {
+            try await user?.delete()
+            return true
+        }
+        catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
     }
-  }
-
-  func signOut() {
-    do {
-      try Auth.auth().signOut()
-    }
-    catch {
-      print(error)
-      errorMessage = error.localizedDescription
-    }
-  }
-
-  func deleteAccount() async -> Bool {
-    do {
-      try await user?.delete()
-      return true
-    }
-    catch {
-      errorMessage = error.localizedDescription
-      return false
-    }
-  }
 }
 

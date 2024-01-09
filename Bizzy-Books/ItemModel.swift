@@ -31,7 +31,6 @@ struct Item: Identifiable, Codable {
     
     func toDictionary() -> [String: Any] {
         var dictionary: [String: Any] = [:]
-        
         dictionary["id"] = id
         dictionary["timeStamp"] = timeStamp
         dictionary["latitude"] = latitude
@@ -52,21 +51,20 @@ struct Item: Identifiable, Codable {
         dictionary["projectID"] = projectID
         dictionary["howMany"] = howMany
         dictionary["odometer"] = odometer
-        
         return dictionary
     }
     
     init(fromDictionary dictionary: [String: Any]) {
         id = dictionary["id"] as? String ?? ""
         timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
-        latitude = dictionary["latitude"] as? Double
-        longitude = dictionary["longitude"] as? Double
+        latitude = dictionary["latitude"] as? Double ?? 0.0
+        longitude = dictionary["longitude"] as? Double ?? 0.0
         if let itemTypeString = dictionary["itemType"] as? String, let itemType = ItemType(rawValue: itemTypeString) {
             self.itemType = itemType
         } else {
             self.itemType = .business
         }
-        notes = dictionary["notes"] as? String
+        notes = dictionary["notes"] as? String ?? ""
         who = dictionary["who"] as? String ?? ""
         whoID = dictionary["whoID"] as? String ?? ""
         what = dictionary["what"] as? Int ?? 0
@@ -84,7 +82,7 @@ struct Item: Identifiable, Codable {
     }
     
     // Initializer that matches the parameter list
-    init(latitude: Double, longitude: Double, itemType: ItemType, notes: String?, who: String, whoID: String, what: Int, whom: String, whomID: String, personalReasonInt: Int, taxReasonInt: Int, vehicleName: String?, vehicleID: String?, workersComp: Bool, projectName: String?, projectID: String?, howMany: Int?, odometer: Int?) {
+    init(latitude: Double?, longitude: Double?, itemType: ItemType, notes: String?, who: String, whoID: String, what: Int, whom: String, whomID: String, personalReasonInt: Int, taxReasonInt: Int, vehicleName: String?, vehicleID: String?, workersComp: Bool, projectName: String?, projectID: String?, howMany: Int?, odometer: Int?) {
         self.latitude = latitude
         self.longitude = longitude
         self.itemType = itemType
@@ -114,7 +112,6 @@ struct Entity: Identifiable, Codable {
     
     func toDictionary() -> [String: Any] {
         var dictionary: [String: Any] = [:]
-        
         dictionary["id"] = id
         dictionary["timeStamp"] = timeStamp
         dictionary["name"] = name
@@ -127,7 +124,6 @@ struct Entity: Identifiable, Codable {
         dictionary["email"] = email
         dictionary["ein"] = ein
         dictionary["ssn"] = ssn
-        
         return dictionary
     }
     
@@ -165,29 +161,108 @@ struct Entity: Identifiable, Codable {
     }
 }
 
+struct YouEntity: Identifiable, Codable {
+    var id: String = UUID().uuidString
+    var timeStamp: TimeInterval = Date().timeIntervalSince1970
+    var name: String = "You" // Default name
+    var uid: String
+    
+    init(uid: String) {
+        self.uid = uid
+    }
+    
+    func toDictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        dictionary["id"] = id
+        dictionary["timeStamp"] = timeStamp
+        dictionary["name"] = name
+        dictionary["uid"] = uid
+        return dictionary
+    }
+    
+    init(fromDictionary dictionary: [String: Any]) {
+        id = dictionary["id"] as? String ?? ""
+        timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
+        name = dictionary["name"] as? String ?? "You"
+        uid = dictionary["uid"] as? String ?? ""
+    }
+}
+
+struct YouBusinessEntity: Identifiable, Codable {
+    var id: String = UUID().uuidString
+    var timeStamp: TimeInterval = Date().timeIntervalSince1970
+    var name: String = "" // Default business name
+    var email, phone, street, city, state, zip, ein, ssn: String?
+    
+    func toDictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        dictionary["id"] = id
+        dictionary["timeStamp"] = timeStamp
+        dictionary["name"] = name
+        dictionary["email"] = email
+        dictionary["phone"] = phone
+        dictionary["street"] = street
+        dictionary["city"] = city
+        dictionary["state"] = state
+        dictionary["zip"] = zip
+        dictionary["ein"] = ein
+        dictionary["ssn"] = ssn
+        return dictionary
+    }
+    
+    init(fromDictionary dictionary: [String: Any]) {
+        id = dictionary["id"] as? String ?? ""
+        timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
+        name = dictionary["name"] as? String ?? ""
+        email = dictionary["email"] as? String
+        phone = dictionary["phone"] as? String
+        street = dictionary["street"] as? String
+        city = dictionary["city"] as? String
+        state = dictionary["state"] as? String
+        zip = dictionary["zip"] as? String
+        ein = dictionary["ein"] as? String
+        ssn = dictionary["ssn"] as? String
+    }
+    
+    init(name: String, email: String?, phone: String?, street: String?, city: String?, state: String?, zip: String?, ein: String?, ssn: String?) {
+        self.name = name
+        self.email = email
+        self.phone = phone
+        self.street = street
+        self.city = city
+        self.state = state
+        self.zip = zip
+        self.ein = ein
+        self.ssn = ssn
+    }
+    
+    init() {
+        
+    }
+}
+
+
 struct Project: Identifiable, Codable {
     var id: String = UUID().uuidString
     var timeStamp: TimeInterval = Date().timeIntervalSince1970
     var name: String
     var notes: String?
-    var customer: Entity? //Probe this for name, address, phone, email for document generation.
+    var customerName: String
+    var customerUID: String
     var jobsiteStreet, jobsiteCity, jobsiteState, jobsiteZip: String?
     
     func toDictionary() -> [String: Any] {
         var dictionary: [String: Any] = [:]
-        
         dictionary["id"] = id
         dictionary["timeStamp"] = timeStamp
         dictionary["name"] = name
         dictionary["notes"] = notes
-        if let customer = customer {
-            dictionary["customer"] = customer.toDictionary()
-        }
+        dictionary["customerName"] = customerName
+        dictionary["customerUID"] = customerUID
         dictionary["jobsiteStreet"] = jobsiteStreet
         dictionary["jobsiteCity"] = jobsiteCity
         dictionary["jobsiteState"] = jobsiteState
         dictionary["jobsiteZip"] = jobsiteZip
-        
         return dictionary
     }
     
@@ -196,21 +271,19 @@ struct Project: Identifiable, Codable {
         timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
         name = dictionary["name"] as? String ?? ""
         notes = dictionary["notes"] as? String
-        if let customerDictionary = dictionary["customer"] as? [String: Any] {
-            customer = Entity(fromDictionary: customerDictionary)
-        } else {
-            customer = nil
-        }
+        customerName = dictionary["customerName"] as? String ?? ""
+        customerUID = dictionary["customerUID"] as? String ?? ""
         jobsiteStreet = dictionary["jobsiteStreet"] as? String ?? ""
         jobsiteCity = dictionary["jobsiteCity"] as? String ?? ""
         jobsiteState = dictionary["jobsiteState"] as? String ?? ""
         jobsiteZip = dictionary["jobsiteZip"] as? String ?? ""
     }
     
-    init(name: String, notes: String?, customer: Entity?, jobsiteStreet: String?, jobsiteCity: String?, jobsiteState: String?, jobsiteZip: String?) {
+    init(name: String, notes: String?, customerName: String, customerUID: String, jobsiteStreet: String?, jobsiteCity: String?, jobsiteState: String?, jobsiteZip: String?) {
         self.name = name
         self.notes = notes
-        self.customer = customer
+        self.customerName = customerName
+        self.customerUID = customerUID
         self.jobsiteStreet = jobsiteStreet
         self.jobsiteCity = jobsiteCity
         self.jobsiteState = jobsiteState
@@ -219,8 +292,11 @@ struct Project: Identifiable, Codable {
     
     init(name: String) {
         self.name = name
+        self.customerName = ""
+        self.customerUID = ""
     }
 }
+
 
 struct Vehicle: Identifiable, Codable {
     var id: String = UUID().uuidString
@@ -234,7 +310,6 @@ struct Vehicle: Identifiable, Codable {
     
     func toDictionary() -> [String: Any] {
         var dictionary: [String: Any] = [:]
-        
         dictionary["id"] = id
         dictionary["timeStamp"] = timeStamp
         dictionary["year"] = year
@@ -244,7 +319,6 @@ struct Vehicle: Identifiable, Codable {
         dictionary["picd"] = picd
         dictionary["vin"] = vin
         dictionary["licPlateNo"] = licPlateNo
-        
         return dictionary
     }
     

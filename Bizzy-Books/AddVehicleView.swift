@@ -6,14 +6,16 @@
 //
 
 import SwiftUI
+import FirebaseDatabase
 
 struct AddVehicleView: View {
+    @Bindable var model: Model
     @State private var vehicle: Vehicle? = nil
     @State private var vehicleName = ""
     @State private var vehicleUID: String? = nil
     @State private var year = ""
     @State private var make = ""
-    @State private var model = ""
+    @State private var vehicleModel = ""
     @State private var color = ""
     @State private var picd = ""
     @State private var vin = ""
@@ -24,7 +26,7 @@ struct AddVehicleView: View {
             Section(header: Text("Add Vehicle: Required Fields")) {
                 TextField("Year", text: $year)
                 TextField("Make", text: $make)
-                TextField("Model", text: $model)
+                TextField("Model", text: $vehicleModel)
             }
             
             Section(header: Text("Optional Fields")) {
@@ -35,19 +37,28 @@ struct AddVehicleView: View {
             }
             
             Section {
-                Button("Save", action: saveVehicle) //parentheses?
-                    .disabled(year.isEmpty || make.isEmpty || model.isEmpty)
+                Button(action: {
+                    let newVehicle = Vehicle(
+                        year: year,
+                        make: make,
+                        model: vehicleModel,
+                        color: color,
+                        picd: picd,
+                        vin: vin,
+                        licPlateNo: licPlateNo
+                    )
+                    model.selectedVehicle = newVehicle.name
+                    model.selectedVehicleUID = newVehicle.id
+                    let newVehicleDict = newVehicle.toDictionary() // Convert the Vehicle to a dictionary
+                    Database.database().reference().child("users").child(model.uid).child("vehicles").child(newVehicle.id).setValue(newVehicleDict) // Save the Vehicle to Firebase
+                }, label: {
+                    Text("Save Vehicle")
+                })
+
+                .disabled(year.isEmpty || make.isEmpty || vehicleModel.isEmpty)
             }
             
             
         }
-    }
-
-    func saveVehicle() {
-        // Implement the Firebase update or create logic here
-        //Lotsa GUARD lests... or is the disabled save logic enuf?
-        //Create project UUID() to make Project and then upload to Firebase]
-        //timestamp creation!
-        //Remember last four need to be set to nil if string == "" prior to sending to database
     }
 }

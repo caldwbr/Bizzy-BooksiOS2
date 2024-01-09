@@ -6,12 +6,13 @@
 //
 
 import SwiftUI
+import FirebaseDatabase
 
 struct AddProjectView: View {
+    @Bindable var model: Model
     @State private var projectName = ""
+    @State private var projectNotes = ""
     @State private var customer: Entity? = nil
-    @State private var customerName = ""
-    @State private var customerUID: String? = nil
     @State private var suggestedCustomers: [Entity] = []
     @State private var email = ""
     @State private var phone = ""
@@ -19,19 +20,34 @@ struct AddProjectView: View {
     @State private var city = ""
     @State private var state = ""
     @State private var zip = ""
+    @State private var showingAddCustomerView = false
 
     var body: some View {
         Form {
             Section(header: Text("Add Project")) {
-                TextField("Name", text: $customerName)
-                    .onChange(of: customerName) { newName, _ in
-                        suggestedCustomers = searchCustomers(for: newName)
-                    }
-                ForEach(suggestedCustomers, id: \.id) { customer in
-                    Text(customer.name)
-                        .onTapGesture {
-                            fillInCustomerDetails(for: customer)
+                TextField("Project Name", text: $projectName)
+                TextField("Project Notes", text: $projectNotes)
+                HStack {
+                    TextField("Name", text: $model.customerName)
+                        .onChange(of: model.customerName) { newName, _ in
+                            suggestedCustomers = searchCustomers(for: newName)
                         }
+                    ForEach(suggestedCustomers, id: \.id) { customer in
+                        Text(customer.name)
+                            .onTapGesture {
+                                fillInCustomerDetails(for: customer)
+                            }
+                    }
+                    Button(action: {
+                        showingAddCustomerView = true
+                    }) {
+                        Image(systemName: "plus")
+                            .foregroundColor(.blue)
+                    }
+                    .padding()
+                    .sheet(isPresented: $showingAddCustomerView) {
+                        AddCustomerView(model: model)
+                    }
                 }
                 TextField("Email", text: $email)
                 TextField("Phone", text: $phone)
@@ -42,8 +58,27 @@ struct AddProjectView: View {
             }
             
             Section {
-                Button("Save", action: saveProject) //parentheses?
-                    .disabled(projectName.isEmpty || customerUID == nil)
+                Button(action: {
+                    let newProject = Project(
+                        name: projectName,
+                        notes: projectNotes,
+                        customerName: model.customerName,
+                        customerUID: model.customerUID,
+                        jobsiteStreet: street,
+                        jobsiteCity: city,
+                        jobsiteState: state,
+                        jobsiteZip: zip
+                    )
+                    model.selectedProject = newProject.name
+                    model.selectedProjectUID = newProject.id
+                    model.selectedWho = newProject.customerName
+                    model.selectedWhoUID = newProject.customerUID
+                    let newProjectDict = newProject.toDictionary() // Convert the Project to a dictionary
+                    Database.database().reference().child("users").child(model.uid).child("projects").child(newProject.id).setValue(newProjectDict) // Save the Project to Firebase
+                }, label: {
+                    Text("Save Project")
+                })
+                .disabled(projectName.isEmpty || model.customerName.isEmpty || model.customerUID.isEmpty)
             }
         }
     }
@@ -57,9 +92,10 @@ struct AddProjectView: View {
         return matchingCustomers
     }
     
+    @MainActor
     func fillInCustomerDetails(for customer: Entity) {
-        self.customerName = customer.name
-        self.customerUID = customer.id
+        model.customerName = customer.name
+        model.customerUID = customer.id
         if let jobsiteStreet = customer.street {
             self.street = jobsiteStreet
         }
@@ -72,12 +108,5 @@ struct AddProjectView: View {
         if let jobsiteZip = customer.zip {
             self.zip = jobsiteZip
         }
-    }
-
-    func saveProject() {
-        // Implement the Firebase update or create logic here
-        //Lotsa GUARD lests... or is the disabled save logic enuf?
-        //Create project UUID() to make Project and then upload to Firebase
-        //Create timestamp!
     }
 }

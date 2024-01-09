@@ -33,7 +33,7 @@ struct WhoSearchView: View {
                     }
                     .padding()
                     .sheet(isPresented: $showingAddWhoView) {
-                        AddWhoView() // Make sure this view can update the list of entities
+                        AddWhoView(model: model) // Make sure this view can update the list of entities
                     }
                 }
 
@@ -82,7 +82,7 @@ struct WhomSearchView: View {
                     }
                     .padding()
                     .sheet(isPresented: $showingAddWhomView) {
-                        AddWhomView() // Make sure this view can update the list of entities
+                        AddWhomView(model: model) // Make sure this view can update the list of entities
                     }
                 }
 
@@ -131,7 +131,7 @@ struct VehicleSearchView: View {
                     }
                     .padding()
                     .sheet(isPresented: $showingAddVehicleView) {
-                        AddVehicleView() // Make sure this view can update the list of entities
+                        AddVehicleView(model: model) // Make sure this view can update the list of entities
                     }
                 }
 
@@ -182,7 +182,7 @@ struct ProjectSearchView: View {
                     }
                     .padding()
                     .sheet(isPresented: $showingAddProjectView) {
-                        AddProjectView() // Make sure this view can update the list of entities
+                        AddProjectView(model: model) // Make sure this view can update the list of entities
                     }
                 }
 

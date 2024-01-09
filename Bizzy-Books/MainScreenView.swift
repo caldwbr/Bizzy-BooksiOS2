@@ -96,7 +96,7 @@ struct FooterHStack: View {
             }
             .padding()
             .sheet(isPresented: $isEditingSheetPresented) {
-                EditBusinessView()
+                EditBusinessView(model: model)
             }
             
             Spacer()
