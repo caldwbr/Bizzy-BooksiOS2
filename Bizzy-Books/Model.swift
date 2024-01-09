@@ -73,7 +73,7 @@ import Contacts
     var fieldZip = ""
     var fieldEIN = ""
     var fieldSSN = ""
-    var fieldIsSearchEnabled = true
+    //var fieldIsSearchEnabled = true
     var contacts: [CNContact] = []
     var predicate: NSPredicate = NSPredicate(value: false)
         
@@ -139,7 +139,7 @@ import Contacts
 
     
     func clearFields() {
-        fieldIsSearchEnabled = true
+        // fieldIsSearchEnabled = true
         fieldName = ""
         fieldBusinessName = ""
         fieldEmail = ""
@@ -170,6 +170,44 @@ import Contacts
         )
         selectedWho = newEntity.name
         selectedWhoUID = newEntity.id
+        let newEntityDict = newEntity.toDictionary() // Convert the Entity to a dictionary
+        Database.database().reference().child("users").child(uid).child("entities").child(newEntity.id).setValue(newEntityDict) // Save the Entity to Firebase
+    }
+    
+    func saveWhomEntity() {
+        let newEntity = Entity(
+            name: fieldName,
+            businessName: fieldBusinessName,
+            street: fieldStreet,
+            city: fieldCity,
+            state: fieldState,
+            zip: fieldZip,
+            phone: fieldPhone,
+            email: fieldEmail,
+            ein: fieldEIN,
+            ssn: fieldSSN
+        )
+        selectedWhom = newEntity.name
+        selectedWhomUID = newEntity.id
+        let newEntityDict = newEntity.toDictionary() // Convert the Entity to a dictionary
+        Database.database().reference().child("users").child(uid).child("entities").child(newEntity.id).setValue(newEntityDict) // Save the Entity to Firebase
+    }
+    
+    func saveCustomerEntity() {
+        let newEntity = Entity(
+            name: fieldName,
+            businessName: fieldBusinessName,
+            street: fieldStreet,
+            city: fieldCity,
+            state: fieldState,
+            zip: fieldZip,
+            phone: fieldPhone,
+            email: fieldEmail,
+            ein: fieldEIN,
+            ssn: fieldSSN
+        )
+        selectedCustomer = newEntity.name
+        selectedCustomerUID = newEntity.id
         let newEntityDict = newEntity.toDictionary() // Convert the Entity to a dictionary
         Database.database().reference().child("users").child(uid).child("entities").child(newEntity.id).setValue(newEntityDict) // Save the Entity to Firebase
     }
@@ -299,6 +337,8 @@ import Contacts
     var selectedWhom = ""
     var selectedWhomUID = ""
     let whomPlaceholder = "whom ▼"
+    var selectedCustomer = ""
+    var selectedCustomerUID = ""
     var selectedVehicle = ""
     var selectedVehicleUID = ""
     let vehiclePlaceholder = "vehicle ▼"
@@ -365,16 +405,16 @@ import Contacts
     var whoEntities: [Entity] = []
     var filteredWhoEntities: [Entity] = []
     
-    func loadWhoEntities() {
-        // Load your entities here
-        // For example:
-        //        whoEntities = [
-        //            Entity(name: "Steve Caldwell"),
-        //            Entity(name: "Entity 1"),
-        //            Entity(name: "Entity 2"),
-        //            Entity(name: "Entity 3")
-        //        ]
-        //        filteredWhoEntities = whoEntities
+    func loadEntities() {
+        print("Loading Entities...")
+        entitiesRef?.observeSingleEvent(of: .value, with: { snapshot in
+            for item in snapshot.children {
+                self.entities.append(Entity(snapshot: item as! DataSnapshot))
+            }
+//            if let value = snapshot.value as? NSDictionary {
+//                
+//            }
+        })
     }
     
     func whoSearchEntities(query: String) {

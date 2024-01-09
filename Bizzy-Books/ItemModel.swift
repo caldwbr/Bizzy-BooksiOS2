@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseDatabase
 
 struct Item: Identifiable, Codable {
     var id: String = UUID().uuidString
@@ -109,6 +110,24 @@ struct Entity: Identifiable, Codable {
     var timeStamp: TimeInterval = Date().timeIntervalSince1970
     var name: String
     var businessName, street, city, state, zip, phone, email, ein, ssn: String?
+    let key: String
+    
+    init(snapshot: DataSnapshot) {
+        key = snapshot.key
+        let snapshotValue = snapshot.value as! [String: AnyObject]
+        id = snapshotValue["id"] as? String ?? ""
+        timeStamp = snapshotValue["timeStamp"] as? TimeInterval ?? 0.0
+        name = snapshotValue["name"] as? String ?? ""
+        businessName = snapshotValue["businessName"] as? String ?? ""
+        street = snapshotValue["street"] as? String ?? ""
+        city = snapshotValue["city"] as? String ?? ""
+        state = snapshotValue["state"] as? String ?? ""
+        zip = snapshotValue["zip"] as? String ?? ""
+        phone = snapshotValue["phone"] as? String ?? ""
+        email = snapshotValue["email"] as? String ?? ""
+        ein = snapshotValue["ein"] as? String ?? ""
+        ssn = snapshotValue["ssn"] as? String ?? ""
+    }
     
     func toDictionary() -> [String: Any] {
         var dictionary: [String: Any] = [:]
@@ -127,23 +146,9 @@ struct Entity: Identifiable, Codable {
         return dictionary
     }
     
-    init(fromDictionary dictionary: [String: Any]) {
-        id = dictionary["id"] as? String ?? ""
-        timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
-        name = dictionary["name"] as? String ?? ""
-        businessName = dictionary["businessName"] as? String ?? ""
-        street = dictionary["street"] as? String ?? ""
-        city = dictionary["city"] as? String ?? ""
-        state = dictionary["state"] as? String ?? ""
-        zip = dictionary["zip"] as? String ?? ""
-        phone = dictionary["phone"] as? String ?? ""
-        email = dictionary["email"] as? String ?? ""
-        ein = dictionary["ein"] as? String ?? ""
-        ssn = dictionary["ssn"] as? String ?? ""
-    }
-    
     // Initializer that matches the parameter list
-    init(name: String, businessName: String?, street: String?, city: String?, state: String?, zip: String?, phone: String?, email: String?, ein: String?, ssn: String?) {
+    init(name: String, businessName: String?, street: String?, city: String?, state: String?, zip: String?, phone: String?, email: String?, ein: String?, ssn: String?, key: String = "") {
+        self.key = key
         self.name = name
         self.businessName = businessName
         self.street = street
@@ -156,7 +161,8 @@ struct Entity: Identifiable, Codable {
         self.ssn = ssn
     }
     
-    init(name: String) {
+    init(name: String, key: String = "") {
+        self.key = key
         self.name = name
     }
 }

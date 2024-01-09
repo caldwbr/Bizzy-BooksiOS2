@@ -10,41 +10,62 @@ struct AddWhoView: View {
     @Environment(\.presentationMode) var presentationMode
     @Bindable var model: Model
     @State private var contactsPermissionGranted = false
-
+    @State private var searchName = ""
+    @State private var fieldIsSearchEnabled = true
+    
     var body: some View {
         Form {
             Section() {
                 Text("Add Who Entity")
                     .font(.largeTitle)
             }
+            Button(action: {
+                print("yoohoo")
+                searchName = ""
+                model.clearFields()
+            }, label: {
+                Text("Clear")
+            })
             Section() {
                 HStack {
-                    Image(systemName: "magnifyingglass") // Magnifying glass icon
-                        .foregroundColor(.gray)
+
+                    Button(action: {
+                        print("toggle button click =================")
+                         fieldIsSearchEnabled.toggle()
+                    }, label: {
+                        Image(systemName: fieldIsSearchEnabled ? "phone.circle.fill" : "phone.circle")
+                    })
+                    .padding()
+                    .accentColor(Color.BizzyColor.whatGreen)
                     
-                    Toggle(isOn: $model.fieldIsSearchEnabled) {
-                    }
-                    
-                    TextField("Name", text: $model.fieldName)
-                        .onChange(of: model.fieldName) { newName, _ in
-                            model.searchContacts(name: newName) { matchingContacts in
-                                model.suggestedContacts = matchingContacts ?? []
+                    TextField("Name", text: $searchName)
+                        .onChange(of: searchName) { oldName, newName in
+                            print("TextFiled changed ::: \(newName)")
+                            
+                            if (!newName.isEmpty) {
+                                model.searchContacts(name: newName) { matchingContacts in
+                                    model.suggestedContacts = matchingContacts ?? []
+                                }
+                            }
+                            else {
+                                model.clearFields()
                             }
                         }
-                    Button(action: {
-                        model.clearFields()
-                    }, label: {
-                        Text("Clear")
-                    })
                 }
             }
-            if model.fieldIsSearchEnabled && !model.suggestedContacts.isEmpty {
+
+            
+            /* Search list when type in searchField. */
+            if fieldIsSearchEnabled && !model.suggestedContacts.isEmpty {
                 Section() {
                     List(model.suggestedContacts, id: \.identifier) { contact in
                         Text(contact.givenName + " " + contact.familyName)
                             .onTapGesture {
                                 model.fillInContactDetails(for: contact)
-                                model.fieldIsSearchEnabled = false
+                                // fieldIsSearchEnabled = false
+                                
+                                searchName = contact.givenName + " " + contact.familyName
+                                
                             }
                     }
                 }
@@ -88,3 +109,42 @@ struct AddWhoView: View {
         }
     }
 }
+
+/*
+struct MagnifyingGlassStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            Button(action: {
+                configuration.isOn.toggle()
+            }, label: {
+                Image(systemName: configuration.isOn ? "phone.circle" : "phone.circle.fill")
+            })
+            .padding()
+            .accentColor(Color.BizzyColor.whatGreen)
+            configuration.label
+        }
+    }
+}
+
+ This text field is for entering a new entity name. When toggle is on, it searches user's phone contacts to prepopulate all the fields. When toggle is off, it allows user to type all the fields and the name field without any suggestions popping up.
+ 
+can you explain more here?
+ 
+This screen is for adding a new entity. A lot of times, it is useful to search from my existing contacts on my phone. This functionality is working fine! BUT, sometimes, I want to add someone that isn't in my phone contacts, and I don't want that thing trying to connect to somebody on my phone contacts. So I want to toggle the functionality. And - even the name field is important for making a new contact from scratch without phone contact suggestions.
+ The toggle button is turning on/off SUGGESTIONS.
+ 
+ If I add new entity "Test",there is no carlo in your contact, ?
+ then ?
+ 
+ Sorry, After type 'Carlo' now, then? what do you want with togle on/off?
+ Toggle is currently on: showing suggestions
+ Toggle off: I want the suggestions to disappear
+ So you should click togle on/off manually, right?
+ I'm not sure. At least manually, but maybe programmatically too for when you click on a suggested name. Because if I click a suggestion, I want all the suggestions and the match to disappear (as they currently do), and automatically populate fields properly from that selection.
+ 
+ Now I want to add 'Davi'. right?
+There are no Davi in your contact list, lright?
+ To add 'Davi' you should click toggle off, then suggestion list should be disapeeared. right?
+ We should make toggle to clickable 'button
+ 
+ */

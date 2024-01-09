@@ -9,11 +9,33 @@ import Foundation
 import SwiftUI
 import Observation
 
+@MainActor
 struct WhoSearchView: View {
     @Bindable var model: Model
     @Environment(\.presentationMode) var presentationMode
     @State private var searchQuery = ""
     @State private var showingAddWhoView = false
+    var filteredWhoEntities: [Entity] {
+            let searchText = searchQuery.lowercased() // Convert the search query to lowercase for case-insensitive matching
+            
+            // Print the loaded entities for debugging
+            print("Loaded Entities:")
+            for entity in model.entities {
+                print(entity.name)
+            }
+            
+            let filteredEntities = model.entities.filter { entity in
+                return entity.name.lowercased().contains(searchText)
+            }
+            
+            // Print the filtered entities for debugging
+            print("Filtered Entities:")
+            for entity in filteredEntities {
+                print(entity.name)
+            }
+            
+            return filteredEntities
+        }
     
     var body: some View {
         NavigationView {
@@ -37,7 +59,7 @@ struct WhoSearchView: View {
                     }
                 }
 
-                List(model.filteredWhoEntities, id: \.id) { entity in // Assuming Entity conforms to Identifiable
+                List(filteredWhoEntities, id: \.id) { entity in // Assuming Entity conforms to Identifiable
                     Text(entity.name)
                         .onTapGesture {
                             model.selectedWho = entity.name
@@ -55,6 +77,7 @@ struct WhoSearchView: View {
             }
             .navigationBarTitle("Who")
         }
+        .padding(.horizontal)
     }
 }
 

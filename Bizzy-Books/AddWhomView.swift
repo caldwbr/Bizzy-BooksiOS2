@@ -1,83 +1,101 @@
-//  AddWhoView.swift
+//  AddWhomView.swift
 //  Bizzy-Books
 //
 //  Created by Brad Caldwell on 1/1/24.
 //
 
 import SwiftUI
-import Contacts
-import FirebaseDatabase
 
 struct AddWhomView: View {
+    @Environment(\.presentationMode) var presentationMode
     @Bindable var model: Model
-    @State private var name = ""
-    @State private var suggestedContacts = [CNContact]()
-    @State private var businessName = ""
-    @State private var email = ""
-    @State private var phone = ""
-    @State private var street = ""
-    @State private var city = ""
-    @State private var state = ""
-    @State private var zip = ""
-    @State private var ein = ""
-    @State private var ssn = ""
     @State private var contactsPermissionGranted = false
+    @State private var searchName = ""
+    @State private var fieldIsSearchEnabled = true
     
     var body: some View {
         Form {
-            Section(header: Text("Add Whom Entity")) {
-                TextField("Name", text: $name)
-                    .onChange(of: name) { newName, _ in
-                        searchContacts(for: newName) { matchingContacts in
-                            suggestedContacts = matchingContacts
-                        }
-                    }
-                ForEach(suggestedContacts, id: \.identifier) { contact in
-                    Text(contact.givenName + " " + contact.familyName)
-                        .onTapGesture {
-                            fillInContactDetails(for: contact)
+            Section() {
+                Text("Add Whom Entity")
+                    .font(.largeTitle)
+            }
+            Button(action: {
+                searchName = ""
+                model.clearFields()
+            }, label: {
+                Text("Clear")
+            })
+            Section() {
+                HStack {
+                    Button(action: {
+                         fieldIsSearchEnabled.toggle()
+                    }, label: {
+                        Image(systemName: fieldIsSearchEnabled ? "phone.circle.fill" : "phone.circle")
+                    })
+                    .padding()
+                    .accentColor(Color.BizzyColor.whatGreen)
+                    
+                    TextField("Name", text: $searchName)
+                        .onChange(of: searchName) { oldName, newName in
+                            print("TextFiled changed ::: \(newName)")
+                            
+                            if (!newName.isEmpty) {
+                                model.searchContacts(name: newName) { matchingContacts in
+                                    model.suggestedContacts = matchingContacts ?? []
+                                }
+                            }
+                            else {
+                                model.clearFields()
+                            }
                         }
                 }
-                TextField("Business Name", text: $businessName)
-                TextField("Email", text: $email)
-                TextField("Phone", text: $phone)
-                TextField("Street", text: $street)
-                TextField("City", text: $city)
-                TextField("State", text: $state)
-                TextField("Zip", text: $zip)
-                TextField("EIN", text: $ein)
-                TextField("SSN", text: $ssn)
             }
+
             
+            /* Search list when type in searchField. */
+            if fieldIsSearchEnabled && !model.suggestedContacts.isEmpty {
+                Section() {
+                    List(model.suggestedContacts, id: \.identifier) { contact in
+                        Text(contact.givenName + " " + contact.familyName)
+                            .onTapGesture {
+                                model.fillInContactDetails(for: contact)
+                                // fieldIsSearchEnabled = false
+                                
+                                searchName = contact.givenName + " " + contact.familyName
+                                
+                            }
+                    }
+                }
+            }
+
+            Section() {
+                TextField("Business Name", text: $model.fieldBusinessName)
+                TextField("Email", text: $model.fieldEmail)
+                TextField("Phone", text: $model.fieldPhone)
+                TextField("Street", text: $model.fieldStreet)
+                TextField("City", text: $model.fieldCity)
+                TextField("State", text: $model.fieldState)
+                TextField("Zip", text: $model.fieldZip)
+                TextField("EIN", text: $model.fieldEIN)
+                TextField("SSN", text: $model.fieldSSN)
+            }
+
             Section {
                 Button(action: {
-                    let newEntity = Entity(
-                        name: name,
-                        businessName: businessName, // Provide values for other parameters if needed
-                        street: street,
-                        city: city,
-                        state: state,
-                        zip: zip,
-                        phone: phone,
-                        email: email,
-                        ein: ein,
-                        ssn: ssn
-                    )
-                    model.selectedWhom = newEntity.name
-                    model.selectedWhomUID = newEntity.id
-                    let newEntityDict = newEntity.toDictionary() // Convert the Entity to a dictionary
-                    Database.database().reference().child("users").child(model.uid).child("entities").child(newEntity.id).setValue(newEntityDict) // Save the Entity to Firebase
+                    model.saveWhomEntity()
+                    model.showWhomSearchView = false
+                    presentationMode.wrappedValue.dismiss()
                 }, label: {
                     Text("Save Whom")
                 })
-                .disabled(name.isEmpty)
+                .disabled(model.fieldName.isEmpty)
                 .font(.largeTitle)
                 .padding()
             }
         }
-        .navigationBarTitle("Add Entity")
+        .navigationBarTitle("Add Who Entity")
         .onAppear{
-            requestContactsPermission { granted in
+            model.requestContactsPermission { granted in
                 contactsPermissionGranted = granted
                 if granted {
                     // Permission was granted, you can now access contacts
@@ -85,80 +103,6 @@ struct AddWhomView: View {
                     // Handle the case where permission was not granted
                 }
             }
-        }
-    }
-    
-    func requestContactsPermission(completion: @escaping (Bool) -> Void) {
-        let store = CNContactStore()
-        
-        store.requestAccess(for: .contacts) { granted, error in
-            DispatchQueue.main.async {
-                completion(granted)
-            }
-        }
-    }
-    
-    func searchContacts(for query: String, completion: @escaping ([CNContact]) -> Void) {
-        // Create a background queue for contact processing
-        DispatchQueue.global(qos: .background).async {
-            var matchingContacts: [CNContact] = []
-            
-            // Create a contact store object
-            let store = CNContactStore()
-            
-            // Specify the keys you want to fetch (e.g., name)
-            let keysToFetch = [CNContactGivenNameKey, CNContactFamilyNameKey] as [CNKeyDescriptor]
-            
-            // Create a fetch request
-            let fetchRequest = CNContactFetchRequest(keysToFetch: keysToFetch)
-            
-            do {
-                try store.enumerateContacts(with: fetchRequest) { (contact, stop) in
-                    // Check if the contact's name contains the query string
-                    if contact.givenName.lowercased().contains(query.lowercased()) ||
-                        contact.familyName.lowercased().contains(query.lowercased()) {
-                        matchingContacts.append(contact)
-                    }
-                }
-                
-                // Return the matching contacts on the main thread
-                DispatchQueue.main.async {
-                    completion(matchingContacts)
-                }
-            } catch {
-                // Handle any errors that may occur during contact fetching
-                print("Failed to fetch contacts: \(error)")
-                
-                // Return an empty result on the main thread in case of an error
-                DispatchQueue.main.async {
-                    completion([])
-                }
-            }
-        }
-    }
-    
-    func fillInContactDetails(for contact: CNContact) {
-        let store = CNContactStore()
-        let keys = [CNContactEmailAddressesKey, CNContactPhoneNumbersKey, CNContactPostalAddressesKey] as [CNKeyDescriptor]
-        let predicate = CNContact.predicateForContacts(matchingName: name)
-        
-        do {
-            let contacts = try store.unifiedContacts(matching: predicate, keysToFetch: keys)
-            if let firstContact = contacts.first {
-                self.name = contact.givenName + " " + contact.familyName
-                self.email = firstContact.emailAddresses.first?.value as String? ?? ""
-                self.phone = firstContact.phoneNumbers.first?.value.stringValue ?? ""
-                
-                // Fetching and setting address details
-                if let postalAddress = firstContact.postalAddresses.first?.value {
-                    self.street = "\(postalAddress.street)"
-                    self.city = "\(postalAddress.city)"
-                    self.state = "\(postalAddress.state)"
-                    self.zip = "\(postalAddress.postalCode)"
-                }
-            }
-        } catch {
-            print("Error fetching contacts: \(error)")
         }
     }
 }

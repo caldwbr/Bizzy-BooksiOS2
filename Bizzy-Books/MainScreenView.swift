@@ -26,8 +26,7 @@ struct MainScreenView: View {
             model.checkAndCreateYouEntity()
             model.loadProjects() //need to consolidate to initial loading of projects, entities, etc
             model.loadVehicles()
-            model.loadWhoEntities()
-            model.loadWhomEntities()
+            model.loadEntities()
         })
     }
 }
