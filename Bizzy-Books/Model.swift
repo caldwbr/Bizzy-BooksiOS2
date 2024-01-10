@@ -79,6 +79,7 @@ import Contacts
         
     let contactStore = CNContactStore()
     var suggestedContacts: [CNContact] = []
+    var suggestedEntities: [Entity] = []
     let keys = [CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactGivenNameKey, CNContactFamilyNameKey]
     let keysToFetch: [CNKeyDescriptor] = [
             CNContactPhoneNumbersKey as CNKeyDescriptor,
@@ -121,6 +122,18 @@ import Contacts
             }
         }
     }
+    
+    func searchEntities(entityName: String, completion: @escaping ([Entity]?) -> Void) {
+        // Filter the existing entities array based on the entityName
+        let fetchedEntities = entities.filter { entity in
+            return entity.name.contains(entityName)
+        }
+        
+        DispatchQueue.main.async {
+            completion(fetchedEntities)
+        }
+    }
+
     
     func fillInContactDetails(for contact: CNContact) {
         // Populate fields from the clicked contact directly
@@ -206,8 +219,8 @@ import Contacts
             ein: fieldEIN,
             ssn: fieldSSN
         )
-        selectedCustomer = newEntity.name
-        selectedCustomerUID = newEntity.id
+        selectedCustomerName = newEntity.name
+        selectedCustomerNameUID = newEntity.id
         let newEntityDict = newEntity.toDictionary() // Convert the Entity to a dictionary
         Database.database().reference().child("users").child(uid).child("entities").child(newEntity.id).setValue(newEntityDict) // Save the Entity to Firebase
     }
@@ -224,8 +237,8 @@ import Contacts
     var entitiesRef: DatabaseReference? = nil
     var projectsRef: DatabaseReference? = nil
     var vehiclesRef: DatabaseReference? = nil
-    var customerName = ""
-    var customerUID = ""
+    var selectedCustomerName = ""
+    var selectedCustomerNameUID = ""
     var youEntity: YouEntity? = nil
     var youBusinessEntity: YouBusinessEntity? = nil
     
@@ -337,8 +350,6 @@ import Contacts
     var selectedWhom = ""
     var selectedWhomUID = ""
     let whomPlaceholder = "whom ▼"
-    var selectedCustomer = ""
-    var selectedCustomerUID = ""
     var selectedVehicle = ""
     var selectedVehicleUID = ""
     let vehiclePlaceholder = "vehicle ▼"
@@ -356,15 +367,14 @@ import Contacts
     
     //Formerly ProjectViewModel
     var filteredProjects: [Project] = []
+    var filteredEntities: [Entity] = []
     
     func loadProjects() {
-        // Load your entities here
-        // For example:
-        projects = [
-            Project(name: "Proj 1"),
-            Project(name: "Proj 2")
-        ]
-        filteredProjects = projects
+        projectsRef?.observeSingleEvent(of: .value, with: { snapshot in
+            for item in snapshot.children {
+                self.projects.append(Project(snapshot: item as! DataSnapshot))
+            }
+        })
     }
     
     func searchProjects(query: String) {
@@ -381,14 +391,11 @@ import Contacts
     var filteredVehicles: [Vehicle] = []
     
     func loadVehicles() {
-        // Load your entities here
-        // For example:
-        //        vehicles = [
-        //            Vehicle(year: "2012", make: "Toyota", model: "Prius"),
-        //            Vehicle(year: "2015", make: "Toyota", model: "Prius"),
-        //            Vehicle(year: "2018", make: "Toyota", model: "Prius")
-        //        ]
-        //        filteredVehicles = vehicles
+        vehiclesRef?.observeSingleEvent(of: .value, with: { snapshot in
+            for item in snapshot.children {
+                self.vehicles.append(Vehicle(snapshot: item as! DataSnapshot))
+            }
+        })
     }
     
     func searchVehicles(query: String) {
@@ -428,29 +435,19 @@ import Contacts
     }
     
     //Formerly WhomViewModel
-    var whomEntities: [Entity] = []
     var filteredWhomEntities: [Entity] = []
-    
-    func loadWhomEntities() {
-        // Load your entities here
-        // For example:
-        //        whomEntities = [
-        //            Entity(name: "Entity 1"),
-        //            Entity(name: "Entity 2"),
-        //            Entity(name: "Entity 3")
-        //        ]
-        //        filteredWhomEntities = whomEntities
-    }
+    var filteredCustomerEntities: [Entity] = []
     
     func whomSearchEntities(query: String) {
         if query.isEmpty {
-            filteredWhomEntities = whomEntities
+            filteredWhomEntities = entities
         } else {
-            filteredWhomEntities = whomEntities.filter { entity in
+            filteredWhomEntities = entities.filter { entity in
                 entity.name.lowercased().contains(query.lowercased())
             }
         }
     }
+    
     
     func clearButtonsTFsAndPickers() {
         selectedWho = whoPlaceholder
@@ -465,6 +462,8 @@ import Contacts
         selectedProjectUID = ""
         selectedVehicle = vehiclePlaceholder
         selectedVehicleUID = ""
+        selectedCustomerName = ""
+        selectedCustomerNameUID = ""
         howManyInt = 0
         howManyValue = ""
         odometerInt = 0

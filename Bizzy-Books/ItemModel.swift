@@ -29,6 +29,36 @@ struct Item: Identifiable, Codable {
     var projectID: String? //nil for overhead
     var howMany: Int? //thousandths of gallons of fuel
     var odometer: Int? //miles
+    let key: String
+    
+    init(snapshot: DataSnapshot) {
+            key = snapshot.key
+            let snapshotValue = snapshot.value as! [String: AnyObject]
+            id = snapshotValue["id"] as? String ?? ""
+            timeStamp = snapshotValue["timeStamp"] as? TimeInterval ?? 0.0
+            latitude = snapshotValue["latitude"] as? Double ?? 0.0
+            longitude = snapshotValue["longitude"] as? Double ?? 0.0
+            if let itemTypeString = snapshotValue["itemType"] as? String, let itemType = ItemType(rawValue: itemTypeString) {
+                self.itemType = itemType
+            } else {
+                self.itemType = .business
+            }
+            notes = snapshotValue["notes"] as? String ?? ""
+            who = snapshotValue["who"] as? String ?? ""
+            whoID = snapshotValue["whoID"] as? String ?? ""
+            what = snapshotValue["what"] as? Int ?? 0
+            whom = snapshotValue["whom"] as? String ?? ""
+            whomID = snapshotValue["whomID"] as? String ?? ""
+            personalReasonInt = snapshotValue["personalReasonInt"] as? Int ?? 0
+            taxReasonInt = snapshotValue["taxReasonInt"] as? Int ?? 0
+            vehicleName = snapshotValue["vehicleName"] as? String
+            vehicleID = snapshotValue["vehicleID"] as? String
+            workersComp = snapshotValue["workersComp"] as? Bool ?? false
+            projectName = snapshotValue["projectName"] as? String
+            projectID = snapshotValue["projectID"] as? String
+            howMany = snapshotValue["howMany"] as? Int
+            odometer = snapshotValue["odometer"] as? Int
+        }
     
     func toDictionary() -> [String: Any] {
         var dictionary: [String: Any] = [:]
@@ -54,36 +84,11 @@ struct Item: Identifiable, Codable {
         dictionary["odometer"] = odometer
         return dictionary
     }
-    
-    init(fromDictionary dictionary: [String: Any]) {
-        id = dictionary["id"] as? String ?? ""
-        timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
-        latitude = dictionary["latitude"] as? Double ?? 0.0
-        longitude = dictionary["longitude"] as? Double ?? 0.0
-        if let itemTypeString = dictionary["itemType"] as? String, let itemType = ItemType(rawValue: itemTypeString) {
-            self.itemType = itemType
-        } else {
-            self.itemType = .business
-        }
-        notes = dictionary["notes"] as? String ?? ""
-        who = dictionary["who"] as? String ?? ""
-        whoID = dictionary["whoID"] as? String ?? ""
-        what = dictionary["what"] as? Int ?? 0
-        whom = dictionary["whom"] as? String ?? ""
-        whomID = dictionary["whomID"] as? String ?? ""
-        personalReasonInt = dictionary["personalReasonInt"] as? Int ?? 0
-        taxReasonInt = dictionary["taxReasonInt"] as? Int ?? 0
-        vehicleName = dictionary["vehicleName"] as? String
-        vehicleID = dictionary["vehicleID"] as? String
-        workersComp = dictionary["workersComp"] as? Bool ?? false
-        projectName = dictionary["projectName"] as? String
-        projectID = dictionary["projectID"] as? String
-        howMany = dictionary["howMany"] as? Int
-        odometer = dictionary["odometer"] as? Int
-    }
+   
     
     // Initializer that matches the parameter list
-    init(latitude: Double?, longitude: Double?, itemType: ItemType, notes: String?, who: String, whoID: String, what: Int, whom: String, whomID: String, personalReasonInt: Int, taxReasonInt: Int, vehicleName: String?, vehicleID: String?, workersComp: Bool, projectName: String?, projectID: String?, howMany: Int?, odometer: Int?) {
+    init(latitude: Double?, longitude: Double?, itemType: ItemType, notes: String?, who: String, whoID: String, what: Int, whom: String, whomID: String, personalReasonInt: Int, taxReasonInt: Int, vehicleName: String?, vehicleID: String?, workersComp: Bool, projectName: String?, projectID: String?, howMany: Int?, odometer: Int?, key: String = "") {
+        self.key = key
         self.latitude = latitude
         self.longitude = longitude
         self.itemType = itemType
@@ -111,6 +116,8 @@ struct Entity: Identifiable, Codable {
     var name: String
     var businessName, street, city, state, zip, phone, email, ein, ssn: String?
     let key: String
+    
+    
     
     init(snapshot: DataSnapshot) {
         key = snapshot.key
@@ -145,6 +152,8 @@ struct Entity: Identifiable, Codable {
         dictionary["ssn"] = ssn
         return dictionary
     }
+    
+    
     
     // Initializer that matches the parameter list
     init(name: String, businessName: String?, street: String?, city: String?, state: String?, zip: String?, phone: String?, email: String?, ein: String?, ssn: String?, key: String = "") {
@@ -256,6 +265,9 @@ struct Project: Identifiable, Codable {
     var customerName: String
     var customerUID: String
     var jobsiteStreet, jobsiteCity, jobsiteState, jobsiteZip: String?
+    var customerSSN: String?
+    var customerEIN: String?
+    let key: String
     
     func toDictionary() -> [String: Any] {
         var dictionary: [String: Any] = [:]
@@ -269,23 +281,30 @@ struct Project: Identifiable, Codable {
         dictionary["jobsiteCity"] = jobsiteCity
         dictionary["jobsiteState"] = jobsiteState
         dictionary["jobsiteZip"] = jobsiteZip
+        dictionary["customerSSN"] = customerSSN
+        dictionary["customerEIN"] = customerEIN
         return dictionary
     }
     
-    init(fromDictionary dictionary: [String: Any]) {
-        id = dictionary["id"] as? String ?? ""
-        timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
-        name = dictionary["name"] as? String ?? ""
-        notes = dictionary["notes"] as? String
-        customerName = dictionary["customerName"] as? String ?? ""
-        customerUID = dictionary["customerUID"] as? String ?? ""
-        jobsiteStreet = dictionary["jobsiteStreet"] as? String ?? ""
-        jobsiteCity = dictionary["jobsiteCity"] as? String ?? ""
-        jobsiteState = dictionary["jobsiteState"] as? String ?? ""
-        jobsiteZip = dictionary["jobsiteZip"] as? String ?? ""
-    }
+    init(snapshot: DataSnapshot) {
+            key = snapshot.key
+            let snapshotValue = snapshot.value as! [String: AnyObject]
+            id = snapshotValue["id"] as? String ?? ""
+            timeStamp = snapshotValue["timeStamp"] as? TimeInterval ?? 0.0
+            name = snapshotValue["name"] as? String ?? ""
+            notes = snapshotValue["notes"] as? String
+            customerName = snapshotValue["customerName"] as? String ?? ""
+            customerUID = snapshotValue["customerUID"] as? String ?? ""
+            jobsiteStreet = snapshotValue["jobsiteStreet"] as? String
+            jobsiteCity = snapshotValue["jobsiteCity"] as? String
+            jobsiteState = snapshotValue["jobsiteState"] as? String
+            jobsiteZip = snapshotValue["jobsiteZip"] as? String
+            customerSSN = snapshotValue["customerSSN"] as? String ?? ""
+            customerEIN = snapshotValue["customerEIN"] as? String ?? ""
+        }
     
-    init(name: String, notes: String?, customerName: String, customerUID: String, jobsiteStreet: String?, jobsiteCity: String?, jobsiteState: String?, jobsiteZip: String?) {
+    init(name: String, notes: String?, customerName: String, customerUID: String, jobsiteStreet: String?, jobsiteCity: String?, jobsiteState: String?, jobsiteZip: String?, customerSSN: String?, customerEIN: String?, key: String = "") {
+        self.key = key
         self.name = name
         self.notes = notes
         self.customerName = customerName
@@ -294,9 +313,12 @@ struct Project: Identifiable, Codable {
         self.jobsiteCity = jobsiteCity
         self.jobsiteState = jobsiteState
         self.jobsiteZip = jobsiteZip
+        self.customerSSN = customerSSN
+        self.customerEIN = customerEIN
     }
     
-    init(name: String) {
+    init(name: String, key: String = "") {
+        self.key = key
         self.name = name
         self.customerName = ""
         self.customerUID = ""
@@ -309,6 +331,7 @@ struct Vehicle: Identifiable, Codable {
     var timeStamp: TimeInterval = Date().timeIntervalSince1970
     var year, make, model: String
     var color, picd, vin, licPlateNo: String?
+    let key: String
     
     var name: String {
         [year, make, model].joined(separator: " ")
@@ -328,20 +351,23 @@ struct Vehicle: Identifiable, Codable {
         return dictionary
     }
     
-    init(fromDictionary dictionary: [String: Any]) {
-        id = dictionary["id"] as? String ?? ""
-        timeStamp = dictionary["timeStamp"] as? TimeInterval ?? 0.0
-        year = dictionary["year"] as? String ?? ""
-        make = dictionary["make"] as? String ?? ""
-        model = dictionary["model"] as? String ?? ""
-        color = dictionary["color"] as? String
-        picd = dictionary["picd"] as? String
-        vin = dictionary["vin"] as? String
-        licPlateNo = dictionary["licPlateNo"] as? String
-    }
+    init(snapshot: DataSnapshot) {
+            key = snapshot.key
+            let snapshotValue = snapshot.value as! [String: AnyObject]
+            id = snapshotValue["id"] as? String ?? ""
+            timeStamp = snapshotValue["timeStamp"] as? TimeInterval ?? 0.0
+            year = snapshotValue["year"] as? String ?? ""
+            make = snapshotValue["make"] as? String ?? ""
+            model = snapshotValue["model"] as? String ?? ""
+            color = snapshotValue["color"] as? String
+            picd = snapshotValue["picd"] as? String
+            vin = snapshotValue["vin"] as? String
+            licPlateNo = snapshotValue["licPlateNo"] as? String
+        }
     
     // Initializer that matches the parameter list
-    init(year: String, make: String, model: String, color: String?, picd: String?, vin: String?, licPlateNo: String?) {
+    init(year: String, make: String, model: String, color: String?, picd: String?, vin: String?, licPlateNo: String?, key: String = "") {
+        self.key = key
         self.year = year
         self.make = make
         self.model = model

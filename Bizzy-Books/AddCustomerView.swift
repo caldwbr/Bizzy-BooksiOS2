@@ -13,6 +13,16 @@ struct AddCustomerView: View {
     @State private var contactsPermissionGranted = false
     @State private var searchName = ""
     @State private var fieldIsSearchEnabled = true
+    @Binding var projectCustomerName: String
+    @Binding var projectCustomerNameUID: String
+    @Binding var email: String
+    @Binding var phone: String
+    @Binding var street: String
+    @Binding var city: String
+    @Binding var state: String
+    @Binding var zip: String
+    @Binding var ssn: String
+    @Binding var ein: String
     
     var body: some View {
         Form {
@@ -84,7 +94,16 @@ struct AddCustomerView: View {
             Section {
                 Button(action: {
                     model.saveCustomerEntity()
-                    model.showProjectSearchView = false
+                    projectCustomerName = model.selectedCustomerName
+                    projectCustomerNameUID = model.selectedCustomerNameUID
+                    email = model.fieldEmail
+                    phone = model.fieldPhone
+                    street = model.fieldStreet
+                    city = model.fieldCity
+                    state = model.fieldState
+                    zip = model.fieldZip
+                    ein = model.fieldEIN
+                    ssn = model.fieldSSN
                     presentationMode.wrappedValue.dismiss()
                 }, label: {
                     Text("Save Customer Entity")

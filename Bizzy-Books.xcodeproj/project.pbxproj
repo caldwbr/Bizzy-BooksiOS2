@@ -189,8 +189,8 @@
 				678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */,
 				678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */,
 				678FBB862B4500FD00A38561 /* LayoutFlow.swift */,
-				678FBB882B45039800A38561 /* AddVehicleView.swift */,
 				673CF3AE2B48952E00506736 /* Model.swift */,
+				678FBB882B45039800A38561 /* AddVehicleView.swift */,
 				678FBB8A2B4503A800A38561 /* AddProjectView.swift */,
 			);
 			path = "Bizzy-Books";

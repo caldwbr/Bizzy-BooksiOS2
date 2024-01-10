@@ -9,104 +9,128 @@ import SwiftUI
 import FirebaseDatabase
 
 struct AddProjectView: View {
+    @Environment(\.presentationMode) var presentationMode
     @Bindable var model: Model
     @State private var projectName = ""
     @State private var projectNotes = ""
     @State private var customer: Entity? = nil
     @State private var suggestedCustomers: [Entity] = []
+    @State private var projectCustomerName = ""
+    @State private var projectCustomerNameUID = ""
     @State private var email = ""
     @State private var phone = ""
     @State private var street = ""
     @State private var city = ""
     @State private var state = ""
     @State private var zip = ""
+    @State private var ssn = ""
+    @State private var ein = ""
     @State private var showingAddCustomerView = false
-
+    @State private var showingSuggestions = true
+    
     var body: some View {
         Form {
-            Section(header: Text("Add Project")) {
+            Section {
                 TextField("Project Name", text: $projectName)
                 TextField("Project Notes", text: $projectNotes)
-                HStack {
-                    TextField("Name", text: $model.customerName)
-                        .onChange(of: model.customerName) { newName, _ in
-                            suggestedCustomers = searchCustomers(for: newName)
+                nameFieldForCustomer
+                ifStatementAndSuggestions
+                mainFields
+                saveProjectButton
+            }
+        }
+    }
+    
+    @MainActor
+    var nameFieldForCustomer: some View {
+        Group {
+            HStack {
+                TextField("Customer Name", text: $projectCustomerName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                    .onChange(of: projectCustomerName) { oldName, newName in
+                        if (!newName.isEmpty && projectCustomerNameUID.isEmpty) {
+                            showingSuggestions = true
+                            model.searchEntities(entityName: projectCustomerName) { matchingEntities in
+                                model.suggestedEntities = matchingEntities ?? []
+                            }
                         }
-                    ForEach(suggestedCustomers, id: \.id) { customer in
-                        Text(customer.name)
+                        else if (newName.isEmpty) {
+                            showingSuggestions = false
+                        }
+                    }
+                
+                Button(action: {
+                    showingAddCustomerView = true
+                }) {
+                    Image(systemName: "plus")
+                }
+                .padding()
+                .sheet(isPresented: $showingAddCustomerView) {
+                    AddCustomerView(model: model, projectCustomerName: $projectCustomerName, projectCustomerNameUID: $projectCustomerNameUID, email: $email, phone: $phone, street: $street, city: $city, state: $state, zip: $zip, ssn: $ssn, ein: $ein)
+                }
+            }
+        }
+    }
+    
+    @MainActor
+    var ifStatementAndSuggestions: some View {
+        Group {
+            if showingSuggestions {
+                Section() {
+                    List(model.suggestedEntities, id: \.id) { entity in
+                        Text(entity.name)
                             .onTapGesture {
-                                fillInCustomerDetails(for: customer)
+                                customer = entity
+                                projectCustomerName = entity.name
+                                projectCustomerNameUID = entity.id
+                                email = entity.email ?? ""
+                                phone = entity.phone ?? ""
+                                street = entity.street ?? ""
+                                city = entity.city ?? ""
+                                state = entity.state ?? ""
+                                zip = entity.zip ?? ""
+                                ssn = entity.ssn ?? ""
+                                ein = entity.ein ?? ""
+                                showingSuggestions = false
                             }
                     }
-                    Button(action: {
-                        showingAddCustomerView = true
-                    }) {
-                        Image(systemName: "plus")
-                            .foregroundColor(.blue)
-                    }
-                    .padding()
-                    .sheet(isPresented: $showingAddCustomerView) {
-                        AddCustomerView(model: model)
-                    }
                 }
+            }
+            Text("").frame(width: 1, height: 1)
+        }
+    }
+
+    var mainFields: some View {
+        Group {
+            VStack {
                 TextField("Email", text: $email)
                 TextField("Phone", text: $phone)
                 TextField("Street", text: $street)
                 TextField("City", text: $city)
                 TextField("State", text: $state)
                 TextField("Zip", text: $zip)
-            }
-            
-            Section {
-                Button(action: {
-                    let newProject = Project(
-                        name: projectName,
-                        notes: projectNotes,
-                        customerName: model.customerName,
-                        customerUID: model.customerUID,
-                        jobsiteStreet: street,
-                        jobsiteCity: city,
-                        jobsiteState: state,
-                        jobsiteZip: zip
-                    )
-                    model.selectedProject = newProject.name
-                    model.selectedProjectUID = newProject.id
-                    model.selectedWho = newProject.customerName
-                    model.selectedWhoUID = newProject.customerUID
-                    let newProjectDict = newProject.toDictionary() // Convert the Project to a dictionary
-                    Database.database().reference().child("users").child(model.uid).child("projects").child(newProject.id).setValue(newProjectDict) // Save the Project to Firebase
-                }, label: {
-                    Text("Save Project")
-                })
-                .disabled(projectName.isEmpty || model.customerName.isEmpty || model.customerUID.isEmpty)
+                TextField("SSN", text: $ssn)
+                TextField("EIN", text: $ein)
             }
         }
-    }
-    
-    func searchCustomers(for query: String) -> [Entity] {
-        var matchingCustomers: [Entity] = []
-        
-        if ((customer?.name.contains(query.lowercased())) != nil) {
-            matchingCustomers.append(customer!)
-        }
-        return matchingCustomers
     }
     
     @MainActor
-    func fillInCustomerDetails(for customer: Entity) {
-        model.customerName = customer.name
-        model.customerUID = customer.id
-        if let jobsiteStreet = customer.street {
-            self.street = jobsiteStreet
-        }
-        if let jobsiteCity = customer.city {
-            self.city = jobsiteCity
-        }
-        if let jobsiteState = customer.state {
-            self.state = jobsiteState
-        }
-        if let jobsiteZip = customer.zip {
-            self.zip = jobsiteZip
-        }
+    var saveProjectButton: some View {
+        Button(action: {
+            let newProject = Project(name: projectName, notes: projectNotes, customerName: projectCustomerName, customerUID: projectCustomerNameUID, jobsiteStreet: street, jobsiteCity: city, jobsiteState: state, jobsiteZip: zip, customerSSN: ssn, customerEIN: ein)
+            model.selectedProject = newProject.name
+            model.selectedProjectUID = newProject.id
+            model.selectedWho = newProject.customerName
+            model.selectedWhoUID = newProject.customerUID
+            let newProjectDict = newProject.toDictionary() // Convert the Project to a dictionary
+            Database.database().reference().child("users").child(model.uid).child("projects").child(newProject.id).setValue(newProjectDict) // Save the Project to Firebase
+            model.showProjectSearchView = false
+            presentationMode.wrappedValue.dismiss()
+        }, label: {
+            Text("Save Project")
+        })
+        .disabled(projectName.isEmpty || projectCustomerName.isEmpty || projectCustomerNameUID.isEmpty)
     }
 }

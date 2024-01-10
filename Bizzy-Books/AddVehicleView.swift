@@ -9,6 +9,7 @@ import SwiftUI
 import FirebaseDatabase
 
 struct AddVehicleView: View {
+    @Environment(\.presentationMode) var presentationMode
     @Bindable var model: Model
     @State private var vehicle: Vehicle? = nil
     @State private var vehicleName = ""
@@ -51,10 +52,11 @@ struct AddVehicleView: View {
                     model.selectedVehicleUID = newVehicle.id
                     let newVehicleDict = newVehicle.toDictionary() // Convert the Vehicle to a dictionary
                     Database.database().reference().child("users").child(model.uid).child("vehicles").child(newVehicle.id).setValue(newVehicleDict) // Save the Vehicle to Firebase
+                    model.showVehicleSearchView = false
+                    presentationMode.wrappedValue.dismiss()
                 }, label: {
                     Text("Save Vehicle")
                 })
-
                 .disabled(year.isEmpty || make.isEmpty || vehicleModel.isEmpty)
             }
             

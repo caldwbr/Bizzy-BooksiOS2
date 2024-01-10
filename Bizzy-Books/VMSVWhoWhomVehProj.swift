@@ -44,7 +44,7 @@ struct WhoSearchView: View {
                     TextField("Search", text: $searchQuery)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
-                        .onChange(of: searchQuery) { newValue, _ in
+                        .onChange(of: searchQuery) { oldValue, newValue in
                             model.whoSearchEntities(query: newValue)
                         }
 
@@ -94,7 +94,7 @@ struct WhomSearchView: View {
                     TextField("Search", text: $searchQuery)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
-                        .onChange(of: searchQuery) { newValue, _ in
+                        .onChange(of: searchQuery) { oldValue, newValue in
                             model.whomSearchEntities(query: newValue)
                         }
 
@@ -127,6 +127,7 @@ struct WhomSearchView: View {
             }
             .navigationBarTitle("Who")
         }
+        .padding(.horizontal)
     }
 }
 
@@ -143,7 +144,7 @@ struct VehicleSearchView: View {
                     TextField("Search", text: $searchQuery)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
-                        .onChange(of: searchQuery) { newValue, _ in
+                        .onChange(of: searchQuery) { oldValue, newValue in
                             model.searchVehicles(query: newValue)
                         }
 
@@ -176,6 +177,7 @@ struct VehicleSearchView: View {
             }
             .navigationBarTitle("Vehicle")
         }
+        .padding(.horizontal)
     }
 }
 
@@ -194,7 +196,7 @@ struct ProjectSearchView: View {
                     TextField("Search", text: $searchQuery)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
-                        .onChange(of: searchQuery) { newValue, _ in
+                        .onChange(of: searchQuery) { oldValue, newValue in
                             model.searchProjects(query: newValue)
                         }
 
@@ -227,5 +229,6 @@ struct ProjectSearchView: View {
             }
             .navigationBarTitle("Project")
         }
+        .padding(.horizontal)
     }
 }
