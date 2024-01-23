@@ -17,16 +17,14 @@ struct MainScreenView: View {
             TextField("", text: $model.authEmail)
             HeaderHStack(isFilterActive: $isFilterActive)
             FilterByHStack(isFilterActive: $isFilterActive)
-            BodyScrollView(isFilterActive: $isFilterActive)
+            BodyScrollView(model: model, isFilterActive: $isFilterActive)
             FooterHStack(model: model, isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView)
         }
         .onAppear(perform: {
             model.configureFirebaseReferences()
             model.fetchDataFromFirebase()
             model.checkAndCreateYouEntity()
-            model.loadProjects() //need to consolidate to initial loading of projects, entities, etc
-            model.loadVehicles()
-            model.loadEntities()
+            model.loadDataAndConcatenate()
         })
     }
 }
@@ -70,10 +68,19 @@ struct FilterByHStack: View {
 }
 
 struct BodyScrollView: View {
+    @Bindable var model: Model
     @Binding var isFilterActive: Bool
     var body: some View {
-        ScrollView {
-            // Card views go here, generated dynamically
+        return ScrollView {
+            if model.displayedUniversals.isEmpty {
+                ProgressView() // or a custom placeholder view
+            } else {
+                LazyVStack {
+                    ForEach(model.displayedUniversals) { displayedUniversal in
+                        CardView(displayedUniversal: displayedUniversal)
+                    }
+                }
+            }
         }
     }
 }
@@ -140,6 +147,23 @@ struct CircleAvatarView: View {
             .frame(width: 40, height: 40) // Adjust the size as needed
             .clipShape(Circle())
             .overlay(Circle().stroke(Color.blue, lineWidth: 2)) // Add a border if desired
+    }
+}
+
+struct CardView: View {
+    var displayedUniversal: Universal
+    var body: some View {
+        switch displayedUniversal.type {
+        case .item:
+            Text("Item")
+        case .entity:
+            Text("Entity")
+            Text(displayedUniversal.entityName)
+        case .project:
+            Text("Project")
+        case .vehicle:
+            Text("Vehicle")
+        }
     }
 }
 

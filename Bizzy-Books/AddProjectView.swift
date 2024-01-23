@@ -28,91 +28,92 @@ struct AddProjectView: View {
     @State private var showingAddCustomerView = false
     @State private var showingSuggestions = true
     
+    @MainActor
     var body: some View {
-        Form {
-            Section {
-                TextField("Project Name", text: $projectName)
-                TextField("Project Notes", text: $projectNotes)
+        ScrollView {
+            VStack {
+                Text("Add Project").font(.title)
+                TextField("Project Name", text: $projectName).padding()
+                TextField("Project Notes", text: $projectNotes).padding()
                 nameFieldForCustomer
-                ifStatementAndSuggestions
+                if showingSuggestions {
+                    ifStatementAndSuggestions
+                }
                 mainFields
                 saveProjectButton
             }
+            
         }
     }
     
     @MainActor
     var nameFieldForCustomer: some View {
-        Group {
-            HStack {
-                TextField("Customer Name", text: $projectCustomerName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .onChange(of: projectCustomerName) { oldName, newName in
-                        if (!newName.isEmpty && projectCustomerNameUID.isEmpty) {
-                            showingSuggestions = true
-                            model.searchEntities(entityName: projectCustomerName) { matchingEntities in
-                                model.suggestedEntities = matchingEntities ?? []
-                            }
-                        }
-                        else if (newName.isEmpty) {
-                            showingSuggestions = false
+        HStack {
+            TextField("Customer Name", text: $projectCustomerName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .onChange(of: projectCustomerName) { oldName, newName in
+                    if (!newName.isEmpty && projectCustomerNameUID.isEmpty) {
+                        showingSuggestions = true
+                        model.searchEntities(entityName: projectCustomerName) { matchingEntities in
+                            model.suggestedEntities = matchingEntities ?? []
                         }
                     }
-                
-                Button(action: {
-                    showingAddCustomerView = true
-                }) {
-                    Image(systemName: "plus")
+                    else if (newName.isEmpty) {
+                        showingSuggestions = false
+                    }
                 }
-                .padding()
-                .sheet(isPresented: $showingAddCustomerView) {
-                    AddCustomerView(model: model, projectCustomerName: $projectCustomerName, projectCustomerNameUID: $projectCustomerNameUID, email: $email, phone: $phone, street: $street, city: $city, state: $state, zip: $zip, ssn: $ssn, ein: $ein)
-                }
+            
+            Button(action: {
+                showingAddCustomerView = true
+            }) {
+                Image(systemName: "plus")
+            }
+            .padding()
+            .sheet(isPresented: $showingAddCustomerView) {
+                AddCustomerView(model: model, projectCustomerName: $projectCustomerName, projectCustomerNameUID: $projectCustomerNameUID, email: $email, phone: $phone, street: $street, city: $city, state: $state, zip: $zip, ssn: $ssn, ein: $ein)
             }
         }
     }
     
     @MainActor
     var ifStatementAndSuggestions: some View {
-        Group {
-            if showingSuggestions {
-                Section() {
-                    List(model.suggestedEntities, id: \.id) { entity in
-                        Text(entity.name)
-                            .onTapGesture {
-                                customer = entity
-                                projectCustomerName = entity.name
-                                projectCustomerNameUID = entity.id
-                                email = entity.email ?? ""
-                                phone = entity.phone ?? ""
-                                street = entity.street ?? ""
-                                city = entity.city ?? ""
-                                state = entity.state ?? ""
-                                zip = entity.zip ?? ""
-                                ssn = entity.ssn ?? ""
-                                ein = entity.ein ?? ""
-                                showingSuggestions = false
-                            }
+        
+        ForEach(model.suggestedEntities, id: \.id) { entity in
+            VStack(alignment: .leading) {
+                Text(entity.name)
+                    .font(.custom("Avenir Next Regular", size: 12))
+                    .onTapGesture {
+                        customer = entity
+                        projectCustomerName = entity.name
+                        projectCustomerNameUID = entity.id
+                        email = entity.email ?? ""
+                        phone = entity.phone ?? ""
+                        street = entity.street ?? ""
+                        city = entity.city ?? ""
+                        state = entity.state ?? ""
+                        zip = entity.zip ?? ""
+                        ssn = entity.ssn ?? ""
+                        ein = entity.ein ?? ""
+                        showingSuggestions = false
                     }
-                }
-            }
-            Text("").frame(width: 1, height: 1)
+                Divider()
+            }.padding(.horizontal, 8)
+            
         }
+        
     }
 
     var mainFields: some View {
-        Group {
-            VStack {
-                TextField("Email", text: $email)
-                TextField("Phone", text: $phone)
-                TextField("Street", text: $street)
-                TextField("City", text: $city)
-                TextField("State", text: $state)
-                TextField("Zip", text: $zip)
-                TextField("SSN", text: $ssn)
-                TextField("EIN", text: $ein)
-            }
+        VStack {
+            TextField("Email", text: $email).padding()
+            TextField("Phone", text: $phone).padding()
+            TextField("Street", text: $street).padding()
+            TextField("City", text: $city).padding()
+            TextField("State", text: $state).padding()
+            TextField("Zip", text: $zip).padding()
+            TextField("SSN", text: $ssn).padding()
+            TextField("EIN", text: $ein).padding()
         }
     }
     

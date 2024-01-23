@@ -368,12 +368,64 @@ import Contacts
     //Formerly ProjectViewModel
     var filteredProjects: [Project] = []
     var filteredEntities: [Entity] = []
+    var universals: [Universal] = []
+    var displayedUniversals: [Universal] = []
+    var filteredUniversals: [Universal] = []
+    let dataLoadGroup = DispatchGroup()
+    
+    func loadItems() {
+        dataLoadGroup.enter()
+        itemsRef?.observeSingleEvent(of: .value, with: { snapshot in
+            for item in snapshot.children {
+                self.items.append(Item(snapshot: item as! DataSnapshot))
+            }
+            self.dataLoadGroup.leave()
+        })
+    }
+    
+    func concatenateUniversals() {
+        // Clear existing universals
+        universals.removeAll()
+
+        // Append items
+        for item in items {
+            let newUniversal = Universal(type: .item(item))
+            universals.append(newUniversal)
+        }
+
+        // Append entities
+        for entity in entities {
+            let newUniversal = Universal(type: .entity(entity))
+            universals.append(newUniversal)
+        }
+
+        // Append projects
+        for project in projects {
+            let newUniversal = Universal(type: .project(project))
+            universals.append(newUniversal)
+        }
+
+        // Append vehicles
+        for vehicle in vehicles {
+            let newUniversal = Universal(type: .vehicle(vehicle))
+            universals.append(newUniversal)
+        }
+
+        // Sort universals by timestamp
+        universals.sort { $0.timestamp > $1.timestamp }
+
+        // Update displayedUniversals if needed
+        displayedUniversals = universals
+    }
+
     
     func loadProjects() {
+        dataLoadGroup.enter()
         projectsRef?.observeSingleEvent(of: .value, with: { snapshot in
             for item in snapshot.children {
                 self.projects.append(Project(snapshot: item as! DataSnapshot))
             }
+            self.dataLoadGroup.leave()
         })
     }
     
@@ -391,10 +443,12 @@ import Contacts
     var filteredVehicles: [Vehicle] = []
     
     func loadVehicles() {
+        dataLoadGroup.enter()
         vehiclesRef?.observeSingleEvent(of: .value, with: { snapshot in
             for item in snapshot.children {
                 self.vehicles.append(Vehicle(snapshot: item as! DataSnapshot))
             }
+            self.dataLoadGroup.leave()
         })
     }
     
@@ -413,15 +467,24 @@ import Contacts
     var filteredWhoEntities: [Entity] = []
     
     func loadEntities() {
-        print("Loading Entities...")
+        dataLoadGroup.enter()
         entitiesRef?.observeSingleEvent(of: .value, with: { snapshot in
             for item in snapshot.children {
                 self.entities.append(Entity(snapshot: item as! DataSnapshot))
             }
-//            if let value = snapshot.value as? NSDictionary {
-//                
-//            }
+            self.dataLoadGroup.leave()
         })
+    }
+    
+    func loadDataAndConcatenate() {
+        loadItems()
+        loadProjects()
+        loadVehicles()
+        loadEntities()
+        
+        dataLoadGroup.notify(queue: .main) {
+            self.concatenateUniversals()
+        }
     }
     
     func whoSearchEntities(query: String) {
