@@ -58,18 +58,27 @@ struct WhoSearchView: View {
                         AddWhoView(model: model) // Make sure this view can update the list of entities
                     }
                 }
+                
+                Spacer()
 
                 List(filteredWhoEntities, id: \.id) { entity in // Assuming Entity conforms to Identifiable
                     Text(entity.name)
                         .onTapGesture {
                             model.selectedWho = entity.name
                             self.searchQuery = entity.name
-                            model.selectedWhoUID = entity.id
+                            if entity.key == model.uid {
+                                model.selectedWhoUID = entity.key
+                            } else {
+                                model.selectedWhoUID = entity.id
+                            }
                         }
                 }
                 .listStyle(PlainListStyle())
                 
+                Spacer()
+                
                 Button("Select") {
+                    model.showWhoSearchView = false
                     presentationMode.wrappedValue.dismiss()
                 }
                 .disabled(model.selectedWhoUID.isEmpty)
@@ -114,18 +123,23 @@ struct WhomSearchView: View {
                         .onTapGesture {
                             model.selectedWhom = entity.name
                             self.searchQuery = entity.name
-                            model.selectedWhomUID = entity.id
+                            if entity.key == model.uid {
+                                model.selectedWhomUID = entity.key
+                            } else {
+                                model.selectedWhomUID = entity.id
+                            }
                         }
                 }
                 .listStyle(PlainListStyle())
                 
                 Button("Select") {
+                    model.showWhomSearchView = false
                     presentationMode.wrappedValue.dismiss()
                 }
                 .disabled(model.selectedWhomUID.isEmpty)
                 .padding()
             }
-            .navigationBarTitle("Who")
+            .navigationBarTitle("Whom")
         }
         .padding(.horizontal)
     }
@@ -170,6 +184,7 @@ struct VehicleSearchView: View {
                 .listStyle(PlainListStyle())
                 
                 Button("Select") {
+                    model.showVehicleSearchView = false
                     presentationMode.wrappedValue.dismiss()
                 }
                 .disabled(model.selectedVehicleUID.isEmpty)
@@ -222,6 +237,7 @@ struct ProjectSearchView: View {
                 .listStyle(PlainListStyle())
                 
                 Button("Select") {
+                    model.showProjectSearchView = false
                     presentationMode.wrappedValue.dismiss()
                 }
                 .disabled(model.selectedProjectUID.isEmpty)

@@ -19,6 +19,7 @@ import Contacts
     var authEmail = ""
     var authPassword = ""
     var authConfirmPassword = ""
+    var hasLoaded = false
     
     var flow: AuthenticationFlow = .login
     
@@ -76,19 +77,19 @@ import Contacts
     //var fieldIsSearchEnabled = true
     var contacts: [CNContact] = []
     var predicate: NSPredicate = NSPredicate(value: false)
-        
+    
     let contactStore = CNContactStore()
     var suggestedContacts: [CNContact] = []
     var suggestedEntities: [Entity] = []
     let keys = [CNContactPhoneNumbersKey, CNContactEmailAddressesKey, CNContactPostalAddressesKey, CNContactGivenNameKey, CNContactFamilyNameKey]
     let keysToFetch: [CNKeyDescriptor] = [
-            CNContactPhoneNumbersKey as CNKeyDescriptor,
-            CNContactEmailAddressesKey as CNKeyDescriptor,
-            CNContactPostalAddressesKey as CNKeyDescriptor,
-            CNContactGivenNameKey as CNKeyDescriptor,
-            CNContactFamilyNameKey as CNKeyDescriptor,
-            // Add other keys you need here
-        ]
+        CNContactPhoneNumbersKey as CNKeyDescriptor,
+        CNContactEmailAddressesKey as CNKeyDescriptor,
+        CNContactPostalAddressesKey as CNKeyDescriptor,
+        CNContactGivenNameKey as CNKeyDescriptor,
+        CNContactFamilyNameKey as CNKeyDescriptor,
+        // Add other keys you need here
+    ]
     
     func requestContactsPermission(completion: @escaping (Bool) -> Void) {
         contactStore.requestAccess(for: .contacts) { granted, error in
@@ -133,7 +134,7 @@ import Contacts
             completion(fetchedEntities)
         }
     }
-
+    
     
     func fillInContactDetails(for contact: CNContact) {
         // Populate fields from the clicked contact directly
@@ -149,7 +150,7 @@ import Contacts
             fieldZip = "\(postalAddress.postalCode)"
         }
     }
-
+    
     
     func clearFields() {
         // fieldIsSearchEnabled = true
@@ -239,7 +240,7 @@ import Contacts
     var vehiclesRef: DatabaseReference? = nil
     var selectedCustomerName = ""
     var selectedCustomerNameUID = ""
-    var youEntity: YouEntity? = nil
+    var youEntity: Entity? = nil
     var youBusinessEntity: YouBusinessEntity? = nil
     
     func configureFirebaseReferences() {
@@ -251,58 +252,28 @@ import Contacts
         vehiclesRef = Database.database().reference().child("users").child(uid).child("vehicles")
     }
     
-    func fetchDataFromFirebase() {
-        // Use Firebase's observe methods to read data from the references.
-        itemsRef!.observe(.value) { snapshot in
-            // Parse and populate the 'items' array from the snapshot.
-            // Ensure you decode the snapshot data into 'Item' objects.
-        }
-        
-        entitiesRef!.observe(.value) { snapshot in
-            // Parse and populate the 'entities' array from the snapshot.
-            // Ensure you decode the snapshot data into 'Entity' objects.
-        }
-        
-        projectsRef!.observe(.value) { snapshot in
-            // Parse and populate the 'projects' array from the snapshot.
-            // Ensure you decode the snapshot data into 'Project' objects.
-        }
-        
-        vehiclesRef!.observe(.value) { snapshot in
-            // Parse and populate the 'vehicles' array from the snapshot.
-            // Ensure you decode the snapshot data into 'Vehicle' objects.
-        }
-    }
-    
     func checkAndCreateYouEntity() {
         guard let uid = Auth.auth().currentUser?.uid else {
             return // User is not logged in, so we can't create the entity.
         }
         
-        let youEntityRef = Database.database().reference().child("users").child(uid).child("youentity")
-        let youBusinessEntityRef = Database.database().reference().child("users").child(uid).child("youbusinessentity")
-        youEntityRef.observeSingleEvent(of: .value) { snapshot in
-            if snapshot.exists() {
-                if let youEntityRefDictionary = snapshot.value as? [String: Any] {
-                    self.youEntity = YouEntity(fromDictionary: youEntityRefDictionary)
-                } else {
-                    self.youEntity = YouEntity(uid: uid)
-                }
-            } else {
-                self.youEntity = YouEntity(uid: uid)
+        let youRef = Database.database().reference().child("users").child(uid).child("entities").child(uid)
+        
+        youRef.observeSingleEvent(of: .value) { snapshot in
+            if !snapshot.exists() {
+                self.youEntity =  Entity(name: "You", key: self.uid)
                 if let youEntityDict = self.youEntity?.toDictionary() {
-                    youEntityRef.setValue(youEntityDict)
+                    youRef.setValue(youEntityDict)
                 }
             }
         }
         
-        //Load youBusinessEntity
+        let youBusinessEntityRef = Database.database().reference().child("users").child(uid).child("youbusinessentity")
+        
         youBusinessEntityRef.observeSingleEvent(of: .value) { snapshot in
             if snapshot.exists() {
                 if let youBusinessEntityRefDictionary = snapshot.value as? [String: Any] {
                     self.youBusinessEntity = YouBusinessEntity(fromDictionary: youBusinessEntityRefDictionary)
-                    print("YOOO")
-                    print(self.youBusinessEntity?.name ?? "Suppy")
                 } else {
                     self.youBusinessEntity = YouBusinessEntity()
                     let youBusinessEntityDict = self.youBusinessEntity?.toDictionary()
@@ -374,6 +345,7 @@ import Contacts
     let dataLoadGroup = DispatchGroup()
     
     func loadItems() {
+        items.removeAll()
         dataLoadGroup.enter()
         itemsRef?.observeSingleEvent(of: .value, with: { snapshot in
             for item in snapshot.children {
@@ -386,40 +358,42 @@ import Contacts
     func concatenateUniversals() {
         // Clear existing universals
         universals.removeAll()
-
+        
         // Append items
         for item in items {
             let newUniversal = Universal(type: .item(item))
             universals.append(newUniversal)
         }
-
+        
         // Append entities
         for entity in entities {
             let newUniversal = Universal(type: .entity(entity))
             universals.append(newUniversal)
         }
-
+        
         // Append projects
         for project in projects {
             let newUniversal = Universal(type: .project(project))
             universals.append(newUniversal)
         }
-
+        
         // Append vehicles
         for vehicle in vehicles {
             let newUniversal = Universal(type: .vehicle(vehicle))
             universals.append(newUniversal)
         }
-
+        
         // Sort universals by timestamp
         universals.sort { $0.timestamp > $1.timestamp }
-
+        
         // Update displayedUniversals if needed
         displayedUniversals = universals
+        hasLoaded = true
     }
-
+    
     
     func loadProjects() {
+        projects.removeAll()
         dataLoadGroup.enter()
         projectsRef?.observeSingleEvent(of: .value, with: { snapshot in
             for item in snapshot.children {
@@ -443,6 +417,7 @@ import Contacts
     var filteredVehicles: [Vehicle] = []
     
     func loadVehicles() {
+        vehicles.removeAll()
         dataLoadGroup.enter()
         vehiclesRef?.observeSingleEvent(of: .value, with: { snapshot in
             for item in snapshot.children {
@@ -467,6 +442,7 @@ import Contacts
     var filteredWhoEntities: [Entity] = []
     
     func loadEntities() {
+        entities.removeAll()
         dataLoadGroup.enter()
         entitiesRef?.observeSingleEvent(of: .value, with: { snapshot in
             for item in snapshot.children {
@@ -535,6 +511,115 @@ import Contacts
         showWorkersCompToggle = false
         incursWorkersComp = false
     }
+    
+    var trialName = "Brad" // Assuming this is part of your class properties
+    
+    // Other properties and functions...
+    
+    var docuType: CustomerDocument = .contract
+    
+    func generateTaxPDFReport(forYear year: Int) -> Data? {
+        let pdfMetaData = [
+            kCGPDFContextCreator: "MyApp",
+            kCGPDFContextAuthor: "app user",
+            kCGPDFContextTitle: "Financial Report for Fiscal Year \(year)"
+        ]
+        let format = UIGraphicsPDFRendererFormat()
+        format.documentInfo = pdfMetaData as [String: Any]
+        
+        let pageWidth = 8.5 * 72.0
+        let pageHeight = 11 * 72.0
+        let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        let renderer = UIGraphicsPDFRenderer(bounds: pageRect, format: format)
+        
+        let data = renderer.pdfData { context in
+            context.beginPage()
+            // Define your text attributes
+            let attributes = [
+                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12),
+                NSAttributedString.Key.foregroundColor: UIColor.black
+            ]
+            // Customize the header of your PDF with the fiscal year
+            let header = "Financial Report for Fiscal Year \(year)"
+            header.draw(at: CGPoint(x: 20, y: 20), withAttributes: attributes)
+            
+            // Example drawing code, replace or expand with your content
+            let text = "User Report for \(self.trialName)"
+            text.draw(at: CGPoint(x: 20, y: 50), withAttributes: attributes)
+            
+            // Add more content as needed, such as financial data for the year
+            // You might loop through your data here, drawing each item
+        }
+        
+        return data
+    }
+    
+    func generateCustomerPDFReport(forProjectUID projectUID: String) -> Data? {
+        let pdfMetaData = [
+            kCGPDFContextCreator: "MyApp",
+            kCGPDFContextAuthor: "app user",
+            kCGPDFContextTitle: "\(docuType.displayName) for Project \(projectUID)"
+        ]
+        let format = UIGraphicsPDFRendererFormat()
+        format.documentInfo = pdfMetaData as [String: Any]
+
+        let pageWidth = 8.5 * 72.0
+        let pageHeight = 11 * 72.0
+        let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+        let renderer = UIGraphicsPDFRenderer(bounds: pageRect, format: format)
+
+        let data = renderer.pdfData { context in
+            context.beginPage()
+            let titleAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.boldSystemFont(ofSize: 18),
+                .foregroundColor: UIColor.black
+            ]
+            let bodyAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 12),
+                .foregroundColor: UIColor.darkGray
+            ]
+            
+            // Header specific to document type and project
+            let header = "\(docuType.displayName) Document for Project ID: \(projectUID)"
+            header.draw(at: CGPoint(x: 20, y: 20), withAttributes: titleAttributes)
+            
+            // Now, switch over the document type to customize the content
+            switch docuType {
+            case .contract:
+                let text = "Contract Details for \(projectUID)"
+                text.draw(at: CGPoint(x: 20, y: 50), withAttributes: titleAttributes)
+                // Add more specific drawing code for contract document
+                
+            case .invoice:
+                let text = "Invoice Details for \(projectUID)"
+                text.draw(at: CGPoint(x: 20, y: 50), withAttributes: titleAttributes)
+                // Add more specific drawing code for invoice document
+                
+            case .receipt:
+                let text = "Receipt Details for \(projectUID)"
+                text.draw(at: CGPoint(x: 20, y: 50), withAttributes: titleAttributes)
+                // Add more specific drawing code for receipt document
+                
+            case .warranty:
+                let text = "Warranty Details for \(projectUID)"
+                text.draw(at: CGPoint(x: 20, y: 50), withAttributes: titleAttributes)
+                // Add more specific drawing code for warranty document
+            }
+            
+            // Use similar logic to add more content based on the document type
+        }
+
+        return data
+    }
+
+    
+    func savePDFDataToTemporaryFile(_ data: Data) throws -> URL {
+        let temporaryDirectoryURL = FileManager.default.temporaryDirectory
+        let temporaryFileURL = temporaryDirectoryURL.appendingPathComponent(UUID().uuidString + ".pdf")
+        try data.write(to: temporaryFileURL)
+        return temporaryFileURL
+    }
+    
 }
 
 

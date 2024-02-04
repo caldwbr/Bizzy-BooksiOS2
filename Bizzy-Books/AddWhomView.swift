@@ -37,7 +37,7 @@ struct AddWhomView: View {
                     
                     TextField("Name", text: $searchName)
                         .onChange(of: searchName) { oldName, newName in
-                            print("TextFiled changed ::: \(newName)")
+                            model.fieldName = newName
                             
                             if (!newName.isEmpty) {
                                 model.searchContacts(name: newName) { matchingContacts in
@@ -93,8 +93,9 @@ struct AddWhomView: View {
                 .padding()
             }
         }
-        .navigationBarTitle("Add Who Entity")
+        .navigationBarTitle("Add Whom Entity")
         .onAppear{
+            model.clearFields()
             model.requestContactsPermission { granted in
                 contactsPermissionGranted = granted
                 if granted {

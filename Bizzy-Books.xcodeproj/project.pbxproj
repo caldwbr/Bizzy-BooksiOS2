@@ -41,6 +41,7 @@
 		67E103FB2B0E72EF0092082B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */; };
 		67E103FC2B0E72EF0092082B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */; };
 		67E103FD2B0E72EF0092082B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */; };
+		67EEBF362B6FF78900764C46 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67EEBF352B6FF78900764C46 /* ReportsView.swift */; };
 		91229F5F0068E9870F9B4DA3 /* Pods_Bizzy_BooksTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4563FCE17754DC0A93911CCB /* Pods_Bizzy_BooksTests.framework */; };
 		CFAFD0EA67FCBE6FF7CD6F67 /* Pods_Bizzy_Books_Bizzy_BooksUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51EB572154D551BF80CE3100 /* Pods_Bizzy_Books_Bizzy_BooksUITests.framework */; };
 /* End PBXBuildFile section */
@@ -104,6 +105,7 @@
 		67E103EB2B0E6DB20092082B /* Bizzy_BooksUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bizzy_BooksUITests.swift; sourceTree = "<group>"; };
 		67E103ED2B0E6DB20092082B /* Bizzy_BooksUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bizzy_BooksUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		67EEBF352B6FF78900764C46 /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
 		8214491142499E9B3E30692F /* Pods-Bizzy-BooksTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-BooksTests.release.xcconfig"; path = "Target Support Files/Pods-Bizzy-BooksTests/Pods-Bizzy-BooksTests.release.xcconfig"; sourceTree = "<group>"; };
 		8799C4BD5BE7FF9F3917A3AE /* Pods-Bizzy-Books-Bizzy-BooksUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-Books-Bizzy-BooksUITests.release.xcconfig"; path = "Target Support Files/Pods-Bizzy-Books-Bizzy-BooksUITests/Pods-Bizzy-Books-Bizzy-BooksUITests.release.xcconfig"; sourceTree = "<group>"; };
 		C35B12FA4361FF57CD24EEF3 /* Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig"; path = "Target Support Files/Pods-Bizzy-Books-Bizzy-BooksUITests/Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -192,6 +194,7 @@
 				673CF3AE2B48952E00506736 /* Model.swift */,
 				678FBB882B45039800A38561 /* AddVehicleView.swift */,
 				678FBB8A2B4503A800A38561 /* AddProjectView.swift */,
+				67EEBF352B6FF78900764C46 /* ReportsView.swift */,
 			);
 			path = "Bizzy-Books";
 			sourceTree = "<group>";
@@ -510,6 +513,7 @@
 				678FBB872B4500FD00A38561 /* LayoutFlow.swift in Sources */,
 				678FBB852B45008000A38561 /* TFCurrencyGallonsOdo.swift in Sources */,
 				67C709C32B32075900C09CC6 /* ColorExtensions.swift in Sources */,
+				67EEBF362B6FF78900764C46 /* ReportsView.swift in Sources */,
 				67AB9AFD2B35FDCF00FB81A1 /* SentenceFlowView.swift in Sources */,
 				677B70A72B0F0B3D0044216A /* EmptyView.swift in Sources */,
 				673CF3AF2B48952E00506736 /* Model.swift in Sources */,

@@ -8,14 +8,17 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 struct CurrencyTextField: View {
+    @Bindable var model: Model
     @Binding var value: String
     private let formatter: NumberFormatter
     private let maxDigits = 10
     var placeholder: String
 
-    init(value: Binding<String>, placeholder: String = "what") {
+    init(model: Model, value: Binding<String>, placeholder: String = "what") {
         self._value = value
+        self.model = model
         self.placeholder = placeholder
         self.formatter = NumberFormatter()
         formatter.numberStyle = .currency
@@ -47,18 +50,22 @@ struct CurrencyTextField: View {
             let centsValue = Double(intValue) / 100.0
             if let formattedString = formatter.string(from: NSNumber(value: centsValue)) {
                 value = formattedString
+                model.whatInt = intValue
             }
         }
     }
 }
 
+@MainActor
 struct GallonsTextField: View {
+    @Bindable var model: Model
     @Binding var value: String
     private let formatter: NumberFormatter
     private let maxDigits = 10
     var placeholder: String
 
-    init(value: Binding<String>, placeholder: String = "how many") {
+    init(model: Model, value: Binding<String>, placeholder: String = "how many") {
+        self.model = model
         self._value = value
         self.placeholder = placeholder
         self.formatter = NumberFormatter()
@@ -90,18 +97,22 @@ struct GallonsTextField: View {
             let gallonsValue = Double(intValue) / 1000.0 // Starting with three decimal points
             if let formattedString = formatter.string(from: NSNumber(value: gallonsValue)) {
                 value = formattedString
+                model.howManyInt = intValue
             }
         }
     }
 }
 
+@MainActor
 struct OdometerTextField: View {
+    @Bindable var model: Model
     @Binding var value: String
     private let formatter: NumberFormatter
     private let maxDigits = 10
     var placeholder: String
 
-    init(value: Binding<String>, placeholder: String = "odometer") {
+    init(model: Model, value: Binding<String>, placeholder: String = "odometer") {
+        self.model = model
         self._value = value
         self.placeholder = placeholder
         self.formatter = NumberFormatter()
@@ -131,6 +142,7 @@ struct OdometerTextField: View {
         if let intValue = Int(numericString), intValue < Int(pow(10.0, Double(maxDigits))) {
             if let formattedString = formatter.string(from: NSNumber(value: intValue)) {
                 value = formattedString
+                model.odometerInt = intValue
             }
         }
     }

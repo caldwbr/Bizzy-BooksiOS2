@@ -5,6 +5,7 @@ import FirebaseDatabase
 @MainActor
 struct AddItemView: View {
     @Bindable var model: Model
+    @Binding var isAddItemViewPresented: Bool
     
     var body: some View {
         
@@ -19,6 +20,10 @@ struct AddItemView: View {
         }
         .onAppear(perform: {
             model.clearButtonsTFsAndPickers()
+        })
+        .onDisappear(perform: {
+            model.checkAndCreateYouEntity()
+            model.loadDataAndConcatenate()
         })
         .padding()
     }
@@ -44,10 +49,11 @@ struct AddItemView: View {
             print("New Item Id: ", newItem.id)
             let newItemDict = newItem.toDictionary()
             Database.database().reference().child("users").child(model.uid).child("items").child(newItemID).setValue(newItemDict)
+            self.isAddItemViewPresented = false
         }, label: {
             Text("Save")
         })
-        .disabled(model.selectedWhoUID.isEmpty || model.selectedWhomUID.isEmpty || (model.itemType == .business && model.taxReasonIndex == 0) || (model.itemType == .business && model.selectedProjectUID.isEmpty) || (model.itemType == .personal && model.personalReasonIndex == 0) || (model.itemType == .fuel && model.howManyInt == 0) || (model.itemType == .fuel && model.selectedVehicleUID.isEmpty) || (model.itemType == .fuel && model.odometerInt == 0) )
+        .disabled(model.selectedWhoUID.isEmpty || model.selectedWhomUID.isEmpty || (model.itemType == .business && model.taxReasonIndex == 0) || (model.itemType == .business && model.selectedProjectUID.isEmpty) || (model.itemType == .personal && model.personalReasonIndex == 0) || (model.itemType == .fuel && model.howManyInt == 0) || (model.itemType == .fuel && model.selectedVehicleUID.isEmpty) || (model.itemType == .fuel && model.odometerInt == 0) || (model.selectedWhoUID != model.uid && model.selectedWhomUID != model.uid) || (model.selectedWhoUID == model.uid && model.selectedWhomUID == model.uid))
         .font(.largeTitle)
         .padding()
     }
@@ -89,6 +95,7 @@ struct AddItemView: View {
     
     var who: some View {
         Button(action: { //0=Who
+            print("Who tapped")
             model.showWhoSearchView = true
         }, label: {
             Text(model.selectedWho)
@@ -105,7 +112,7 @@ struct AddItemView: View {
     }
     
     var what: some View {
-        CurrencyTextField(value: $model.whatValue,  placeholder: model.whatPlaceholder) //2=What
+        CurrencyTextField(model: model, value: $model.whatValue,  placeholder: model.whatPlaceholder) //2=What
             .foregroundColor(Color.BizzyColor.whatGreen)
             .padding(11)
     }
@@ -116,6 +123,7 @@ struct AddItemView: View {
     
     var whom: some View {
         Button(action: { //4=Whom
+            print("Whom tapped")
             model.showWhomSearchView = true
         }, label: {
             Text(model.selectedWhom)
@@ -137,8 +145,8 @@ struct AddItemView: View {
                 Text(model.taxReasonArray[index])
             }
         }
-        .onChange(of: model.taxReasonIndex) { newIndex, _ in
-            if newIndex == 3 {
+        .onChange(of: model.taxReasonIndex) { oldValue, newValue in
+            if newValue == 3 {
                 model.showWorkersCompToggle = true
             } else {
                 model.showWorkersCompToggle = false
@@ -172,7 +180,7 @@ struct AddItemView: View {
     }
     
     var howMany: some View {
-        GallonsTextField(value: $model.howManyValue, placeholder: model.howManyPlaceholder)
+        GallonsTextField(model: model, value: $model.howManyValue, placeholder: model.howManyPlaceholder)
             .foregroundColor(Color.BizzyColor.orange)
             .padding(11)
     }
@@ -195,7 +203,7 @@ struct AddItemView: View {
     }
     
     var odometer: some View {
-        OdometerTextField(value: $model.odometerValue, placeholder: model.odometerPlaceholder)
+        OdometerTextField(model: model, value: $model.odometerValue, placeholder: model.odometerPlaceholder)
             .foregroundColor(Color.BizzyColor.grey)
             .padding(11)
     }

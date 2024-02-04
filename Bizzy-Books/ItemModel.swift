@@ -8,6 +8,29 @@
 import Foundation
 import FirebaseDatabase
 
+enum CustomerDocument: String, CaseIterable, Identifiable {
+    case contract = "Contract"
+    case invoice = "Invoice"
+    case receipt = "Receipt"
+    case warranty = "Warranty"
+    
+    var id: String { self.rawValue }
+    
+    // Optional: Add any additional properties or methods that might be useful for handling document-specific logic
+    var displayName: String {
+        switch self {
+        case .contract:
+            return "Contract Document"
+        case .invoice:
+            return "Invoice Document"
+        case .receipt:
+            return "Receipt Document"
+        case .warranty:
+            return "Warranty Document"
+        }
+    }
+}
+
 enum UniversalType {
     case item(Item)
     case entity(Entity)

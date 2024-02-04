@@ -20,7 +20,6 @@ struct AddWhoView: View {
                     .font(.largeTitle)
             }
             Button(action: {
-                print("yoohoo")
                 searchName = ""
                 model.clearFields()
             }, label: {
@@ -30,7 +29,6 @@ struct AddWhoView: View {
                 HStack {
 
                     Button(action: {
-                        print("toggle button click =================")
                          fieldIsSearchEnabled.toggle()
                     }, label: {
                         Image(systemName: fieldIsSearchEnabled ? "phone.circle.fill" : "phone.circle")
@@ -40,8 +38,7 @@ struct AddWhoView: View {
                     
                     TextField("Name", text: $searchName)
                         .onChange(of: searchName) { oldName, newName in
-                            print("TextFiled changed ::: \(newName)")
-                            
+                            model.fieldName = newName
                             if (!newName.isEmpty) {
                                 model.searchContacts(name: newName) { matchingContacts in
                                     model.suggestedContacts = matchingContacts ?? []
@@ -98,14 +95,15 @@ struct AddWhoView: View {
         }
         .navigationBarTitle("Add Entity")
         .onAppear{
-            model.requestContactsPermission { granted in
-                contactsPermissionGranted = granted
-                if granted {
-                    // Permission was granted, you can now access contacts
-                } else {
-                    // Handle the case where permission was not granted
-                }
-            }
+            model.clearFields()
+//            model.requestContactsPermission { granted in
+//                contactsPermissionGranted = granted
+//                if granted {
+//                    // Permission was granted, you can now access contacts
+//                } else {
+//                    // Handle the case where permission was not granted
+//                }
+//            }
         }
     }
 }
