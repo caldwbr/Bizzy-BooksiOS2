@@ -242,6 +242,7 @@ import Contacts
     var selectedCustomerNameUID = ""
     var youEntity: Entity? = nil
     var youBusinessEntity: YouBusinessEntity? = nil
+    var projectOverhead: Project? = nil
     
     func configureFirebaseReferences() {
         uid = Auth.auth().currentUser?.uid ?? ""
@@ -264,6 +265,17 @@ import Contacts
                 self.youEntity =  Entity(name: "You", key: self.uid)
                 if let youEntityDict = self.youEntity?.toDictionary() {
                     youRef.setValue(youEntityDict)
+                }
+            }
+        }
+        
+        let overheadRef = Database.database().reference().child("users").child(uid).child("projects").child("OverheadID")
+        
+        overheadRef.observeSingleEvent(of: .value) { snapshot in
+            if !snapshot.exists() {
+                self.projectOverhead = Project(name: "Overhead", key: "OverheadID")
+                if let projectOverheadDict = self.projectOverhead?.toDictionary() {
+                    overheadRef.setValue(projectOverheadDict)
                 }
             }
         }
@@ -645,12 +657,83 @@ import Contacts
     // 10 - "Clothes"
     // 11 - "Other" (Miscellaneous Personal Expenses)
     
+    struct WorkersCompRecord {
+        var workerName: String
+        var incurredWC: Int
+        var noWC: Int
+        var total: Int
+    }
+    
+    struct FuelStopRecord {
+        var date: Date
+        var gasStation: String
+        var odometer: Int
+        var amountSpent: Int
+        var gallonsFilled: Int
+    }
+    
+    struct ProjectRecord {
+        var projectName: String
+        var grossIncome: Int
+        var materialsCost: Int
+        var laborAndProHelpCost: Int
+        var netIncome: Int {
+            grossIncome - (materialsCost + laborAndProHelpCost)
+        }
+    }
+
+    var workersCompRecords: [WorkersCompRecord] = []
+    var vehicleFuelStops: [String: [FuelStopRecord]] = [:]
+    var projectRecords: [ProjectRecord] = []
+    
     func calculateTaxData(forYear year: Int) {
         itemsByYear.removeAll()
+        workersCompRecords.removeAll()
+        vehicleFuelStops.removeAll()
+        projectRecords.removeAll()
         itemsByYear = items.filter { $0.year == year }
         resetTDValues()
+        // Temporary storage for aggregating data
+        var tempWorkersCompData: [String: (name: String, incurredWC: Int, noWC: Int)] = [:]
+        var projectData: [String: (name: String, grossIncome: Int, materialsCost: Int, laborAndProHelpCost: Int)] = [:]
+        
         for item in itemsByYear {
             if item.itemType == .business {
+                if !item.projectID.isEmpty {
+                    let projectID = item.projectID
+                    let projectName = getProjectName(by: projectID)
+                    
+                    // Initialize data structure if necessary
+                    if projectData[projectID] == nil {
+                        projectData[projectID] = (name: projectName, grossIncome: 0, materialsCost: 0, laborAndProHelpCost: 0)
+                    }
+                    
+                    switch item.taxReasonInt {
+                    case 1: // Income
+                        projectData[projectID]?.grossIncome += item.what
+                    case 3, 5: // Labor or Pro Help
+                        projectData[projectID]?.laborAndProHelpCost += item.what
+                    case 0: // Ignore default,  as they are not part of the calculations here
+                        break
+                    default: // Materials (everything else except Income, Labor, and Pro Help)
+                        projectData[projectID]?.materialsCost += item.what
+                    }
+                }
+                if item.taxReasonInt == 3 {
+                    let workerName = getWorkerName(by: item.whomID)
+                    
+                    // Initialize or update the worker's comp data for this worker
+                    if var workerData = tempWorkersCompData[item.whomID] {
+                        if item.workersComp {
+                            workerData.incurredWC += item.what
+                        } else {
+                            workerData.noWC += item.what
+                        }
+                        tempWorkersCompData[item.whomID] = workerData
+                    } else {
+                        tempWorkersCompData[item.whomID] = (name: workerName, incurredWC: item.workersComp ? item.what : 0, noWC: !item.workersComp ? item.what : 0)
+                    }
+                }
                 switch item.taxReasonInt {
                 case 1:
                     tdGrossIncome += item.what
@@ -730,7 +813,31 @@ import Contacts
                     // Handle any other cases or log an unexpected value
                     print("Unexpected personal reason: \(item.personalReasonInt)")
                 }
+            }  else if item.itemType == .fuel {
+                let date = Date(timeIntervalSince1970: item.timeStamp)
+                let fuelStop = FuelStopRecord(
+                    date: date,
+                    gasStation: item.whom,
+                    odometer: item.odometer,
+                    amountSpent: item.what,
+                    gallonsFilled: item.howMany
+                )
+                
+                // Append this record to the correct vehicle's array
+                if var stops = vehicleFuelStops[item.vehicleID] {
+                    stops.append(fuelStop)
+                    vehicleFuelStops[item.vehicleID] = stops
+                } else {
+                    vehicleFuelStops[item.vehicleID] = [fuelStop]
+                }
             }
+        }
+        projectRecords = projectData.values.map {
+                ProjectRecord(projectName: $0.name, grossIncome: $0.grossIncome, materialsCost: $0.materialsCost, laborAndProHelpCost: $0.laborAndProHelpCost)
+            }
+        // Convert the temporary storage into your final WorkersCompRecords array
+        workersCompRecords = tempWorkersCompData.map { id, data in
+            WorkersCompRecord(workerName: data.name, incurredWC: data.incurredWC, noWC: data.noWC, total: data.incurredWC + data.noWC)
         }
         // At this point, all the variables like tdGrossIncome, tdSupplies, etc.,
         // hold the summation of their respective categories for the given year.
@@ -741,6 +848,27 @@ import Contacts
                           tdDepletion + tdUtilitiesBusiness + tdCommissions + tdWages +
                           tdMortgageInt + tdOtherInt + tdRepairs + tdPension
         tdTotalExpenses = tdNonLaborExpenses + tdLabor
+        //print("Vehicle Fuel Stops: \(vehicleFuelStops)")
+    }
+    
+    func getProjectName(by id: String) -> String {
+        // For example, look up the project in a projects array
+        if let matchingProject = projects.first(where: { $0.id == id }) {
+            return matchingProject.name
+        } else {
+            return "Name not found for ID \(id)"
+        }
+    }
+    
+    func getWorkerName(by id: String) -> String {
+        // Use the `first(where:)` method to find the matching entity
+        if let matchingEntity = entities.first(where: { $0.id == id }) {
+            // If found, return the entity's name
+            return matchingEntity.name
+        } else {
+            // If not found, return a default value or indicate not found
+            return "Name not found for ID \(id)"
+        }
     }
 
     

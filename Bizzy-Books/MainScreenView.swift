@@ -22,7 +22,8 @@ struct MainScreenView: View {
             BodyScrollView(model: model, searchCardsText: $searchCardsText, isFilterActive: $isFilterActive)
             FooterHStack(model: model, isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView, isReportsViewPresented: $isReportsViewPresented)
         }
-        .onAppear(perform: {            model.configureFirebaseReferences()
+        .onAppear(perform: {            
+            model.configureFirebaseReferences()
             model.checkAndCreateYouEntity()
             model.loadDataAndConcatenate()
         })
