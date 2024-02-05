@@ -327,6 +327,7 @@ import Contacts
     var selectedProject = ""
     var selectedProjectUID = ""
     var projectPlaceholder = "project ▼"
+    var transactionYear = 0
     
     func sizeForElementContent(_ content: String, semanticType: SentenceElement.SemanticType) -> CGSize {
         // Calculate the size based on content and type
@@ -514,11 +515,241 @@ import Contacts
     
     var trialName = "Brad" // Assuming this is part of your class properties
     
-    // Other properties and functions...
+    var whatIsNegative = false
+
+    // Business Expenses
+    var tdGrossIncome = 0
+    var tdNonLaborExpenses = 0
+    var tdTotalExpenses = 0
+    var tdSupplies = 0
+    var tdLabor = 0
+    var tdVehicle = 0
+    var tdProHelp = 0
+    var tdInsurance = 0 // Assuming "Ins (WC+GL)" stands for Insurance (Workers' Compensation + General Liability)
+    var tdTaxLicense = 0
+    var tdTravel = 0
+    var tdMeals = 0
+    var tdOffice = 0 // Note: "Office" appears twice in your list. Ensure to differentiate or consolidate as needed.
+    var tdAdvertising = 0
+    var tdMachineRent = 0
+    var tdPropertyRent = 0
+    var tdEmpBenefit = 0
+    var tdDepreciation = 0
+    var tdDepletion = 0
+    var tdUtilitiesBusiness = 0 // Renamed to differentiate from personal "Utilities"
+    var tdCommissions = 0
+    var tdWages = 0
+    var tdMortgageInt = 0
+    var tdOtherInt = 0
+    var tdRepairs = 0
+    var tdPension = 0
+
+    // Personal Expenses (assuming these are separate categories)
+    var tdPersonalReason = 0
+    var tdFood = 0
+    var tdFun = 0
+    var tdPet = 0
+    var tdUtilitiesPersonal = 0 // Renamed to differentiate from business "Utilities"
+    var tdPhone = 0
+    var tdInternet = 0
+    var tdOfficePersonal = 0 // Assuming differentiation from business "Office"
+    var tdMedical = 0
+    var tdTravelPersonal = 0 // Assuming differentiation from business "Travel"
+    var tdClothes = 0
+    var tdOtherPersonal = 0
+
+    var tdNetIncome = 0
+    var itemsByYear: [Item] = []
+    
+    func resetTDValues() {
+        tdGrossIncome = 0
+        tdNonLaborExpenses = 0
+        tdTotalExpenses = 0
+        tdSupplies = 0
+        tdLabor = 0
+        tdVehicle = 0
+        tdProHelp = 0
+        tdInsurance = 0 // Assuming "Ins (WC+GL)" stands for Insurance (Workers' Compensation + General Liability)
+        tdTaxLicense = 0
+        tdTravel = 0
+        tdMeals = 0
+        tdOffice = 0 // Note: "Office" appears twice in your list. Ensure to differentiate or consolidate as needed.
+        tdAdvertising = 0
+        tdMachineRent = 0
+        tdPropertyRent = 0
+        tdEmpBenefit = 0
+        tdDepreciation = 0
+        tdDepletion = 0
+        tdUtilitiesBusiness = 0 // Renamed to differentiate from personal "Utilities"
+        tdCommissions = 0
+        tdWages = 0
+        tdMortgageInt = 0
+        tdOtherInt = 0
+        tdRepairs = 0
+        tdPension = 0
+
+        // Personal Expenses (assuming these are separate categories)
+        tdPersonalReason = 0
+        tdFood = 0
+        tdFun = 0
+        tdPet = 0
+        tdUtilitiesPersonal = 0 // Renamed to differentiate from business "Utilities"
+        tdPhone = 0
+        tdInternet = 0
+        tdOfficePersonal = 0 // Assuming differentiation from business "Office"
+        tdMedical = 0
+        tdTravelPersonal = 0 // Assuming differentiation from business "Travel"
+        tdClothes = 0
+        tdOtherPersonal = 0
+
+        tdNetIncome = 0
+    }
+    
+    // Tax Reason Int to String Mapping
+    // 0 - "tax reason" (General or default category)
+    // 1 - "Income"
+    // 2 - "Supplies"
+    // 3 - "Labor"
+    // 4 - "Vehicle"
+    // 5 - "Pro Help" (Professional Help)
+    // 6 - "Ins (WC+GL)" (Insurance, including Workers' Compensation and General Liability)
+    // 7 - "Tax+License" (Taxes and Licenses)
+    // 8 - "Travel"
+    // 9 - "Meals"
+    // 10 - "Office" (Office Expenses)
+    // 11 - "Advertising"
+    // 12 - "Machine Rent"
+    // 13 - "Property Rent"
+    // 14 - "Emp Benefit" (Employee Benefits)
+    // 15 - "Depreciation"
+    // 16 - "Depletion"
+    // 17 - "Utilities"
+    // 18 - "Commissions"
+    // 19 - "Wages"
+    // 20 - "Mortgage Int" (Mortgage Interest)
+    // 21 - "Other Int" (Other Interest)
+    // 22 - "Repairs"
+    // 23 - "Pension"
+    
+    // Personal Reason Int to String Mapping
+    // 0 - "personal reason" (General or default category)
+    // 1 - "Food"
+    // 2 - "Fun"
+    // 3 - "Pet"
+    // 4 - "Utilities"
+    // 5 - "Phone"
+    // 6 - "Internet"
+    // 7 - "Office" (Home Office or Personal Office Expenses)
+    // 8 - "Medical"
+    // 9 - "Travel"
+    // 10 - "Clothes"
+    // 11 - "Other" (Miscellaneous Personal Expenses)
+    
+    func calculateTaxData(forYear year: Int) {
+        itemsByYear.removeAll()
+        itemsByYear = items.filter { $0.year == year }
+        resetTDValues()
+        for item in itemsByYear {
+            if item.itemType == .business {
+                switch item.taxReasonInt {
+                case 1:
+                    tdGrossIncome += item.what
+                case 2:
+                    tdSupplies += item.what
+                case 3:
+                    tdLabor += item.what
+                case 4:
+                    tdVehicle += item.what
+                case 5:
+                    tdProHelp += item.what
+                case 6:
+                    tdInsurance += item.what
+                case 7:
+                    tdTaxLicense += item.what
+                case 8:
+                    tdTravel += item.what
+                case 9:
+                    tdMeals += item.what
+                case 10:
+                    tdOffice += item.what
+                case 11:
+                    tdAdvertising += item.what
+                case 12:
+                    tdMachineRent += item.what
+                case 13:
+                    tdPropertyRent += item.what
+                case 14:
+                    tdEmpBenefit += item.what
+                case 15:
+                    tdDepreciation += item.what
+                case 16:
+                    tdDepletion += item.what
+                case 17:
+                    tdUtilitiesBusiness += item.what
+                case 18:
+                    tdCommissions += item.what
+                case 19:
+                    tdWages += item.what
+                case 20:
+                    tdMortgageInt += item.what
+                case 21:
+                    tdOtherInt += item.what
+                case 22:
+                    tdRepairs += item.what
+                case 23:
+                    tdPension += item.what
+                default:
+                    // Handle any other cases or log an unexpected value
+                    print("Unexpected tax reason: \(item.taxReasonInt)")
+                }
+            } else if item.itemType == .personal { // Assuming differentiation based on itemType
+                switch item.personalReasonInt {
+                case 1:
+                    tdFood += item.what
+                case 2:
+                    tdFun += item.what
+                case 3:
+                    tdPet += item.what
+                case 4:
+                    tdUtilitiesPersonal += item.what
+                case 5:
+                    tdPhone += item.what
+                case 6:
+                    tdInternet += item.what
+                case 7:
+                    tdOfficePersonal += item.what
+                case 8:
+                    tdMedical += item.what
+                case 9:
+                    tdTravelPersonal += item.what
+                case 10:
+                    tdClothes += item.what
+                case 11:
+                    tdOtherPersonal += item.what
+                default:
+                    // Handle any other cases or log an unexpected value
+                    print("Unexpected personal reason: \(item.personalReasonInt)")
+                }
+            }
+        }
+        // At this point, all the variables like tdGrossIncome, tdSupplies, etc.,
+        // hold the summation of their respective categories for the given year.
+        // Summation of all tax reasons to get total expenses
+        tdNonLaborExpenses = tdSupplies + tdVehicle + tdProHelp + tdInsurance +
+                          tdTaxLicense + tdTravel + tdMeals + tdOffice + tdAdvertising +
+                          tdMachineRent + tdPropertyRent + tdEmpBenefit + tdDepreciation +
+                          tdDepletion + tdUtilitiesBusiness + tdCommissions + tdWages +
+                          tdMortgageInt + tdOtherInt + tdRepairs + tdPension
+        tdTotalExpenses = tdNonLaborExpenses + tdLabor
+    }
+
     
     var docuType: CustomerDocument = .contract
+    var isGeneratingPDF = false
     
     func generateTaxPDFReport(forYear year: Int) -> Data? {
+        isGeneratingPDF = true
+        calculateTaxData(forYear: year)
         let pdfMetaData = [
             kCGPDFContextCreator: "MyApp",
             kCGPDFContextAuthor: "app user",
@@ -550,11 +781,12 @@ import Contacts
             // Add more content as needed, such as financial data for the year
             // You might loop through your data here, drawing each item
         }
-        
+        isGeneratingPDF = false
         return data
     }
     
     func generateCustomerPDFReport(forProjectUID projectUID: String) -> Data? {
+        isGeneratingPDF = true
         let pdfMetaData = [
             kCGPDFContextCreator: "MyApp",
             kCGPDFContextAuthor: "app user",
@@ -608,7 +840,7 @@ import Contacts
             
             // Use similar logic to add more content based on the document type
         }
-
+        isGeneratingPDF = false
         return data
     }
 

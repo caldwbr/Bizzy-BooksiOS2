@@ -6,7 +6,6 @@ import FirebaseDatabase
 struct AddItemView: View {
     @Bindable var model: Model
     @Binding var isAddItemViewPresented: Bool
-    
     var body: some View {
         
         VStack {
@@ -44,7 +43,8 @@ struct AddItemView: View {
     
     var saveButton: some View {
         Button(action: {
-            let newItem = Item(latitude: model.latitude ?? 0.0, longitude: model.longitude ?? 0.0, itemType: model.itemType, notes: model.notesValue, who: model.selectedWho, whoID: model.selectedWhoUID, what: model.whatInt, whom: model.selectedWhom, whomID: model.selectedWhomUID, personalReasonInt: model.personalReasonIndex, taxReasonInt: model.taxReasonIndex, vehicleName: model.selectedVehicle, vehicleID: model.selectedVehicleUID, workersComp: model.incursWorkersComp, projectName: model.selectedProject, projectID: model.selectedProjectUID, howMany: model.howManyInt, odometer: model.odometerInt)
+            model.selectedWhoUID = model.uid
+            let newItem = Item(latitude: model.latitude ?? 0.0, longitude: model.longitude ?? 0.0, itemType: model.itemType, notes: model.notesValue, what: model.whatInt, whom: model.selectedWhom, whomID: model.selectedWhomUID, personalReasonInt: model.personalReasonIndex, taxReasonInt: model.taxReasonIndex, vehicleName: model.selectedVehicle, vehicleID: model.selectedVehicleUID, workersComp: model.incursWorkersComp, projectName: model.selectedProject, projectID: model.selectedProjectUID, howMany: model.howManyInt, odometer: model.odometerInt)
             let newItemID = newItem.id
             print("New Item Id: ", newItem.id)
             let newItemDict = newItem.toDictionary()
@@ -53,7 +53,7 @@ struct AddItemView: View {
         }, label: {
             Text("Save")
         })
-        .disabled(model.selectedWhoUID.isEmpty || model.selectedWhomUID.isEmpty || (model.itemType == .business && model.taxReasonIndex == 0) || (model.itemType == .business && model.selectedProjectUID.isEmpty) || (model.itemType == .personal && model.personalReasonIndex == 0) || (model.itemType == .fuel && model.howManyInt == 0) || (model.itemType == .fuel && model.selectedVehicleUID.isEmpty) || (model.itemType == .fuel && model.odometerInt == 0) || (model.selectedWhoUID != model.uid && model.selectedWhomUID != model.uid) || (model.selectedWhoUID == model.uid && model.selectedWhomUID == model.uid))
+        .disabled((model.itemType == .business && model.taxReasonIndex == 0) || (model.itemType == .business && model.selectedProjectUID.isEmpty) || (model.itemType == .personal && model.personalReasonIndex == 0) || (model.itemType == .fuel && model.howManyInt == 0) || (model.itemType == .fuel && model.selectedVehicleUID.isEmpty) || (model.itemType == .fuel && model.odometerInt == 0))
         .font(.largeTitle)
         .padding()
     }
@@ -82,7 +82,11 @@ struct AddItemView: View {
     
     var yeSentence: some View {
         FlowLayout(alignment: model.align.alignment) {
-            who; paid; what; toW; whom
+            if model.taxReasonIndex == 1 {
+                whom; paid; plusMinus; what; toW; whoO
+            } else {
+                whoS; paid; plusMinus; what; toW; whom
+            }
             switch model.itemType {
             case .business: forW; taxReason; project
             case .personal: forW; personalReason
@@ -93,27 +97,38 @@ struct AddItemView: View {
         .frame(maxHeight: 300)
     }
     
-    var who: some View {
-        Button(action: { //0=Who
-            print("Who tapped")
-            model.showWhoSearchView = true
-        }, label: {
-            Text(model.selectedWho)
-                .padding()
-                .foregroundColor(Color.BizzyColor.whoBlue)
-        })
-        .sheet(isPresented: $model.showWhoSearchView) {
-            WhoSearchView(model: model)
-        }
+    var whoS: some View {
+        Text("You").foregroundColor(Color.BizzyColor.whoBlue).padding()
+    }
+    
+    var whoO: some View {
+        Text("you").foregroundColor(Color.BizzyColor.whoBlue).padding()
     }
     
     var paid: some View {
         Text("paid").padding() //1=Paid
     }
     
+    var plusMinus: some View {
+        Button(action: {
+            // Toggle between positive and negative
+            if model.whatIsNegative {
+                model.whatIsNegative = false
+            } else {
+                model.whatIsNegative = true
+            }
+            
+        }) {
+            // Display "+" or "-" based on isNegative state
+            Text(model.whatIsNegative ? "-" : "+")
+                .foregroundColor(model.whatIsNegative ? Color.red : Color.BizzyColor.whatGreen)
+                .padding()
+        }
+    }
+    
     var what: some View {
         CurrencyTextField(model: model, value: $model.whatValue,  placeholder: model.whatPlaceholder) //2=What
-            .foregroundColor(Color.BizzyColor.whatGreen)
+            .foregroundColor(model.whatIsNegative ? Color.red : Color.BizzyColor.whatGreen)
             .padding(11)
     }
     

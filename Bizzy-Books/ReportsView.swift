@@ -91,6 +91,11 @@ struct ReportsView: View {
             .onAppear {
                 generateAndDisplayTaxPDF()
             }
+            if model.isGeneratingPDF {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle()) // Use the circular style
+                    .scaleEffect(1.5) // Optional: Scale the progress view for better visibility
+            }
         }
     }
     
@@ -124,6 +129,11 @@ struct ReportsView: View {
             
             Spacer()
 
+            if model.isGeneratingPDF {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle()) // Use the circular style
+                    .scaleEffect(1.5) // Optional: Scale the progress view for better visibility
+            }
         }
     }
     

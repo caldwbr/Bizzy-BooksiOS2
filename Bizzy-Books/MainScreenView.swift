@@ -188,7 +188,11 @@ struct CardView: View {
     
     var mainSentence: some View {
         FlowLayout(alignment: model.align.alignment) {
-            who; paid; what; toW; whom
+            if displayedUniversal.itemTaxReasonInt == 1 {
+                whom; paid; what; toW; whoO
+            } else {
+                whoS; paid; what; toW; whom
+            }
             switch displayedUniversal.itemItemType {
             case .business: forW; taxReason; project
             case .personal: forW; personalReason
@@ -199,8 +203,14 @@ struct CardView: View {
         .frame(maxHeight: .infinity)
     }
     
-    var who: some View {
-        Text(displayedUniversal.itemWho)
+    var whoS: some View {
+        Text("You")
+            .foregroundColor(Color.BizzyColor.whoBlue)
+            .padding()
+    }
+    
+    var whoO: some View {
+        Text("you")
             .foregroundColor(Color.BizzyColor.whoBlue)
             .padding()
     }
@@ -211,7 +221,7 @@ struct CardView: View {
     
     var what: some View {
         Text(formattedWhat)
-            .foregroundColor(Color.BizzyColor.whatGreen)
+            .foregroundColor(displayedUniversal.itemWhat < 0 ? Color.red : Color.BizzyColor.whatGreen)
             .padding()
     }
     
@@ -244,7 +254,7 @@ struct CardView: View {
     }
     
     var taxReason: some View {
-        Text(String(displayedUniversal.itemTaxReasonInt))
+        Text(String(displayedUniversal.taxReasonString))
             .foregroundColor(Color.BizzyColor.taxReasonMagenta)
             .padding()
     }
@@ -256,7 +266,7 @@ struct CardView: View {
     }
     
     var personalReason: some View {
-        Text(String(displayedUniversal.itemPersonalReasonInt))
+        Text(String(displayedUniversal.personalReasonString))
             .foregroundColor(Color.BizzyColor.taxReasonMagenta)
             .padding()
     }

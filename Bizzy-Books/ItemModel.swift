@@ -58,6 +58,13 @@ struct Universal: Identifiable {
     }
     
     // Computed properties for Item
+    var itemYear: Int {
+        if case .item(let item) = type {
+            return item.year
+        }
+        return 0
+    }
+    
     var itemLatitude: Double {
         if case .item(let item) = type {
             return item.latitude
@@ -82,20 +89,6 @@ struct Universal: Identifiable {
     var itemNotes: String {
         if case .item(let item) = type {
             return item.notes
-        }
-        return ""
-    }
-    
-    var itemWho: String {
-        if case .item(let item) = type {
-            return item.who
-        }
-        return ""
-    }
-    
-    var itemWhoID: String {
-        if case .item(let item) = type {
-            return item.whoID
         }
         return ""
     }
@@ -384,15 +377,47 @@ struct Universal: Identifiable {
     }
 }
 
+extension Universal {
+    // Converts itemTaxReasonInt to its corresponding string value
+    var taxReasonString: String {
+        // Ensure the index is within the bounds of the array
+        guard itemTaxReasonInt >= 0, itemTaxReasonInt < taxReasonArray.count else {
+            return "Unknown Tax Reason"
+        }
+        return taxReasonArray[itemTaxReasonInt]
+    }
+
+    // Converts itemPersonalReasonInt to its corresponding string value
+    var personalReasonString: String {
+        // Ensure the index is within the bounds of the array
+        guard itemPersonalReasonInt >= 0, itemPersonalReasonInt < personalReasonArray.count else {
+            return "Unknown Personal Reason"
+        }
+        return personalReasonArray[itemPersonalReasonInt]
+    }
+
+    // Define your arrays within the extension if they're exclusively used here
+    private var taxReasonArray: [String] {
+        ["tax reason", "Income", "Supplies", "Labor", "Vehicle", "Pro Help", "Ins (WC+GL)", "Tax+License", "Travel", "Meals", "Office", "Advertising", "Machine Rent", "Property Rent", "Emp Benefit", "Depreciation", "Depletion", "Utilities", "Commissions", "Wages", "Mortgage Int", "Other Int", "Repairs", "Pension"]
+    }
+
+    private var personalReasonArray: [String] {
+        ["personal reason", "Food", "Fun", "Pet", "Utilities", "Phone", "Internet", "Office", "Medical", "Travel", "Clothes", "Other"]
+    }
+}
+
 struct Item: Identifiable, Codable {
     var id: String = UUID().uuidString
     var timeStamp: TimeInterval = Date().timeIntervalSince1970
+    var year: Int {
+        let date = Date(timeIntervalSince1970: timeStamp)
+        let calendar = Calendar.current
+        return calendar.component(.year, from: date)
+    }
     var latitude: Double //0.0 if off
     var longitude: Double //0.0 if off
     var itemType: ItemType //.business, .personal, .fuel
     var notes: String
-    var who: String
-    var whoID: String
     var what: Int
     var whom: String
     var whomID: String
@@ -420,8 +445,6 @@ struct Item: Identifiable, Codable {
             self.itemType = .business
         }
         notes = snapshotValue["notes"] as? String ?? ""
-        who = snapshotValue["who"] as? String ?? ""
-        whoID = snapshotValue["whoID"] as? String ?? ""
         what = snapshotValue["what"] as? Int ?? 0
         whom = snapshotValue["whom"] as? String ?? ""
         whomID = snapshotValue["whomID"] as? String ?? ""
@@ -444,8 +467,6 @@ struct Item: Identifiable, Codable {
         dictionary["longitude"] = longitude
         dictionary["itemType"] = itemType.rawValue
         dictionary["notes"] = notes
-        dictionary["who"] = who
-        dictionary["whoID"] = whoID
         dictionary["what"] = what
         dictionary["whom"] = whom
         dictionary["whomID"] = whomID
@@ -463,14 +484,12 @@ struct Item: Identifiable, Codable {
     
     
     // Initializer that matches the parameter list
-    init(latitude: Double, longitude: Double, itemType: ItemType, notes: String, who: String, whoID: String, what: Int, whom: String, whomID: String, personalReasonInt: Int, taxReasonInt: Int, vehicleName: String, vehicleID: String, workersComp: Bool, projectName: String, projectID: String, howMany: Int, odometer: Int, key: String = "") {
+    init(latitude: Double, longitude: Double, itemType: ItemType, notes: String, what: Int, whom: String, whomID: String, personalReasonInt: Int, taxReasonInt: Int, vehicleName: String, vehicleID: String, workersComp: Bool, projectName: String, projectID: String, howMany: Int, odometer: Int, key: String = "") {
         self.key = key
         self.latitude = latitude
         self.longitude = longitude
         self.itemType = itemType
         self.notes = notes
-        self.who = who
-        self.whoID = whoID
         self.what = what
         self.whom = whom
         self.whomID = whomID

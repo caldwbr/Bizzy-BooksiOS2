@@ -31,13 +31,13 @@ struct CurrencyTextField: View {
         ZStack(alignment: .leading) {
             if value.isEmpty {
                 Text(placeholder)
-                    .foregroundColor(Color.BizzyColor.whatGreen)
+                    .foregroundColor(model.whatIsNegative ? Color.red : Color.BizzyColor.whatGreen)
                     .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
             }
             TextField("", text: $value)
-                .foregroundColor(Color.BizzyColor.whatGreen)
+                .foregroundColor(model.whatIsNegative ? Color.red : Color.BizzyColor.whatGreen)
                 .keyboardType(.decimalPad)
-                .onChange(of: value) { newValue, _ in
+                .onChange(of: value) { oldValue, newValue in
                     formatCurrencyInput(newValue)
                 }
                 .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
@@ -50,7 +50,10 @@ struct CurrencyTextField: View {
             let centsValue = Double(intValue) / 100.0
             if let formattedString = formatter.string(from: NSNumber(value: centsValue)) {
                 value = formattedString
-                model.whatInt = intValue
+                switch model.whatIsNegative {
+                case false: model.whatInt = intValue
+                case true: model.whatInt = -intValue
+                }
             }
         }
     }

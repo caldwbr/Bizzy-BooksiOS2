@@ -13,16 +13,12 @@
 		673CF3AF2B48952E00506736 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673CF3AE2B48952E00506736 /* Model.swift */; };
 		673CF3B12B4B497600506736 /* AddCustomerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673CF3B02B4B497600506736 /* AddCustomerView.swift */; };
 		674D4EB52B325BFA001699F2 /* AddItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674D4EB42B325BFA001699F2 /* AddItemModel.swift */; };
-		677B70A72B0F0B3D0044216A /* EmptyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677B70A62B0F0B3D0044216A /* EmptyView.swift */; };
-		678FBB7D2B43C53900A38561 /* AddWhoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB7C2B43C53900A38561 /* AddWhoView.swift */; };
 		678FBB812B44F2A100A38561 /* AddWhomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB802B44F2A100A38561 /* AddWhomView.swift */; };
 		678FBB832B45002500A38561 /* VMSVWhoWhomVehProj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */; };
 		678FBB852B45008000A38561 /* TFCurrencyGallonsOdo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */; };
 		678FBB872B4500FD00A38561 /* LayoutFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB862B4500FD00A38561 /* LayoutFlow.swift */; };
 		678FBB892B45039800A38561 /* AddVehicleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB882B45039800A38561 /* AddVehicleView.swift */; };
 		678FBB8B2B4503A800A38561 /* AddProjectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB8A2B4503A800A38561 /* AddProjectView.swift */; };
-		67AB9AF92B35F42800FB81A1 /* SingletonDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67AB9AF82B35F42800FB81A1 /* SingletonDataManager.swift */; };
-		67AB9AFD2B35FDCF00FB81A1 /* SentenceFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67AB9AFC2B35FDCF00FB81A1 /* SentenceFlowView.swift */; };
 		67C709B52B30EED400C09CC6 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67C709B42B30EED400C09CC6 /* LoginView.swift */; };
 		67C709B72B30EF3400C09CC6 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67C709B62B30EF3400C09CC6 /* SignupView.swift */; };
 		67C709B92B30EF6C00C09CC6 /* UserProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67C709B82B30EF6C00C09CC6 /* UserProfileView.swift */; };
@@ -75,16 +71,12 @@
 		673CF3B02B4B497600506736 /* AddCustomerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCustomerView.swift; sourceTree = "<group>"; };
 		674D4EB42B325BFA001699F2 /* AddItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemModel.swift; sourceTree = "<group>"; };
 		6759408F2B30C2D5002EAF9C /* FirebaseAuth.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = FirebaseAuth.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		677B70A62B0F0B3D0044216A /* EmptyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyView.swift; sourceTree = "<group>"; };
-		678FBB7C2B43C53900A38561 /* AddWhoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWhoView.swift; sourceTree = "<group>"; };
 		678FBB802B44F2A100A38561 /* AddWhomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWhomView.swift; sourceTree = "<group>"; };
 		678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VMSVWhoWhomVehProj.swift; sourceTree = "<group>"; };
 		678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TFCurrencyGallonsOdo.swift; sourceTree = "<group>"; };
 		678FBB862B4500FD00A38561 /* LayoutFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutFlow.swift; sourceTree = "<group>"; };
 		678FBB882B45039800A38561 /* AddVehicleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddVehicleView.swift; sourceTree = "<group>"; };
 		678FBB8A2B4503A800A38561 /* AddProjectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddProjectView.swift; sourceTree = "<group>"; };
-		67AB9AF82B35F42800FB81A1 /* SingletonDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingletonDataManager.swift; sourceTree = "<group>"; };
-		67AB9AFC2B35FDCF00FB81A1 /* SentenceFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentenceFlowView.swift; sourceTree = "<group>"; };
 		67C709B42B30EED400C09CC6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		67C709B62B30EF3400C09CC6 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		67C709B82B30EF6C00C09CC6 /* UserProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileView.swift; sourceTree = "<group>"; };
@@ -173,7 +165,6 @@
 				67E103CF2B0E6DB10092082B /* Bizzy_BooksApp.swift */,
 				67E103D12B0E6DB10092082B /* MainScreenView.swift */,
 				67D58C472B0EC83800740E70 /* EditBusinessView.swift */,
-				677B70A62B0F0B3D0044216A /* EmptyView.swift */,
 				67E103D32B0E6DB20092082B /* Assets.xcassets */,
 				67E103D52B0E6DB20092082B /* Bizzy_Books.entitlements */,
 				67E103D62B0E6DB20092082B /* Preview Content */,
@@ -181,11 +172,8 @@
 				67C709BE2B31F99000C09CC6 /* AddItemView.swift */,
 				67C709C22B32075900C09CC6 /* ColorExtensions.swift */,
 				674D4EB42B325BFA001699F2 /* AddItemModel.swift */,
-				67AB9AF82B35F42800FB81A1 /* SingletonDataManager.swift */,
-				67AB9AFC2B35FDCF00FB81A1 /* SentenceFlowView.swift */,
 				670D45BC2B43161D00FF9BB3 /* FirebaseDatabase.swift */,
 				670D45BE2B43178B00FF9BB3 /* ItemModel.swift */,
-				678FBB7C2B43C53900A38561 /* AddWhoView.swift */,
 				678FBB802B44F2A100A38561 /* AddWhomView.swift */,
 				673CF3B02B4B497600506736 /* AddCustomerView.swift */,
 				678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */,
@@ -494,7 +482,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				673CF3B12B4B497600506736 /* AddCustomerView.swift in Sources */,
-				67AB9AF92B35F42800FB81A1 /* SingletonDataManager.swift in Sources */,
 				67E103D22B0E6DB10092082B /* MainScreenView.swift in Sources */,
 				67E103D02B0E6DB10092082B /* Bizzy_BooksApp.swift in Sources */,
 				67C709BB2B30F00400C09CC6 /* AuthenticationView.swift in Sources */,
@@ -505,7 +492,6 @@
 				67C709B72B30EF3400C09CC6 /* SignupView.swift in Sources */,
 				678FBB8B2B4503A800A38561 /* AddProjectView.swift in Sources */,
 				670D45BF2B43178B00FF9BB3 /* ItemModel.swift in Sources */,
-				678FBB7D2B43C53900A38561 /* AddWhoView.swift in Sources */,
 				67D58C482B0EC83800740E70 /* EditBusinessView.swift in Sources */,
 				678FBB812B44F2A100A38561 /* AddWhomView.swift in Sources */,
 				67C709B92B30EF6C00C09CC6 /* UserProfileView.swift in Sources */,
@@ -514,8 +500,6 @@
 				678FBB852B45008000A38561 /* TFCurrencyGallonsOdo.swift in Sources */,
 				67C709C32B32075900C09CC6 /* ColorExtensions.swift in Sources */,
 				67EEBF362B6FF78900764C46 /* ReportsView.swift in Sources */,
-				67AB9AFD2B35FDCF00FB81A1 /* SentenceFlowView.swift in Sources */,
-				677B70A72B0F0B3D0044216A /* EmptyView.swift in Sources */,
 				673CF3AF2B48952E00506736 /* Model.swift in Sources */,
 				670D45BD2B43161D00FF9BB3 /* FirebaseDatabase.swift in Sources */,
 				678FBB832B45002500A38561 /* VMSVWhoWhomVehProj.swift in Sources */,
