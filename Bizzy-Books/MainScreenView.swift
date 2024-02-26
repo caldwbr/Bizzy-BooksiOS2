@@ -43,7 +43,9 @@ struct HeaderHStack: View {
             
             Text("Bizzy Books")
                 .font(.title)
-                .bold()
+                //.font(.custom("MinionPro-Regular", size: 14))
+                //.bold()
+
             
             Spacer()
             
@@ -120,6 +122,8 @@ struct FooterHStack: View {
             .sheet(isPresented: $isEditingSheetPresented) {
                 EditBusinessView(model: model)
             }
+            .foregroundColor(model.hasLoaded ? .blue : .gray)
+            .disabled(!model.hasLoaded)
             
             Spacer()
             
@@ -129,7 +133,10 @@ struct FooterHStack: View {
                     model.displayedUniversals = model.universals
                 }
                 isFilterActive.toggle()
-            }) {Image(systemName: "magnifyingglass").foregroundColor(.blue).disabled(!model.hasLoaded)}
+            }) {
+                Image(systemName: "magnifyingglass").foregroundColor(model.hasLoaded ? .blue : .gray)
+            }
+            .disabled(!model.hasLoaded)
             
             Spacer()
             
@@ -137,11 +144,12 @@ struct FooterHStack: View {
                 isReportsViewPresented = true
             }) {
                 Image(systemName: "book")
-                    .foregroundColor(.blue)
+                    .foregroundColor(model.hasLoaded ? .blue : .gray)
             }
             .sheet(isPresented: $isReportsViewPresented) {
                 ReportsView(model: model)
             }
+            .disabled(!model.hasLoaded)
             
             Spacer()
             
@@ -149,12 +157,13 @@ struct FooterHStack: View {
                 showingAddItemView = true
             }) {
                 Image(systemName: "plus")
-                    .foregroundColor(.blue)
+                    .foregroundColor(model.hasLoaded ? .blue : .gray)
             }
             .padding()
             .sheet(isPresented: $showingAddItemView) {
                 AddItemView(model: model, isAddItemViewPresented: $showingAddItemView)
             }
+            .disabled(!model.hasLoaded)
         }
         .padding()
         .background(Color.offWhiteGray)

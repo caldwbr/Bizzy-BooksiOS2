@@ -38,6 +38,9 @@
 		67E103FC2B0E72EF0092082B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */; };
 		67E103FD2B0E72EF0092082B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */; };
 		67EEBF362B6FF78900764C46 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67EEBF352B6FF78900764C46 /* ReportsView.swift */; };
+		67EEBF3D2B73F60400764C46 /* MinionPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */; };
+		67EEBF3E2B73F60400764C46 /* MinionPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */; };
+		67EEBF3F2B73F60400764C46 /* MinionPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */; };
 		91229F5F0068E9870F9B4DA3 /* Pods_Bizzy_BooksTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4563FCE17754DC0A93911CCB /* Pods_Bizzy_BooksTests.framework */; };
 		CFAFD0EA67FCBE6FF7CD6F67 /* Pods_Bizzy_Books_Bizzy_BooksUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51EB572154D551BF80CE3100 /* Pods_Bizzy_Books_Bizzy_BooksUITests.framework */; };
 /* End PBXBuildFile section */
@@ -98,6 +101,8 @@
 		67E103ED2B0E6DB20092082B /* Bizzy_BooksUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bizzy_BooksUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		67E103FA2B0E72EF0092082B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		67EEBF352B6FF78900764C46 /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
+		67EEBF3B2B73F08B00764C46 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "MinionPro-Regular.otf"; sourceTree = "<group>"; };
 		8214491142499E9B3E30692F /* Pods-Bizzy-BooksTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-BooksTests.release.xcconfig"; path = "Target Support Files/Pods-Bizzy-BooksTests/Pods-Bizzy-BooksTests.release.xcconfig"; sourceTree = "<group>"; };
 		8799C4BD5BE7FF9F3917A3AE /* Pods-Bizzy-Books-Bizzy-BooksUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-Books-Bizzy-BooksUITests.release.xcconfig"; path = "Target Support Files/Pods-Bizzy-Books-Bizzy-BooksUITests/Pods-Bizzy-Books-Bizzy-BooksUITests.release.xcconfig"; sourceTree = "<group>"; };
 		C35B12FA4361FF57CD24EEF3 /* Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig"; path = "Target Support Files/Pods-Bizzy-Books-Bizzy-BooksUITests/Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -157,6 +162,7 @@
 		67E103CE2B0E6DB10092082B /* Bizzy-Books */ = {
 			isa = PBXGroup;
 			children = (
+				67EEBF3B2B73F08B00764C46 /* Info.plist */,
 				67C709BA2B30F00400C09CC6 /* AuthenticationView.swift */,
 				67C709BC2B30F02A00C09CC6 /* AuthenticatedView.swift */,
 				67C709B82B30EF6C00C09CC6 /* UserProfileView.swift */,
@@ -176,6 +182,7 @@
 				670D45BE2B43178B00FF9BB3 /* ItemModel.swift */,
 				678FBB802B44F2A100A38561 /* AddWhomView.swift */,
 				673CF3B02B4B497600506736 /* AddCustomerView.swift */,
+				67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */,
 				678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */,
 				678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */,
 				678FBB862B4500FD00A38561 /* LayoutFlow.swift */,
@@ -351,6 +358,7 @@
 			files = (
 				67E103D82B0E6DB20092082B /* Preview Assets.xcassets in Resources */,
 				67E103D42B0E6DB20092082B /* Assets.xcassets in Resources */,
+				67EEBF3D2B73F60400764C46 /* MinionPro-Regular.otf in Resources */,
 				67E103FB2B0E72EF0092082B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -359,6 +367,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				67EEBF3E2B73F60400764C46 /* MinionPro-Regular.otf in Resources */,
 				67E103FC2B0E72EF0092082B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -367,6 +376,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				67EEBF3F2B73F60400764C46 /* MinionPro-Regular.otf in Resources */,
 				67E103FD2B0E72EF0092082B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -675,6 +685,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Bizzy-Books/Info.plist";
 				INFOPLIST_KEY_NSContactsUsageDescription = "We need access to your contacts to autofill information.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need access to your location for geo-tagging feature.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -728,6 +739,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Bizzy-Books/Info.plist";
 				INFOPLIST_KEY_NSContactsUsageDescription = "We need access to your contacts to autofill information.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need access to your location for geo-tagging feature.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;

@@ -8,28 +8,40 @@
 import Foundation
 import FirebaseDatabase
 
-enum CustomerDocument: String, CaseIterable, Identifiable {
-    case contract = "Contract"
-    case invoice = "Invoice"
-    case receipt = "Receipt"
-    case warranty = "Warranty"
+struct TextTemplates {
+    var binderText: String
+    var invoiceText: String
+    var receiptText: String
+    var warrantyText: String
+    let key: String
     
-    var id: String { self.rawValue }
+    init(snapshot: DataSnapshot) {
+        key = snapshot.key
+        let snapshotValue = snapshot.value as! [String: AnyObject]
+        binderText = snapshotValue["binderText"] as? String ?? ""
+        invoiceText = snapshotValue["invoiceText"] as? String ?? ""
+        receiptText = snapshotValue["receiptText"] as? String ?? ""
+        warrantyText = snapshotValue["warrantyText"] as? String ?? ""
+    }
     
-    // Optional: Add any additional properties or methods that might be useful for handling document-specific logic
-    var displayName: String {
-        switch self {
-        case .contract:
-            return "Contract Document"
-        case .invoice:
-            return "Invoice Document"
-        case .receipt:
-            return "Receipt Document"
-        case .warranty:
-            return "Warranty Document"
-        }
+    func toDictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        dictionary["binderText"] = binderText
+        dictionary["invoiceText"] = invoiceText
+        dictionary["receiptText"] = receiptText
+        dictionary["warrantyText"] = warrantyText
+        return dictionary
+    }
+    
+    init(binderText: String, invoiceText: String, receiptText: String, warrantyText: String, key: String = "") {
+        self.binderText = binderText
+        self.invoiceText = invoiceText
+        self.receiptText = receiptText
+        self.warrantyText = warrantyText
+        self.key = key
     }
 }
+
 
 enum UniversalType {
     case item(Item)
@@ -406,6 +418,76 @@ extension Universal {
     }
 }
 
+struct TailoredScopeEdit {
+    var id: String
+    var name: String
+    var description: String
+    var priceEa: Int
+}
+
+struct Scope: Identifiable, Codable {
+    var id: String = UUID().uuidString
+    var name: String
+    var desc: String
+    let key: String
+    
+    init(snapshot: DataSnapshot) {
+        key = snapshot.key
+        let snapshotValue = snapshot.value as! [String: AnyObject]
+        id = snapshotValue["id"] as? String ?? ""
+        name = snapshotValue["name"] as? String ?? ""
+        desc = snapshotValue["desc"] as? String ?? ""
+    }
+    
+    func toDictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        dictionary["id"] = id
+        dictionary["name"] = name
+        dictionary["desc"] = desc
+        return dictionary
+    }
+    
+    init(name: String, desc: String, key: String = "") {
+        self.key = key
+        self.name = name
+        self.desc = desc
+    }
+}
+
+struct TailoredScope: Identifiable, Codable {
+    var id: String = UUID().uuidString
+    var name: String
+    var desc: String
+    var priceEa: Int
+    let key: String
+
+    init(snapshot: DataSnapshot) {
+        key = snapshot.key
+        let snapshotValue = snapshot.value as! [String: AnyObject]
+        id = snapshotValue["id"] as? String ?? ""
+        name = snapshotValue["name"] as? String ?? ""
+        desc = snapshotValue["desc"] as? String ?? ""
+        priceEa = snapshotValue["priceea"] as? Int ?? 0
+    }
+
+    func toDictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        dictionary["id"] = id
+        dictionary["name"] = name
+        dictionary["desc"] = desc
+        dictionary["priceea"] = priceEa
+        return dictionary
+    }
+
+    init(name: String, desc: String, priceEa: Int, key: String = "") {
+        self.key = key
+        self.name = name
+        self.desc = desc
+        self.priceEa = priceEa
+    }
+}
+
+
 struct Item: Identifiable, Codable {
     var id: String = UUID().uuidString
     var timeStamp: TimeInterval = Date().timeIntervalSince1970
@@ -678,6 +760,7 @@ struct Project: Identifiable, Codable {
     var jobsiteZip = ""
     var customerSSN = ""
     var customerEIN = ""
+    var projectNumber = 1000
     let key: String
     
     func toDictionary() -> [String: Any] {
@@ -694,6 +777,7 @@ struct Project: Identifiable, Codable {
         dictionary["jobsiteZip"] = jobsiteZip
         dictionary["customerSSN"] = customerSSN
         dictionary["customerEIN"] = customerEIN
+        dictionary["projectnumber"] = projectNumber
         return dictionary
     }
     
@@ -712,9 +796,10 @@ struct Project: Identifiable, Codable {
         jobsiteZip = snapshotValue["jobsiteZip"] as? String ?? ""
         customerSSN = snapshotValue["customerSSN"] as? String ?? ""
         customerEIN = snapshotValue["customerEIN"] as? String ?? ""
+        projectNumber = snapshotValue["projectnumber"] as? Int ?? 1000
     }
     
-    init(name: String, notes: String, customerName: String, customerUID: String, jobsiteStreet: String, jobsiteCity: String, jobsiteState: String, jobsiteZip: String, customerSSN: String, customerEIN: String, key: String = "") {
+    init(name: String, notes: String, customerName: String, customerUID: String, jobsiteStreet: String, jobsiteCity: String, jobsiteState: String, jobsiteZip: String, customerSSN: String, customerEIN: String, projectNumber: Int, key: String = "") {
         self.key = key
         self.name = name
         self.notes = notes
@@ -726,6 +811,7 @@ struct Project: Identifiable, Codable {
         self.jobsiteZip = jobsiteZip
         self.customerSSN = customerSSN
         self.customerEIN = customerEIN
+        self.projectNumber = projectNumber
     }
     
     init(name: String, key: String = "") {

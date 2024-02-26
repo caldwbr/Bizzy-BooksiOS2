@@ -120,7 +120,17 @@ struct AddProjectView: View {
     @MainActor
     var saveProjectButton: some View {
         Button(action: {
-            let newProject = Project(name: projectName, notes: projectNotes, customerName: projectCustomerName, customerUID: projectCustomerNameUID, jobsiteStreet: street, jobsiteCity: city, jobsiteState: state, jobsiteZip: zip, customerSSN: ssn, customerEIN: ein)
+            var lastNumber = 1000
+            model.projectNumbersRef?.child("lastProjectNumber").observeSingleEvent(of: .value, with: { snapshot in
+                lastNumber = snapshot.value as? Int ?? 1000 // Start from 1000 if not set
+                lastNumber += 1 // Increment for the new project
+                
+                // Use lastNumber for your new project number
+                // Remember to update this back in Firebase
+                model.projectNumbersRef?.child("lastProjectNumber").setValue(lastNumber)
+                
+            })
+            let newProject = Project(name: projectName, notes: projectNotes, customerName: projectCustomerName, customerUID: projectCustomerNameUID, jobsiteStreet: street, jobsiteCity: city, jobsiteState: state, jobsiteZip: zip, customerSSN: ssn, customerEIN: ein, projectNumber: lastNumber)
             model.selectedProject = newProject.name
             model.selectedProjectUID = newProject.id
             model.selectedWho = newProject.customerName

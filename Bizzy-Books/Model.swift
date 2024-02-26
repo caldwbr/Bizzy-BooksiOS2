@@ -9,6 +9,7 @@ import Foundation
 import Observation
 import Firebase
 import FirebaseDatabase
+import FirebaseStorage
 import FirebaseAuth
 import SwiftUI
 import Contacts
@@ -231,6 +232,7 @@ import Contacts
     var entities: [Entity] = []
     var projects: [Project] = []
     var vehicles: [Vehicle] = []
+    var scopes: [Scope] = []
     var userEntity: Entity? = nil  // Replace YourEntityType with your actual data model.
     var uid: String = ""
     var userRef: DatabaseReference? = nil
@@ -238,11 +240,16 @@ import Contacts
     var entitiesRef: DatabaseReference? = nil
     var projectsRef: DatabaseReference? = nil
     var vehiclesRef: DatabaseReference? = nil
+    var scopesRef: DatabaseReference? = nil
     var selectedCustomerName = ""
     var selectedCustomerNameUID = ""
     var youEntity: Entity? = nil
     var youBusinessEntity: YouBusinessEntity? = nil
     var projectOverhead: Project? = nil
+    var projectNumbersRef: DatabaseReference? = nil
+    var storageRef: StorageReference? = nil
+    var logoStorageRef: StorageReference? = nil
+    var termsPDFRef: StorageReference? = nil
     
     func configureFirebaseReferences() {
         uid = Auth.auth().currentUser?.uid ?? ""
@@ -251,6 +258,11 @@ import Contacts
         entitiesRef = Database.database().reference().child("users").child(uid).child("entities")
         projectsRef = Database.database().reference().child("users").child(uid).child("projects")
         vehiclesRef = Database.database().reference().child("users").child(uid).child("vehicles")
+        scopesRef = Database.database().reference().child("users").child(uid).child("scopes")
+        projectNumbersRef = Database.database().reference().child("users").child(uid).child("projectnumbers")
+        storageRef = Storage.storage().reference(forURL: "gs://bizzy-books-2.appspot.com")
+        logoStorageRef = storageRef?.child("\(uid)/logo.jpg")
+        termsPDFRef = storageRef?.child("\(uid)/terms_and_conditions/current_terms.pdf")
     }
     
     func checkAndCreateYouEntity() {
@@ -279,6 +291,16 @@ import Contacts
                 }
             }
         }
+        
+        let textTemplatesRef = Database.database().reference().child("users").child(uid).child("textTemplates")
+        
+        textTemplatesRef.observeSingleEvent(of: .value, with: { snapshot in
+            if snapshot.exists() {
+                if let textTemplatesDict = snapshot.value as? [String: Any] {
+                    self.textTemplates = TextTemplates(snapshot: snapshot)
+                }
+            }
+        })
         
         let youBusinessEntityRef = Database.database().reference().child("users").child(uid).child("youbusinessentity")
         
@@ -401,9 +423,67 @@ import Contacts
         
         // Update displayedUniversals if needed
         displayedUniversals = universals
+        if textTemplates.key.isEmpty {
+            initializeTextTemplates()
+        }
         hasLoaded = true
     }
     
+    func initializeTextTemplates() {
+        textTemplates = TextTemplates(binderText: "This document shall serve as a binding contract between contractor and customer. All language in Standard Terms, Conditions, and Disclaimers, attached, shall apply. 50% required at signing of contract; 50% due promptly upon substantial completion.", invoiceText: "Please find your invoice attached. We appreciate your prompt payment.", receiptText: "Thank you for your payment!", warrantyText: "We warrant our work against defects arising from improper installation for a period of 3 years from substantial completion invoice date, or for the minimum period required in this locality, whichever is greater.", key: "")
+        if let busynessName = youBusinessEntity?.name {
+            updateTextTemplates(with: busynessName)
+        }
+    }
+    
+    var textTemplates = TextTemplates(binderText: "", invoiceText: "", receiptText: "", warrantyText: "", key: "")
+    
+    func updateTextTemplates(with businessName: String) {
+        textTemplates.invoiceText += "\n\nThanks,\n\(businessName)"
+        textTemplates.receiptText += "\n\n\(businessName)"
+        textTemplates.warrantyText += "\n\nThanks,\n\(businessName)"
+        // Now templates contain the updated texts
+    }
+    
+    func saveCustomTexts(for projectNumber: String, with templates: TextTemplates) {
+        let db = Firestore.firestore()
+        let projectRef = db.collection("projects").document(projectNumber)
+        
+        projectRef.updateData([
+            "binderText": templates.binderText,
+            "invoiceText": templates.invoiceText,
+            "receiptText": templates.receiptText,
+            "warrantyText": templates.warrantyText
+        ]) { err in
+            if let err = err {
+                print("Error updating document: \(err)")
+            } else {
+                print("Document successfully updated")
+            }
+        }
+    }
+
+    func fetchCustomTexts(for projectNumber: String, completion: @escaping (TextTemplates?) -> Void) {
+        let db = Firestore.firestore()
+        let projectRef = db.collection("projects").document(projectNumber)
+        
+        projectRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                let data = document.data()
+                let templates = TextTemplates(
+                    binderText: data?["binderText"] as? String ?? "",
+                    invoiceText: data?["invoiceText"] as? String ?? "",
+                    receiptText: data?["receiptText"] as? String ?? "",
+                    warrantyText: data?["warrantyText"] as? String ?? ""
+                )
+                completion(templates)
+            } else {
+                print("Document does not exist")
+                completion(nil)
+            }
+        }
+    }
+
     
     func loadProjects() {
         projects.removeAll()
@@ -453,6 +533,24 @@ import Contacts
     //Formerly WhoViewModel
     var whoEntities: [Entity] = []
     var filteredWhoEntities: [Entity] = []
+    var tailoredScopes: [TailoredScope] = []
+    
+    func updateDescription(id: String, newDescription: String) {
+        if let index = tailoredScopes.firstIndex(where: { $0.id == id }) {
+            var scope = tailoredScopes[index]
+            scope.desc = newDescription
+            tailoredScopes[index] = scope  // Replace the old struct with the updated one
+        }
+    }
+
+    func updatePriceEa(id: String, newPriceEa: Int) {
+        if let index = tailoredScopes.firstIndex(where: { $0.id == id }) {
+            var scope = tailoredScopes[index]
+            let isNegative = priceEaIsNegative[id] ?? false
+            scope.priceEa = isNegative ? -abs(newPriceEa) : abs(newPriceEa)
+            tailoredScopes[index] = scope  // Replace the old struct with the updated one
+        }
+    }
     
     func loadEntities() {
         entities.removeAll()
@@ -465,11 +563,92 @@ import Contacts
         })
     }
     
+    func loadScopes() {
+        scopes.removeAll()
+        dataLoadGroup.enter()
+        scopesRef?.observeSingleEvent(of: .value, with: { snapshot in
+            for scope in snapshot.children {
+                self.scopes.append(Scope(snapshot: scope as! DataSnapshot))
+            }
+            self.dataLoadGroup.leave()
+        })
+    }
+    
+    func fetchTailoredScopes(forProjectUID projectUID: String, completion: @escaping (Bool) -> Void) {
+        clearDocumentsBuffer()
+        priceEaIsNegative.removeAll()
+        let tailoredScopesRef = Database.database().reference().child("users").child(uid).child("tailoredscopes").child(projectUID)
+        tailoredScopesRef.observeSingleEvent(of: .value, with: { snapshot in
+            for tailoredScope in snapshot.children {
+                self.tailoredScopes.append(TailoredScope(snapshot: tailoredScope as! DataSnapshot))
+            }
+            for tailoredScope in self.tailoredScopes {
+                if tailoredScope.priceEa < 0 {
+                    self.priceEaIsNegative[tailoredScope.id] = true
+                } else {
+                    self.priceEaIsNegative[tailoredScope.id] = false
+                }
+            }
+            completion(true)
+        }) { error in
+            print(error.localizedDescription)
+            completion(false)
+        }
+    }
+    
+    var selectedProjectUIDForCustDoc: String = ""
+    
+    func uploadTailoredScopes(completion: @escaping (Bool) -> Void) {
+        // Reference to the Firebase node where tailored scopes will be stored
+        let tailoredScopesRef = Database.database().reference().child("users").child(uid).child("tailoredscopes").child(selectedProjectUIDForCustDoc)
+
+        // Loop over each tailored scope in the model
+        for tailoredScope in tailoredScopes {
+            // Convert each tailored scope to a dictionary suitable for Firebase
+            let tailoredScopeDict = tailoredScope.toDictionary()
+            // Use the tailored scope's id as the key for its Firebase node
+            tailoredScopesRef.child(tailoredScope.id).setValue(tailoredScopeDict, withCompletionBlock: { error, _ in
+                if let error = error {
+                    print("Error uploading tailored scope: \(error.localizedDescription)")
+                    completion(false)
+                    return
+                }
+            })
+        }
+
+        // Call completion handler once all uploads have been initiated
+        // Note: This does not guarantee all uploads have finished.
+        // Consider a more robust completion handling mechanism if necessary.
+        completion(true)
+    }
+
+    
+    func loadLogo() {
+        guard let logoStorageRefNotNil = logoStorageRef else {
+            return
+        }
+        dataLoadGroup.enter()
+        logoStorageRefNotNil.getData(maxSize: 1 * 1024 * 1024) { data, error in
+            defer {
+                self.dataLoadGroup.leave()
+            }
+            if let error = error {
+                print("Error fetching logo: \(error)")
+            } else if let data = data, let image = UIImage(data: data) {
+                DispatchQueue.main.async {
+                    self.logoImage = image
+                }
+            }
+        }
+    }
+    
     func loadDataAndConcatenate() {
         loadItems()
         loadProjects()
         loadVehicles()
         loadEntities()
+        loadScopes()
+        loadLogo()
         
         dataLoadGroup.notify(queue: .main) {
             self.concatenateUniversals()
@@ -525,9 +704,20 @@ import Contacts
         incursWorkersComp = false
     }
     
+    func clearDocumentsBuffer() {
+        tailoredScopes.removeAll()
+    }
+    
+    func removeTailoredScope(withId id: String) {
+        DispatchQueue.main.async {
+            self.tailoredScopes.removeAll { $0.id == id }
+        }
+    }
+    
     var trialName = "Brad" // Assuming this is part of your class properties
     
     var whatIsNegative = false
+    var priceEaIsNegative: [String: Bool] = [:]
 
     // Business Expenses
     var tdGrossIncome = 0
@@ -870,10 +1060,11 @@ import Contacts
             return "Name not found for ID \(id)"
         }
     }
-
     
     var docuType: CustomerDocument = .contract
     var isGeneratingPDF = false
+    var logoImageURL = ""
+    var logoImage: UIImage? = nil
     
     func generateTaxPDFReport(forYear year: Int) -> Data? {
         isGeneratingPDF = true
@@ -922,6 +1113,11 @@ import Contacts
         ]
         let format = UIGraphicsPDFRendererFormat()
         format.documentInfo = pdfMetaData as [String: Any]
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencySymbol = "$"
+        formatter.maximumFractionDigits = 2
+        formatter.minimumFractionDigits = 2
 
         let pageWidth = 8.5 * 72.0
         let pageHeight = 11 * 72.0
@@ -938,17 +1134,109 @@ import Contacts
                 .font: UIFont.systemFont(ofSize: 12),
                 .foregroundColor: UIColor.darkGray
             ]
+            let fontAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "MinionPro-Regular", size: 12)!,
+                .foregroundColor: UIColor.black
+            ]
+            let attributesBold: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "MinionPro-Regular", size: 12)!,
+                .foregroundColor: UIColor.black
+            ]
+            let attributesRegular: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "MinionPro-Regular", size: 10)!,
+                .foregroundColor: UIColor.black
+            ]
+            let leftMargin: CGFloat = 40.0
+            let rightMargin: CGFloat = 40.0
+            let maxWidth = pageWidth - leftMargin - rightMargin
+
+            var currentYPosition: CGFloat = 120  // Initial Y position for the first item
+            let itemSpacing: CGFloat = 20.0
+            let smallSpacing: CGFloat = 5.0
             
             // Header specific to document type and project
-            let header = "\(docuType.displayName) Document for Project ID: \(projectUID)"
-            header.draw(at: CGPoint(x: 20, y: 20), withAttributes: titleAttributes)
+            //let header = "\(docuType.displayName) Document for Project ID: \(projectUID)"
+            //header.draw(at: CGPoint(x: 20, y: 20), withAttributes: fontAttributes)
             
             // Now, switch over the document type to customize the content
             switch docuType {
             case .contract:
-                let text = "Contract Details for \(projectUID)"
-                text.draw(at: CGPoint(x: 20, y: 50), withAttributes: titleAttributes)
+                //let text = "Contract Details for \(projectUID)"
+                //text.draw(at: CGPoint(x: 20, y: 50), withAttributes: titleAttributes)
                 // Add more specific drawing code for contract document
+                if let bizzyBooksIcon = UIImage(named: "bizzyBeeImage") {
+                    let iconRect = CGRect(x: pageRect.width - 100, y: 30, width: 60, height: 60) // Adjust size and position as needed
+                    
+                    // Save the current graphics state
+                    context.cgContext.saveGState()
+                    
+                    // Flip the context coordinates
+                    context.cgContext.translateBy(x: 0, y: pageRect.height)
+                    context.cgContext.scaleBy(x: 1.0, y: -1.0)
+                    
+                    // Now the drawing coordinates are flipped, draw the image
+                    // Adjust the y-position of the iconRect to account for the flipped coordinate system
+                    let flippedIconRect = CGRect(x: iconRect.origin.x, y: pageRect.height - iconRect.origin.y - iconRect.height, width: iconRect.width, height: iconRect.height)
+                    context.cgContext.draw(bizzyBooksIcon.cgImage!, in: flippedIconRect)
+                    
+                    // Restore the graphics state to normal
+                    context.cgContext.restoreGState()
+                }
+                if let companyLogo = logoImage {
+                    let logoWidth: CGFloat = 120
+                    let logoHeight: CGFloat = 60 // Adjust as needed to maintain aspect ratio
+                    let logoXPosition: CGFloat = 40 // Left side
+                    let logoYPosition: CGFloat = 30 // Top
+                    
+                    // Calculate the aspect ratio of the image to maintain it
+                    let aspectRatio = companyLogo.size.width / companyLogo.size.height
+                    let adjustedLogoHeight = logoWidth / aspectRatio // Adjust height based on actual aspect ratio
+                    
+                    // Define the rectangle for the image
+                    let logoRect = CGRect(x: logoXPosition, y: logoYPosition, width: logoWidth, height: adjustedLogoHeight)
+                    
+                    // Draw the image
+                    if let cgImage = companyLogo.cgImage {
+                        context.cgContext.saveGState()
+                        context.cgContext.translateBy(x: 0, y: pageRect.height)
+                        context.cgContext.scaleBy(x: 1.0, y: -1.0)
+                        let flippedLogoRect = CGRect(x: logoRect.origin.x, y: pageRect.height - logoRect.origin.y - adjustedLogoHeight, width: logoWidth, height: adjustedLogoHeight)
+                        context.cgContext.draw(cgImage, in: flippedLogoRect)
+                        context.cgContext.restoreGState()
+                    }
+                }
+                let lineYPosition: CGFloat = 100  // Y position of the line
+                let lineWidth: CGFloat = 1.0  // Line thickness
+                let lineColor: UIColor = .black  // Line color
+                let margin: CGFloat = 40.0  // Margin on either side
+                
+                context.cgContext.setStrokeColor(lineColor.cgColor)
+                context.cgContext.setLineWidth(lineWidth)
+                // Adjust the start and end points to account for the margin
+                context.cgContext.move(to: CGPoint(x: margin, y: lineYPosition))
+                context.cgContext.addLine(to: CGPoint(x: pageWidth - margin, y: lineYPosition))
+                context.cgContext.strokePath()
+                for tailoredScope in tailoredScopes {
+                    // Drawing the title string with name, price, and quantity
+                    let priceInDollars = Double(tailoredScope.priceEa) / 100.0
+                    let formattedPrice = formatter.string(from: NSNumber(value: priceInDollars)) ?? "$0.00"
+
+                    let titleString = "\(formattedPrice) \(tailoredScope.name)"
+                    let titleAttributedString = NSAttributedString(string: titleString, attributes: attributesBold)
+                    titleAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                    currentYPosition += titleAttributedString.size().height + smallSpacing
+
+                    // Preparing and drawing the description string with wrapping
+                    let descString = tailoredScope.desc
+                    let descAttributedString = NSAttributedString(string: descString, attributes: attributesRegular)
+                    let descDrawingRect = CGRect(x: leftMargin, y: currentYPosition, width: maxWidth, height: CGFloat.greatestFiniteMagnitude)
+                    let descBoundingRect = descAttributedString.boundingRect(with: CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+                    
+                    // Ensure the drawing operation respects the calculated bounding rectangle
+                    descAttributedString.draw(with: descDrawingRect, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+                    currentYPosition += descBoundingRect.height + itemSpacing
+                }
+
                 
             case .invoice:
                 let text = "Invoice Details for \(projectUID)"

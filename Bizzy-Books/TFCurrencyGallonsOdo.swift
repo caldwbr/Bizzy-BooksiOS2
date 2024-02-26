@@ -9,6 +9,62 @@ import Foundation
 import SwiftUI
 
 @MainActor
+struct ScopePriceTextField: View {
+    @Bindable var model: Model
+    var scopeId: String
+    @Binding var price: String
+    private let formatter: NumberFormatter
+    private let maxDigits = 15
+    var placeholder: String
+    
+    init(model: Model, scopeId: String, price: Binding<String>, placeholder: String = "Price Each") {
+        self._price = price
+        self.model = model
+        self.scopeId = scopeId
+        self.placeholder = placeholder
+        self.formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencySymbol = "$"
+        formatter.maximumFractionDigits = 2
+        formatter.minimumFractionDigits = 2
+    }
+    
+    var body: some View {
+        ZStack(alignment: .leading) {
+            if price.isEmpty {
+                Text(placeholder)
+                    .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+            }
+            
+            TextField("", text: $price)
+                .foregroundColor(Color.black)
+                .keyboardType(.decimalPad)
+                .onChange(of: price) { oldPrice, newPrice in
+                    formatCurrencyInput(newPrice)
+                }
+                .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+        }
+    }
+    
+    private func formatCurrencyInput(_ input: String) {
+        // Filtering out non-numeric characters, but keeping the input as a currency format
+        let numericString = input.filter { "0123456789".contains($0) }
+        if let intValue = Int(numericString), intValue < Int(pow(10.0, Double(maxDigits))) {
+            let isNegative = model.priceEaIsNegative[self.scopeId] ?? false
+            let finalValue = isNegative ? -intValue : intValue
+            let centsValue = Double(intValue) / 100.0
+            if let formattedString = formatter.string(from: NSNumber(value: centsValue)) {
+                DispatchQueue.main.async {
+                    self.price = formattedString
+                    model.updatePriceEa(id: self.scopeId, newPriceEa: finalValue)
+                }
+            }
+        }
+    }
+}
+
+
+@MainActor
 struct CurrencyTextField: View {
     @Bindable var model: Model
     @Binding var value: String
