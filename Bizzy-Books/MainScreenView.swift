@@ -43,6 +43,7 @@ struct HeaderHStack: View {
             
             Text("Bizzy Books")
                 .font(.title)
+                .bold()
                 //.font(.custom("MinionPro-Regular", size: 14))
                 //.bold()
 

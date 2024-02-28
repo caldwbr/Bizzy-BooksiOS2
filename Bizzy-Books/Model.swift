@@ -292,16 +292,6 @@ import Contacts
             }
         }
         
-        let textTemplatesRef = Database.database().reference().child("users").child(uid).child("textTemplates")
-        
-        textTemplatesRef.observeSingleEvent(of: .value, with: { snapshot in
-            if snapshot.exists() {
-                if let textTemplatesDict = snapshot.value as? [String: Any] {
-                    self.textTemplates = TextTemplates(snapshot: snapshot)
-                }
-            }
-        })
-        
         let youBusinessEntityRef = Database.database().reference().child("users").child(uid).child("youbusinessentity")
         
         youBusinessEntityRef.observeSingleEvent(of: .value) { snapshot in
@@ -423,27 +413,9 @@ import Contacts
         
         // Update displayedUniversals if needed
         displayedUniversals = universals
-        if textTemplates.key.isEmpty {
-            initializeTextTemplates()
-        }
         hasLoaded = true
     }
-    
-    func initializeTextTemplates() {
-        textTemplates = TextTemplates(binderText: "This document shall serve as a binding contract between contractor and customer. All language in Standard Terms, Conditions, and Disclaimers, attached, shall apply. 50% required at signing of contract; 50% due promptly upon substantial completion.", invoiceText: "Please find your invoice attached. We appreciate your prompt payment.", receiptText: "Thank you for your payment!", warrantyText: "We warrant our work against defects arising from improper installation for a period of 3 years from substantial completion invoice date, or for the minimum period required in this locality, whichever is greater.", key: "")
-        if let busynessName = youBusinessEntity?.name {
-            updateTextTemplates(with: busynessName)
-        }
-    }
-    
-    var textTemplates = TextTemplates(binderText: "", invoiceText: "", receiptText: "", warrantyText: "", key: "")
-    
-    func updateTextTemplates(with businessName: String) {
-        textTemplates.invoiceText += "\n\nThanks,\n\(businessName)"
-        textTemplates.receiptText += "\n\n\(businessName)"
-        textTemplates.warrantyText += "\n\nThanks,\n\(businessName)"
-        // Now templates contain the updated texts
-    }
+
     
     func saveCustomTexts(for projectNumber: String, with templates: TextTemplates) {
         let db = Firestore.firestore()
@@ -1127,7 +1099,7 @@ import Contacts
         let data = renderer.pdfData { context in
             context.beginPage()
             let titleAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.boldSystemFont(ofSize: 18),
+                .font: UIFont(name: "MinionPro-Regular", size: 12)!,
                 .foregroundColor: UIColor.black
             ]
             let bodyAttributes: [NSAttributedString.Key: Any] = [
@@ -1139,7 +1111,7 @@ import Contacts
                 .foregroundColor: UIColor.black
             ]
             let attributesBold: [NSAttributedString.Key: Any] = [
-                .font: UIFont(name: "MinionPro-Regular", size: 12)!,
+                .font: UIFont(name: "minionpro-bold", size: 12)!,
                 .foregroundColor: UIColor.black
             ]
             let attributesRegular: [NSAttributedString.Key: Any] = [
@@ -1153,6 +1125,7 @@ import Contacts
             var currentYPosition: CGFloat = 120  // Initial Y position for the first item
             let itemSpacing: CGFloat = 20.0
             let smallSpacing: CGFloat = 5.0
+            let tinySpacing: CGFloat = 2.0
             
             // Header specific to document type and project
             //let header = "\(docuType.displayName) Document for Project ID: \(projectUID)"
@@ -1164,6 +1137,88 @@ import Contacts
                 //let text = "Contract Details for \(projectUID)"
                 //text.draw(at: CGPoint(x: 20, y: 50), withAttributes: titleAttributes)
                 // Add more specific drawing code for contract document
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .long
+                let dateString = dateFormatter.string(from: Date())
+                let dateAttributes = [NSAttributedString.Key.font: UIFont(name: "MinionPro-Regular", size: 10)!]
+                let dateStringSize = dateString.size(withAttributes: dateAttributes)
+                dateString.draw(at: CGPoint(x: pageWidth - dateStringSize.width - 60 - 50, y: 56), withAttributes: dateAttributes)
+
+                let createdText = "Created with Bizzy Books"
+                let createdTextSize = createdText.size(withAttributes: dateAttributes)
+                createdText.draw(at: CGPoint(x: pageWidth - createdTextSize.width - 60 - 50, y: 80), withAttributes: dateAttributes)
+                
+                var projNumby = 1000
+                
+                // Find the project with the matching id
+                if let matchingProject = projects.first(where: { $0.id == projectUID }) {
+                    // If a matching project is found, print or use its projectNumber
+                    projNumby = matchingProject.projectNumber
+                }
+                let projNumbyStr = "Project Number: " + String(projNumby)
+                let projNumbyStrSize = projNumbyStr.size(withAttributes: dateAttributes)
+                projNumbyStr.draw(at: CGPoint(x: pageWidth - projNumbyStrSize.width - 60 - 50, y: 68), withAttributes: dateAttributes)
+
+                let projectContractText = "Project Contract"
+                let projectContractAttributes = [NSAttributedString.Key.font: UIFont(name: "minionpro-bold", size: 20)!]
+                let projectContractSize = projectContractText.size(withAttributes: projectContractAttributes)
+                //let projectContractX = (pageWidth - projectContractSize.width) / 2
+                projectContractText.draw(at: CGPoint(x: 170, y: 30), withAttributes: projectContractAttributes)
+                
+                let businessName = youBusinessEntity?.name ?? ""
+
+                let infoAttributes = [NSAttributedString.Key.font: UIFont(name: "MinionPro-Regular", size: 10)!, NSAttributedString.Key.foregroundColor: UIColor.black]
+
+                
+                
+                // Contractor Info
+                let streetPre = youBusinessEntity?.street ?? ""
+                let cityPre = youBusinessEntity?.city ?? ""
+                let statePre = youBusinessEntity?.state ?? ""
+                let zipPre = youBusinessEntity?.zip ?? ""
+                let street = streetPre.trimmingCharacters(in: .whitespaces)
+                let city = cityPre.trimmingCharacters(in: .whitespaces)
+                let state = statePre.trimmingCharacters(in: .whitespaces)
+                let zip = zipPre.trimmingCharacters(in: .whitespaces)
+
+                let businessPhone = youBusinessEntity?.phone ?? ""
+                let businessEmail = youBusinessEntity?.email ?? ""
+                let businessPhoneEmail = "\(businessPhone) \(businessEmail)"
+                
+                // Start with the street part
+                var businessAddress = ""
+
+                // Check if street is not empty, append it with a semicolon
+                if !street.isEmpty {
+                    businessAddress += street + "; "
+                }
+
+                // Now construct the rest of the address on the same line
+                // Join city and state with a comma only if both are present
+                var cityState = [city, state].filter { !$0.isEmpty }.joined(separator: ", ")
+
+                // Append ZIP directly after state, without a comma
+                if !state.isEmpty && !zip.isEmpty {
+                    cityState += " " + zip // Add a space before ZIP if state is also present
+                } else if !zip.isEmpty {
+                    cityState += zip // Just append ZIP if no state is present
+                }
+
+                // Append cityState to businessAddress, ensuring it's not empty
+                if !cityState.isEmpty {
+                    businessAddress += cityState
+                }
+                
+                businessName.draw(at: CGPoint(x: 170, y: 56), withAttributes: infoAttributes)
+
+                // Draw business phone, adjust `y` value for spacing
+                businessPhoneEmail.draw(at: CGPoint(x: 170, y: 68), withAttributes: infoAttributes)
+
+                // Draw business email, adjust `y` value for spacing
+                businessAddress.draw(at: CGPoint(x: 170, y: 80), withAttributes: infoAttributes)
+
+
                 if let bizzyBooksIcon = UIImage(named: "bizzyBeeImage") {
                     let iconRect = CGRect(x: pageRect.width - 100, y: 30, width: 60, height: 60) // Adjust size and position as needed
                     
@@ -1216,12 +1271,42 @@ import Contacts
                 context.cgContext.move(to: CGPoint(x: margin, y: lineYPosition))
                 context.cgContext.addLine(to: CGPoint(x: pageWidth - margin, y: lineYPosition))
                 context.cgContext.strokePath()
+                
+                var customerBlockNameLiteral = "Customer:"
+                var customerBlockName = ""
+                var customerBlockSiteStreet = ""
+                var customerBlockSiteCityStateZip = ""
+                if let matchingProject = projects.first(where: { $0.id == projectUID }) {
+                    // If a matching project is found, print or use its projectNumber
+                    customerBlockName = matchingProject.customerName
+                    customerBlockSiteStreet = matchingProject.jobsiteStreet
+                    customerBlockSiteCityStateZip = "\(matchingProject.jobsiteCity.trimmingCharacters(in: .whitespaces)), \(matchingProject.jobsiteState) \(matchingProject.jobsiteZip)"
+                }
+                
+                // Drawing the customer information
+                let customerLiteralAttributedString = NSAttributedString(string: customerBlockNameLiteral, attributes: attributesBold)
+                customerLiteralAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerLiteralAttributedString.size().height + tinySpacing
+
+                let customerNameAttributedString = NSAttributedString(string: customerBlockName, attributes: infoAttributes)
+                customerNameAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerNameAttributedString.size().height + tinySpacing
+
+                let customerStreetAttributedString = NSAttributedString(string: customerBlockSiteStreet, attributes: infoAttributes)
+                customerStreetAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerStreetAttributedString.size().height + tinySpacing
+
+                let customerCityStateZipAttributedString = NSAttributedString(string: customerBlockSiteCityStateZip, attributes: infoAttributes)
+                customerCityStateZipAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerCityStateZipAttributedString.size().height + itemSpacing
+
+                
                 for tailoredScope in tailoredScopes {
                     // Drawing the title string with name, price, and quantity
                     let priceInDollars = Double(tailoredScope.priceEa) / 100.0
                     let formattedPrice = formatter.string(from: NSNumber(value: priceInDollars)) ?? "$0.00"
 
-                    let titleString = "\(formattedPrice) \(tailoredScope.name)"
+                    let titleString = "\(tailoredScope.name) \(formattedPrice)"
                     let titleAttributedString = NSAttributedString(string: titleString, attributes: attributesBold)
                     titleAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
                     currentYPosition += titleAttributedString.size().height + smallSpacing
@@ -1236,7 +1321,63 @@ import Contacts
                     descAttributedString.draw(with: descDrawingRect, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
                     currentYPosition += descBoundingRect.height + itemSpacing
                 }
+                
+                var bindyText = ""
+                if let matchingProject = projects.first(where: { $0.id == projectUID }) {
+                    // If a matching project is found, print or use its projectNumber
+                    bindyText = matchingProject.binderText
+                }
+                // Preparing the binderText string with wrapping, similar to the description
+                let bindyAttributedString = NSAttributedString(string: bindyText, attributes: attributesRegular)
+                let bindyDrawingRect = CGRect(x: leftMargin, y: currentYPosition, width: maxWidth, height: CGFloat.greatestFiniteMagnitude)
+                let bindyBoundingRect = bindyAttributedString.boundingRect(with: CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
 
+                // Draw the binderText respecting the calculated bounding rectangle
+                bindyAttributedString.draw(with: bindyDrawingRect, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+                currentYPosition += bindyBoundingRect.height + itemSpacing
+                
+                // Calculate positions for the text labels
+                let contractorText = "Contractor signature/date:"
+                let customerText = "Customer signature/date:"
+                // Define the signature box dimensions
+                let signatureBoxHeight: CGFloat = 50 // Height of the signature boxes
+                let boxWidth: CGFloat = (maxWidth / 2) - 20 // Half the maxWidth minus some margin
+
+                // Calculate the y position for the text to appear above the boxes
+                let textYPosition = currentYPosition // Adjust as needed to position the text above the boxes
+
+                // Draw the "Contractor:" label
+                contractorText.draw(at: CGPoint(x: leftMargin, y: textYPosition), withAttributes: attributesBold)
+
+                // Draw the "Customer:" label, adjusting the x position to align with the customer box
+                customerText.draw(at: CGPoint(x: leftMargin + boxWidth + 20, y: textYPosition), withAttributes: attributesBold)
+                currentYPosition += itemSpacing
+
+                // Contractor Signature Box
+                let contractorSignatureBoxRect = CGRect(x: leftMargin, y: currentYPosition, width: boxWidth, height: signatureBoxHeight)
+
+                // Customer Signature Box (placed to the right of the contractor's box with some spacing)
+                let customerSignatureBoxRect = CGRect(x: leftMargin + boxWidth + 20, y: currentYPosition, width: boxWidth, height: signatureBoxHeight) // 20 is double the spacing for margin
+
+                // Drawing the rectangle for contractor's signature box
+                if let context = UIGraphicsGetCurrentContext() {
+                    context.setStrokeColor(UIColor.black.cgColor) // Set the outline color
+                    context.setLineWidth(2) // Set the line width
+                    
+                    // Draw the contractor's rectangle outline
+                    context.stroke(contractorSignatureBoxRect)
+                    
+                    // Draw the customer's rectangle outline
+                    context.stroke(customerSignatureBoxRect)
+                }
+
+                // Update currentYPosition for content below the signature boxes
+                currentYPosition += signatureBoxHeight + 10 // Adjust based on your layout needs
+                
+                var underSigContractor = businessName
+                underSigContractor.draw(at: CGPoint(x: leftMargin, y: currentYPosition), withAttributes: infoAttributes)
+                var underSigCustomer = customerBlockName
+                underSigCustomer.draw(at: CGPoint(x: leftMargin + boxWidth + 20, y: currentYPosition), withAttributes: infoAttributes)
                 
             case .invoice:
                 let text = "Invoice Details for \(projectUID)"

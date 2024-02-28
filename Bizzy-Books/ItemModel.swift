@@ -760,7 +760,11 @@ struct Project: Identifiable, Codable {
     var jobsiteZip = ""
     var customerSSN = ""
     var customerEIN = ""
-    var projectNumber = 1000
+    var binderText: String
+    var invoiceText: String
+    var receiptText: String
+    var warrantyText: String
+    var projectNumber: Int
     let key: String
     
     func toDictionary() -> [String: Any] {
@@ -778,6 +782,10 @@ struct Project: Identifiable, Codable {
         dictionary["customerSSN"] = customerSSN
         dictionary["customerEIN"] = customerEIN
         dictionary["projectnumber"] = projectNumber
+        dictionary["binderText"] =  binderText
+        dictionary["invoiceText"] = invoiceText
+        dictionary["receiptText"] = receiptText
+        dictionary["warrantyText"] = warrantyText
         return dictionary
     }
     
@@ -797,9 +805,13 @@ struct Project: Identifiable, Codable {
         customerSSN = snapshotValue["customerSSN"] as? String ?? ""
         customerEIN = snapshotValue["customerEIN"] as? String ?? ""
         projectNumber = snapshotValue["projectnumber"] as? Int ?? 1000
+        binderText = snapshotValue["binderText"] as? String ?? "This document shall serve as a binding contract between contractor and customer. All language in Standard Terms, Conditions, and Disclaimers, attached, shall apply. 50% required at signing of contract; 50% due promptly upon substantial completion."
+        invoiceText = snapshotValue["invoiceText"] as? String ?? "Please find your invoice attached. We appreciate your prompt payment."
+        receiptText = snapshotValue["receiptText"] as? String ?? "Thank you for your payment!"
+        warrantyText = snapshotValue["warrantyText"] as? String ?? "We warrant our work against defects arising from improper installation for a period of 3 years from substantial completion invoice date, or for the minimum period required in this locality, whichever is greater."
     }
     
-    init(name: String, notes: String, customerName: String, customerUID: String, jobsiteStreet: String, jobsiteCity: String, jobsiteState: String, jobsiteZip: String, customerSSN: String, customerEIN: String, projectNumber: Int, key: String = "") {
+    init(name: String, notes: String, customerName: String, customerUID: String, jobsiteStreet: String, jobsiteCity: String, jobsiteState: String, jobsiteZip: String, customerSSN: String, customerEIN: String, projectNumber: Int, binderText: String = "This document shall serve as a binding contract between contractor and customer. All language in Standard Terms, Conditions, and Disclaimers, attached, shall apply. 50% required at signing of contract; 50% due promptly upon substantial completion.", invoiceText: String = "Please find your invoice attached. We appreciate your prompt payment.", receiptText: String = "Thank you for your payment!", warrantyText: String = "We warrant our work against defects arising from improper installation for a period of 3 years from substantial completion invoice date, or for the minimum period required in this locality, whichever is greater.", key: String = "") {
         self.key = key
         self.name = name
         self.notes = notes
@@ -812,13 +824,22 @@ struct Project: Identifiable, Codable {
         self.customerSSN = customerSSN
         self.customerEIN = customerEIN
         self.projectNumber = projectNumber
+        self.binderText = binderText
+        self.invoiceText = invoiceText
+        self.receiptText = receiptText
+        self.warrantyText = warrantyText
     }
     
-    init(name: String, key: String = "") {
+    init(name: String, projectNumber: Int = 1000, binderText: String = "This document shall serve as a binding contract between contractor and customer. All language in Standard Terms, Conditions, and Disclaimers, attached, shall apply. 50% required at signing of contract; 50% due promptly upon substantial completion.", invoiceText: String = "Please find your invoice attached. We appreciate your prompt payment.", receiptText: String = "Thank you for your payment!", warrantyText: String = "We warrant our work against defects arising from improper installation for a period of 3 years from substantial completion invoice date, or for the minimum period required in this locality, whichever is greater.", key: String = "") {
         self.key = key
         self.name = name
         self.customerName = ""
+        self.projectNumber = projectNumber
         self.customerUID = ""
+        self.binderText = binderText
+        self.invoiceText = invoiceText
+        self.receiptText = receiptText
+        self.warrantyText = warrantyText
     }
 }
 

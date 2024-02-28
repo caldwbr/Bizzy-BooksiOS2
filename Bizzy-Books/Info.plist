@@ -5,6 +5,8 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>MinionPro-Regular.otf</string>
+		<string>minionpro-bold.otf</string>
+		<string>MinionVariableConcept.otf</string>
 	</array>
 </dict>
 </plist>

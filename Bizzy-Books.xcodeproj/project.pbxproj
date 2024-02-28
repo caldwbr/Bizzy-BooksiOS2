@@ -13,6 +13,8 @@
 		673CF3AF2B48952E00506736 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673CF3AE2B48952E00506736 /* Model.swift */; };
 		673CF3B12B4B497600506736 /* AddCustomerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673CF3B02B4B497600506736 /* AddCustomerView.swift */; };
 		674D4EB52B325BFA001699F2 /* AddItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674D4EB42B325BFA001699F2 /* AddItemModel.swift */; };
+		67559DC42B8E82C20051C9F0 /* MinionVariableConcept-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67559DC32B8E82C20051C9F0 /* MinionVariableConcept-Italic.otf */; };
+		67559DC82B8E830E0051C9F0 /* minionpro-bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67559DC72B8E830E0051C9F0 /* minionpro-bold.otf */; };
 		678FBB812B44F2A100A38561 /* AddWhomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB802B44F2A100A38561 /* AddWhomView.swift */; };
 		678FBB832B45002500A38561 /* VMSVWhoWhomVehProj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */; };
 		678FBB852B45008000A38561 /* TFCurrencyGallonsOdo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */; };
@@ -73,6 +75,8 @@
 		673CF3AE2B48952E00506736 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		673CF3B02B4B497600506736 /* AddCustomerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCustomerView.swift; sourceTree = "<group>"; };
 		674D4EB42B325BFA001699F2 /* AddItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemModel.swift; sourceTree = "<group>"; };
+		67559DC32B8E82C20051C9F0 /* MinionVariableConcept-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "MinionVariableConcept-Italic.otf"; sourceTree = "<group>"; };
+		67559DC72B8E830E0051C9F0 /* minionpro-bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "minionpro-bold.otf"; sourceTree = "<group>"; };
 		6759408F2B30C2D5002EAF9C /* FirebaseAuth.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = FirebaseAuth.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		678FBB802B44F2A100A38561 /* AddWhomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWhomView.swift; sourceTree = "<group>"; };
 		678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VMSVWhoWhomVehProj.swift; sourceTree = "<group>"; };
@@ -182,6 +186,8 @@
 				670D45BE2B43178B00FF9BB3 /* ItemModel.swift */,
 				678FBB802B44F2A100A38561 /* AddWhomView.swift */,
 				673CF3B02B4B497600506736 /* AddCustomerView.swift */,
+				67559DC72B8E830E0051C9F0 /* minionpro-bold.otf */,
+				67559DC32B8E82C20051C9F0 /* MinionVariableConcept-Italic.otf */,
 				67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */,
 				678FBB822B45002500A38561 /* VMSVWhoWhomVehProj.swift */,
 				678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */,
@@ -358,6 +364,8 @@
 			files = (
 				67E103D82B0E6DB20092082B /* Preview Assets.xcassets in Resources */,
 				67E103D42B0E6DB20092082B /* Assets.xcassets in Resources */,
+				67559DC82B8E830E0051C9F0 /* minionpro-bold.otf in Resources */,
+				67559DC42B8E82C20051C9F0 /* MinionVariableConcept-Italic.otf in Resources */,
 				67EEBF3D2B73F60400764C46 /* MinionPro-Regular.otf in Resources */,
 				67E103FB2B0E72EF0092082B /* GoogleService-Info.plist in Resources */,
 			);

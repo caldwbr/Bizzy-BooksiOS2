@@ -9,6 +9,7 @@ import SwiftUI
 import PDFKit
 import UIKit
 import FirebaseStorage
+import FirebaseDatabase
 
 @MainActor
 struct ReportsView: View {
@@ -24,6 +25,7 @@ struct ReportsView: View {
     @State var isShowingLogoPicker = false
     @State var isShowingScopeAdder = false
     @State var isShowingBinderAdder = false
+    @State var isShowingCustomerSiteEditor = false
     @State var logoImage: UIImage?
     @FocusState var docProjListVisible: Bool
     
@@ -59,18 +61,9 @@ struct ReportsView: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.secondary)
                 uploadLogoButton
-                Text("Logo")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
-                addScopeItemButton
-//                Text("Scope")
-//                    .font(.system(size: 14, weight: .medium))
-//                    .foregroundColor(.secondary)
                 addBinderButton
-//                Text("Binder")
-//                    .font(.system(size: 14, weight: .medium))
-//                    .foregroundColor(.secondary)
-//                Spacer()
+                customerSiteButton
+                addScopeItemButton
                 shareButton
             }
         }
@@ -224,12 +217,27 @@ struct ReportsView: View {
         .sheet(isPresented: $isShowingBinderAdder) {
             BinderAdder(model: model)
         }
-        .disabled(documentSelection == .taxDocument)
+        .disabled(model.selectedProjectUIDForCustDoc.isEmpty || documentSelection == .taxDocument)
+    }
+    
+    var customerSiteButton: some View {
+        Button(action: {
+            self.isShowingCustomerSiteEditor = true
+        }) {
+            Image(systemName: "person.crop.square")
+        }
+        .padding()
+        .sheet(isPresented: $isShowingCustomerSiteEditor) {
+            CustomerSiteEditor(model: model, projectUID: model.selectedProjectUIDForCustDoc, onSaveComplete: {
+                self.generateAndDisplayCustomerPDF()
+            })
+        }
+        .disabled(model.selectedProjectUIDForCustDoc.isEmpty || documentSelection == .taxDocument)
     }
     
     var shareButton: some View {
         Group {
-            if let pdfURL = pdfURL {
+            if let pdfURL = pdfURL, model.tailoredScopes.count > 0  {
                 ShareLink(item: pdfURL, label: {
                     Image(systemName: "square.and.arrow.up")
                         .padding()
@@ -714,9 +722,11 @@ struct ScopeCardView: View {
 struct BinderAdder: View {
     @Environment(\.dismiss) var dismiss
     @Bindable var model: Model
+    @State private var bindy: String = ""
+
     var body: some View {
         NavigationView {
-            TextEditor(text: $model.textTemplates.binderText)
+            TextEditor(text: $bindy)
                 .padding()
                 .navigationTitle("Binder Content")
                 .toolbar {
@@ -727,15 +737,105 @@ struct BinderAdder: View {
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Save") {
-                            // Implement the action to save the binder content
-                            dismiss()
+                            // Find the correct project index
+                            if let index = model.projects.firstIndex(where: { $0.id == model.selectedProjectUIDForCustDoc }) {
+                                // Update the binderText for the found project
+                                model.projects[index].binderText = bindy
+                                
+                                // Implement the action to upload updated project to Firebase
+                                // This is a simplified example. Replace with your actual Firebase upload logic.
+                                let updatedProjectDict = model.projects[index].toDictionary() // Assuming your Project model has a toDictionary method
+                                model.projectsRef?.child(model.selectedProjectUIDForCustDoc).updateChildValues(updatedProjectDict)
+                                
+                                dismiss()
+                            }
                         }
+                    }
+                }
+                .onAppear {
+                    // Initialize binderText with the current value from the correct project
+                    if let matchingProject: Project = model.projects.first(where: { $0.id == model.selectedProjectUIDForCustDoc }) {
+                        bindy = matchingProject.binderText
                     }
                 }
         }
     }
 }
 
+
+@MainActor
+struct CustomerSiteEditor: View {
+    @Environment(\.dismiss) var dismiss
+    @Bindable var model: Model
+    var projectUID: String // The unique ID of the project to edit
+    var onSaveComplete: () -> Void
+
+    // Temporary project details to edit
+    @State private var customerName: String = ""
+    @State private var jobsiteStreet: String = ""
+    @State private var jobsiteCity: String = ""
+    @State private var jobsiteState: String = ""
+    @State private var jobsiteZip: String = ""
+
+    // Find the index of the project to edit
+    private var projectIndex: Int? {
+        model.projects.firstIndex { $0.id == projectUID }
+    }
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Customer Information")) {
+                    TextField("Customer Name", text: $customerName)
+                    TextField("Jobsite Street", text: $jobsiteStreet)
+                    TextField("Jobsite City", text: $jobsiteCity)
+                    TextField("Jobsite State", text: $jobsiteState)
+                    TextField("Jobsite Zip", text: $jobsiteZip)
+                }
+            }
+            .navigationBarTitle("Edit Customer", displayMode: .inline)
+            .navigationBarItems(leading: Button("Cancel") {
+                dismiss()
+            }, trailing: Button("Save") {
+                saveChanges()
+            })
+            .onAppear {
+                // Pre-fill the form with the project's details
+                if let projectIndex = projectIndex {
+                    let project = model.projects[projectIndex]
+                    customerName = project.customerName
+                    jobsiteStreet = project.jobsiteStreet
+                    jobsiteCity = project.jobsiteCity
+                    jobsiteState = project.jobsiteState
+                    jobsiteZip = project.jobsiteZip
+                }
+            }
+        }
+    }
+
+    private func saveChanges() {
+        if let projectIndex = projectIndex {
+            // Update the project details
+            model.projects[projectIndex].customerName = customerName
+            model.projects[projectIndex].jobsiteStreet = jobsiteStreet
+            model.projects[projectIndex].jobsiteCity = jobsiteCity
+            model.projects[projectIndex].jobsiteState = jobsiteState
+            model.projects[projectIndex].jobsiteZip = jobsiteZip
+            
+            // Assuming you have a function to update a project in Firebase
+            updateProjectInFirebase(model.projects[projectIndex], projectUID: projectUID)
+            
+            // Dismiss the editor
+            onSaveComplete()
+            dismiss()
+        }
+    }
+
+    private func updateProjectInFirebase(_ project: Project, projectUID: String) {
+        let newProjectDict = project.toDictionary() // Convert the Project to a dictionary
+        Database.database().reference().child("users").child(model.uid).child("projects").child(projectUID).setValue(newProjectDict)
+    }
+}
 
 struct LogoPicker: UIViewControllerRepresentable {
     @Binding var logoImage: UIImage?
