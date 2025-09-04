@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+@import FirebaseAuth;
+
 #import "FirebasePhoneAuthUI/Sources/FUIPhoneAuth_Internal.h"
 
 #import <FirebaseAuthUI/FirebaseAuthUI.h>
@@ -81,7 +83,7 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - FUIAuthProvider
 
 - (nullable NSString *)providerID {
-  return FIRPhoneAuthProviderID;
+  return @"phone";
 }
 
 /** @fn accessToken:
@@ -145,11 +147,11 @@ NS_ASSUME_NONNULL_BEGIN
                     completion:(nullable FUIAuthProviderSignInCompletionBlock)completion {
   _pendingSignInCallback = completion;
   
-  FUIPhoneAuth *delegate = [_authUI providerWithID:FIRPhoneAuthProviderID];
+  FUIPhoneAuth *delegate = [_authUI providerWithID:@"phone"];
   if (!delegate) {
     NSError *error = [FUIAuthErrorUtils errorWithCode:FUIAuthErrorCodeCantFindProvider
                                              userInfo:@{
-                       FUIAuthErrorUserInfoProviderIDKey : FIRPhoneAuthProviderID
+                       FUIAuthErrorUserInfoProviderIDKey : @"phone"
                      }];
     [self callbackWithCredential:nil error:error result:^(FIRUser *_Nullable user,
                                                           NSError *_Nullable error) {

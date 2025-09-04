@@ -28,6 +28,9 @@ struct ReportsView: View {
     @State var isShowingCustomerSiteEditor = false
     @State var logoImage: UIImage?
     @FocusState var docProjListVisible: Bool
+    @State private var showProjectList = false
+    // NEW
+    //@FocusState private var projectSearchFocused: Bool
     
     // Declare pdfURL as a state variable to hold the file URL of the saved PDF
     @State private var pdfURL: URL? = nil
@@ -83,6 +86,30 @@ struct ReportsView: View {
         
     }
 
+    private func hideProjectList() {
+        showProjectList = false
+        docProjListVisible = false
+    }
+
+    private var filteredProjects: [Project] {
+        let q = selectedProjectForCustomerDocumentSearchyField
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        guard !q.isEmpty else { return model.projects }
+        return model.projects.filter { p in
+            let name = p.name.lowercased()
+            let customer = p.customerName.lowercased()
+            let street = p.jobsiteStreet.lowercased()
+            let city = p.jobsiteCity.lowercased()
+            return name.contains(q) || customer.contains(q) || street.contains(q) || city.contains(q)
+        }
+    }
+    
+    private var isProjectListOpen: Bool {
+        // Show the list if the field is focused OR if there’s any text typed.
+        docProjListVisible || !selectedProjectForCustomerDocumentSearchyField.isEmpty
+    }
+
     var taxDocumentSection: some View {
         VStack {
             Picker("Select Year", selection: $selectedYear) {
@@ -107,55 +134,89 @@ struct ReportsView: View {
     }
     
     var customerDocumentSection: some View {
-        VStack {
+        VStack(spacing: 12) {
             Picker("Document Type", selection: $model.docuType) {
                 ForEach(CustomerDocument.allCases, id: \.self) { doc in
                     Text(doc.rawValue).tag(doc)
                 }
             }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding()
-            
-            // Project Picker or TextField for project filtering
-            TextField("Project", text: $selectedProjectForCustomerDocumentSearchyField)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+
+            TextField("Project (type to filter)", text: $selectedProjectForCustomerDocumentSearchyField)
+                .textFieldStyle(.roundedBorder)
+                .padding(.horizontal)
                 .focused($docProjListVisible)
-            if docProjListVisible {
-                List(model.projects, id: \.id) { project in // Assuming Entity conforms to Identifiable
-                    Text(project.name)
-                        .onTapGesture {
-                            selectedProjectForCustomerDocument = project.name
-                            selectedProjectUIDForCustomerDocument = project.id
-                            model.selectedProjectUIDForCustDoc = project.id
-                            self.selectedProjectForCustomerDocumentSearchyField = project.name
-                            model.fetchTailoredScopes(forProjectUID: project.id) { success in
-                                // Ensure execution on the main thread
-                                DispatchQueue.main.async {
-                                    if success {
-                                        // Proceed to generate and display the PDF
-                                        generateAndDisplayCustomerPDF()
-                                    } else {
-                                        // Handle the error case, maybe show an alert
-                                        print("Failed to fetch TailoredScopes")
-                                    }
-                                }
-                            }
-                            //docProjListVisible = false
-                        }
+                .onChange(of: docProjListVisible) { _, isFocused in
+                    showProjectList = isFocused
                 }
-                .listStyle(PlainListStyle())
+                .onSubmit {
+                    if filteredProjects.count == 1, let only = filteredProjects.first {
+                        pickProject(only)
+                        docProjListVisible = false
+                    }
+                }
+            
+            if showProjectList {
+                ScrollView {
+                    // The LazyVStack is all you need now.
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(filteredProjects, id: \.id) { project in
+                            Button {
+                                pickProject(project)
+                                docProjListVisible = false
+                            } label: {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(project.name).font(.headline)
+                                    Text("\(project.customerName) • \(project.jobsiteCity)")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 10)
+                            }
+                            Divider()
+                        }
+                        if filteredProjects.isEmpty {
+                            Text("No projects match “\(selectedProjectForCustomerDocumentSearchyField)”")
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                                .padding()
+                        }
+                    }
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .frame(height: min(UIScreen.main.bounds.height * 0.66, 520))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .shadow(radius: 2)
+                .zIndex(1)
+                .onDisappear {
+                    // To reset the search field when the list is dismissed
+                    selectedProjectForCustomerDocumentSearchyField = ""
+                }
             }
             
-            
-
             if model.isGeneratingPDF {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle()) // Use the circular style
-                    .scaleEffect(1.5) // Optional: Scale the progress view for better visibility
+                ProgressView().scaleEffect(1.2)
             }
         }
     }
+
+
+    private func pickProject(_ project: Project) {
+        selectedProjectForCustomerDocument = project.name
+        selectedProjectUIDForCustomerDocument = project.id
+        model.selectedProjectUIDForCustDoc = project.id
+        selectedProjectForCustomerDocumentSearchyField = project.name
+
+        model.fetchTailoredScopes(forProjectUID: project.id) { success in
+            DispatchQueue.main.async {
+                if success { generateAndDisplayCustomerPDF() }
+                else { print("Failed to fetch TailoredScopes") }
+            }
+        }
+    }
+
     
     var selectTermsButton: some View {
         Button(action: {
@@ -346,24 +407,16 @@ struct ReportsView: View {
     }
     
     func appendTermsAndConditions(to documentData: Data, completion: @escaping (Data?) -> Void) {
-        // Fetch the terms PDF data from Firebase Storage
         let storageRef = Storage.storage().reference(forURL: "gs://bizzy-books-2.appspot.com")
         let termsPDFRef = storageRef.child("\(model.uid)/terms_and_conditions/current_terms.pdf")
-        
         termsPDFRef.getData(maxSize: 5 * 1024 * 1024) { data, error in
-            guard let termsData = data, error == nil else {
-                print(error?.localizedDescription ?? "Failed to fetch terms PDF")
-                completion(nil)
+            guard let termsData = data, error == nil,
+                  let combined = combinePDFs(first: documentData, second: termsData) else {
+                print("Terms missing; showing main doc only.")
+                completion(documentData)
                 return
             }
-
-            // Assuming combinePDFs correctly combines the PDFs
-            if let combinedPDFData = combinePDFs(first: documentData, second: termsData) {
-                completion(combinedPDFData)
-            } else {
-                print("Failed to combine PDFs")
-                completion(nil)
-            }
+            completion(combined)
         }
     }
 

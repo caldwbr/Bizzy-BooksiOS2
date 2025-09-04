@@ -20,6 +20,7 @@
 #import "FUIAuthProvider.h"
 
 @class FIRAuth;
+@class FIRAuthDataResult;
 @class FUIAuthPickerViewController;
 @class FUIAuth;
 @class FIRUser;
@@ -47,7 +48,8 @@ typedef void (^FUIAuthResultCallback)(FIRUser *_Nullable user, NSError *_Nullabl
 
 /** @fn authUI:didSignInWithAuthDataResult:error:
     @brief Message sent after the sign in process has completed to report the signed in user or
-        error encountered.
+        error encountered. Use this variation with Firebase 11 and later. Swift implementations
+        should be marked with `@objc`.
     @param authUI The @c FUIAuth instance sending the message.
     @param authDataResult The data result if the sign in attempt was successful.
     @param url pass the deep link associated with an email link sign-in completion. It is useful
@@ -55,20 +57,21 @@ typedef void (^FUIAuthResultCallback)(FIRUser *_Nullable user, NSError *_Nullabl
     @param error The error that occurred during sign in, if any.
  */
 - (void)authUI:(FUIAuth *)authUI
-    didSignInWithAuthDataResult:(nullable FIRAuthDataResult *)authDataResult
-                            URL:(nullable NSURL *)url
-                          error:(nullable NSError *)error;
+    didSignInWith:(nullable FIRAuthDataResult *)authDataResult
+              URL:(nullable NSURL *)url
+            error:(nullable NSError *)error;
 
 /** @fn authUI:didSignInWithAuthDataResult:error:
     @brief Message sent after the sign in process has completed to report the signed in user or
-        error encountered.
+        error encountered. Use this variation with Firebase 11 and later. Swift implementations
+        should be marked with `@objc`.
     @param authUI The @c FUIAuth instance sending the message.
     @param authDataResult The data result if the sign in attempt was successful.
     @param error The error that occurred during sign in, if any.
  */
 - (void)authUI:(FUIAuth *)authUI
-    didSignInWithAuthDataResult:(nullable FIRAuthDataResult *)authDataResult
-                          error:(nullable NSError *)error;
+    didSignInWith:(nullable FIRAuthDataResult *)authDataResult
+            error:(nullable NSError *)error;
 
 /** @fn authUI:didSignInWithUser:error:
     @brief This is deprecated API and will be removed in a future release.

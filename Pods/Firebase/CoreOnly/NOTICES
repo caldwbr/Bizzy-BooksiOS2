@@ -1,6 +1,7 @@
 AppCheckCore
 Firebase
 FirebaseABTesting
+FirebaseAI
 FirebaseAppCheck
 FirebaseAppCheckInterop
 FirebaseAppDistribution
@@ -9,7 +10,6 @@ FirebaseAuthInterop
 FirebaseCore
 FirebaseCoreExtension
 FirebaseCoreInternal
-FirebaseDynamicLinks
 FirebaseFunctions
 FirebaseInAppMessaging
 FirebaseInstallations
@@ -18,6 +18,7 @@ FirebaseMessaging
 FirebaseMessagingInterop
 FirebasePerformance
 FirebaseRemoteConfig
+FirebaseRemoteConfigInterop
 FirebaseSessions
 FirebaseStorage
 GTMSessionFetcher
@@ -253,6 +254,7 @@ record keeping.)
   27287199
   27287880
   27287883
+  263291445
 
   OpenSSL License
   ---------------
@@ -484,9 +486,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 FirebaseAnalytics
-FirebaseAnalyticsOnDeviceConversion
 GoogleAppMeasurement
-GoogleAppMeasurementOnDeviceConversion
 Copyright 2022 Google
 
 FirebaseCrashlytics
@@ -1925,6 +1925,9 @@ FirebaseSharedSwift
    See the License for the specific language governing permissions and
    limitations under the License.
 
+
+GoogleAdsOnDeviceConversion
+Copyright 2024 Google
 
 GoogleUtilities
 
