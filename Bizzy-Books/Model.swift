@@ -646,7 +646,200 @@ import Contacts
     //Formerly WhomViewModel
     var filteredWhomEntities: [Entity] = []
     var filteredCustomerEntities: [Entity] = []
+    var searchCardsText = ""
+
+    // Advanced Search / "What do you mean?" system
+    struct SearchSuggestion: Identifiable, Hashable {
+        let id = UUID()
+        let type: SuggestionType
+        let name: String
+        let subtitle: String
+        let icon: String
+        
+        enum SuggestionType: String {
+            case entity, project, vehicle, taxCategory, personalCategory, itemType, notes
+        }
+    }
     
+    var searchSuggestions: [SearchSuggestion] = []
+    var showSuggestions = false
+    
+    func updateSearchSuggestions(for query: String) {
+        searchSuggestions.removeAll()
+        guard !query.isEmpty else {
+            showSuggestions = false
+            return
+        }
+        
+        let lowerQuery = query.lowercased()
+        
+        // Search entities (people, stores, companies)
+        for entity in entities {
+            if entity.name.lowercased().contains(lowerQuery) {
+                searchSuggestions.append(SearchSuggestion(
+                    type: .entity,
+                    name: entity.name,
+                    subtitle: entity.businessName.isEmpty ? "Person/Entity" : "Business: \(entity.businessName)",
+                    icon: "person.circle"
+                ))
+            }
+        }
+        
+        // Search projects
+        for project in projects {
+            if project.name.lowercased().contains(lowerQuery) {
+                searchSuggestions.append(SearchSuggestion(
+                    type: .project,
+                    name: project.name,
+                    subtitle: project.customerName.isEmpty ? "Project" : "Project • \(project.customerName)",
+                    icon: "hammer.circle"
+                ))
+            }
+        }
+        
+        // Search vehicles
+        for vehicle in vehicles {
+            let vehName = "\(vehicle.year) \(vehicle.make) \(vehicle.model)".trimmingCharacters(in: .whitespaces)
+            if vehName.lowercased().contains(lowerQuery) || vehicle.licPlateNo.lowercased().contains(lowerQuery) {
+                searchSuggestions.append(SearchSuggestion(
+                    type: .vehicle,
+                    name: vehName.isEmpty ? vehicle.name : vehName,
+                    subtitle: "Vehicle",
+                    icon: "car.circle"
+                ))
+            }
+        }
+        
+        // Search tax categories
+        for (index, reason) in taxReasonArray.enumerated() {
+            if index > 0 && reason.lowercased().contains(lowerQuery) {
+                searchSuggestions.append(SearchSuggestion(
+                    type: .taxCategory,
+                    name: reason,
+                    subtitle: "Business Category",
+                    icon: "chart.bar"
+                ))
+            }
+        }
+        
+        // Search personal categories
+        for (index, reason) in personalReasonArray.enumerated() {
+            if index > 0 && reason.lowercased().contains(lowerQuery) {
+                searchSuggestions.append(SearchSuggestion(
+                    type: .personalCategory,
+                    name: reason,
+                    subtitle: "Personal Category",
+                    icon: "house.circle"
+                ))
+            }
+        }
+        
+        // Add "Notes containing" option
+        searchSuggestions.append(SearchSuggestion(
+            type: .notes,
+            name: "Notes containing \"\(query)\"",
+            subtitle: "Search in transaction notes",
+            icon: "note.text"
+        ))
+        
+        showSuggestions = !searchSuggestions.isEmpty
+    }
+    
+    func applySearchSuggestion(_ suggestion: SearchSuggestion, query: String) {
+        searchCardsText = suggestion.name
+        filteredUniversals.removeAll()
+        showSuggestions = false
+        
+        switch suggestion.type {
+        case .entity:
+            // Find the entity by name, then filter all transactions involving it
+            if let entity = entities.first(where: { $0.name == suggestion.name }) {
+                // Add the entity itself
+                for universal in universals {
+                    if case .entity(let e) = universal.type, e.id == entity.id {
+                        filteredUniversals.append(universal)
+                    }
+                    // Add all projects with this entity as customer
+                    if case .project(let p) = universal.type, p.customerUID == entity.id {
+                        filteredUniversals.append(universal)
+                    }
+                    // Add all transactions where this entity is who or whom
+                    if case .item(let item) = universal.type,
+                       item.whomID == entity.id || (item as? Item)?.whomID == entity.id {
+                        filteredUniversals.append(universal)
+                    }
+                }
+            }
+            
+        case .project:
+            if let project = projects.first(where: { $0.name == suggestion.name }) {
+                for universal in universals {
+                    if case .project(let p) = universal.type, p.id == project.id {
+                        filteredUniversals.append(universal)
+                    }
+                    if case .item(let item) = universal.type, item.projectID == project.id {
+                        filteredUniversals.append(universal)
+                    }
+                }
+            }
+            
+        case .vehicle:
+            if let vehicle = vehicles.first(where: {
+                let vehName = "\($0.year) \($0.make) \($0.model)".trimmingCharacters(in: .whitespaces)
+                return vehName == suggestion.name || $0.name == suggestion.name
+            }) {
+                for universal in universals {
+                    if case .vehicle(let v) = universal.type, v.id == vehicle.id {
+                        filteredUniversals.append(universal)
+                    }
+                    if case .item(let item) = universal.type, item.vehicleID == vehicle.id {
+                        filteredUniversals.append(universal)
+                    }
+                }
+            }
+            
+        case .taxCategory:
+            if let index = taxReasonArray.firstIndex(of: suggestion.name) {
+                for universal in universals {
+                    if case .item(let item) = universal.type, item.taxReasonInt == index {
+                        filteredUniversals.append(universal)
+                    }
+                }
+            }
+            
+        case .personalCategory:
+            if let index = personalReasonArray.firstIndex(of: suggestion.name) {
+                for universal in universals {
+                    if case .item(let item) = universal.type, item.personalReasonInt == index {
+                        filteredUniversals.append(universal)
+                    }
+                }
+            }
+            
+        case .itemType:
+            let itemTypeRaw = suggestion.name
+            for universal in universals {
+                if case .item(let item) = universal.type, item.itemType.rawValue == itemTypeRaw {
+                    filteredUniversals.append(universal)
+                }
+            }
+            
+        case .notes:
+            let lowerQuery = query.lowercased()
+            for universal in universals {
+                if case .item(let item) = universal.type, item.notes.lowercased().contains(lowerQuery) {
+                    filteredUniversals.append(universal)
+                }
+                if case .project(let p) = universal.type, p.notes.lowercased().contains(lowerQuery) {
+                    filteredUniversals.append(universal)
+                }
+            }
+        }
+        
+        displayedUniversals.removeAll()
+        displayedUniversals = filteredUniversals
+    }
+
     func whomSearchEntities(query: String) {
         if query.isEmpty {
             filteredWhomEntities = entities
@@ -1034,6 +1227,7 @@ import Contacts
                           tdDepletion + tdUtilitiesBusiness + tdCommissions + tdWages +
                           tdMortgageInt + tdOtherInt + tdRepairs + tdPension
         tdTotalExpenses = tdNonLaborExpenses + tdLabor
+        tdNetIncome = tdGrossIncome - tdTotalExpenses
         //print("Vehicle Fuel Stops: \(vehicleFuelStops)")
     }
     

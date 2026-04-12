@@ -11,7 +11,6 @@ struct MainScreenView: View {
     @State private var isEditingSheetPresented = false
     @State private var showingAddItemView = false
     @State private var isReportsViewPresented = false
-    @State var searchCardsText = ""
     
     // Advanced filter state
     @State private var filterByProject = ""
@@ -19,6 +18,7 @@ struct MainScreenView: View {
     @State private var filterByTaxCategory = ""
     @State private var filterByVehicle = ""
     @State private var showAdvancedFilters = false
+    @FocusState private var searchFieldFocused: Bool
     
     var body: some View {
         Self._printChanges()
@@ -28,7 +28,6 @@ struct MainScreenView: View {
             HeaderHStack(isFilterActive: $isFilterActive, showAdvancedFilters: $showAdvancedFilters)
             FilterByHStack(
                 model: model,
-                searchCardsText: $searchCardsText,
                 isFilterActive: $isFilterActive,
                 filterByProject: $filterByProject,
                 filterByEntity: $filterByEntity,
@@ -38,7 +37,6 @@ struct MainScreenView: View {
             )
             BodyScrollView(
                 model: model,
-                searchCardsText: $searchCardsText,
                 isFilterActive: $isFilterActive
             )
             FooterHStack(
@@ -92,7 +90,6 @@ struct HeaderHStack: View {
 
 struct FilterByHStack: View {
     @Bindable var model: Model
-    @Binding var searchCardsText: String
     @Binding var isFilterActive: Bool
     @Binding var filterByProject: String
     @Binding var filterByEntity: String
@@ -102,29 +99,90 @@ struct FilterByHStack: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            // Basic text search
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                TextField("Search transactions, projects, entities, vehicles...", text: $searchCardsText)
-                    .onChange(of: searchCardsText) { _, _ in
-                        applyFilters()
+            // Search bar with "what do you mean?" suggestions
+            VStack(spacing: 0) {
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+                    TextField("Search people, stores, projects, vehicles...", text: Binding(
+                        get: { model.searchCardsText },
+                        set: { newValue in
+                            model.searchCardsText = newValue
+                            model.updateSearchSuggestions(for: newValue)
+                        }
+                    ))
+                    .onSubmit {
+                        // If only one suggestion, auto-select it
+                        if model.searchSuggestions.count == 1 {
+                            model.applySearchSuggestion(model.searchSuggestions[0], query: model.searchCardsText)
+                        }
                     }
-                if !searchCardsText.isEmpty {
-                    Button(action: {
-                        searchCardsText = ""
-                        applyFilters()
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
+                    if !model.searchCardsText.isEmpty {
+                        Button(action: {
+                            model.searchCardsText = ""
+                            model.showSuggestions = false
+                            // Reset to show all
+                            model.displayedUniversals = model.universals
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.gray)
+                        }
                     }
                 }
+                .padding(10)
+                
+                // "What do you mean?" suggestion list
+                if model.showSuggestions && !model.searchSuggestions.isEmpty {
+                    Divider()
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("What do you mean?")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal)
+                                .padding(.top, 4)
+                            
+                            ForEach(model.searchSuggestions, id: \.id) { suggestion in
+                                Button(action: {
+                                    model.applySearchSuggestion(suggestion, query: model.searchCardsText)
+                                }) {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: suggestion.icon)
+                                            .font(.system(size: 20))
+                                            .foregroundColor(.blue)
+                                            .frame(width: 30)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(suggestion.name)
+                                                .font(.system(size: 15))
+                                                .foregroundColor(.primary)
+                                                .lineLimit(1)
+                                            Text(suggestion.subtitle)
+                                                .font(.system(size: 12))
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(1)
+                                        }
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                if suggestion.id != model.searchSuggestions.last?.id {
+                                    Divider()
+                                        .padding(.leading, 54)
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxHeight: 300)
+                }
             }
-            .padding(8)
             .background(Color.white)
             .cornerRadius(8)
+            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
             
-            // Advanced filters
+            // Advanced filters (pickers)
             if showAdvancedFilters {
                 VStack(spacing: 8) {
                     // Project filter
@@ -138,7 +196,7 @@ struct FilterByHStack: View {
                             }
                         }
                         .onChange(of: filterByProject) { _, _ in
-                            applyFilters()
+                            applyAdvancedFilters()
                         }
                     }
                     .padding(6)
@@ -156,7 +214,7 @@ struct FilterByHStack: View {
                             }
                         }
                         .onChange(of: filterByEntity) { _, _ in
-                            applyFilters()
+                            applyAdvancedFilters()
                         }
                     }
                     .padding(6)
@@ -176,7 +234,7 @@ struct FilterByHStack: View {
                             }
                         }
                         .onChange(of: filterByTaxCategory) { _, _ in
-                            applyFilters()
+                            applyAdvancedFilters()
                         }
                     }
                     .padding(6)
@@ -194,7 +252,7 @@ struct FilterByHStack: View {
                             }
                         }
                         .onChange(of: filterByVehicle) { _, _ in
-                            applyFilters()
+                            applyAdvancedFilters()
                         }
                     }
                     .padding(6)
@@ -208,33 +266,20 @@ struct FilterByHStack: View {
         .opacity(isFilterActive ? 1.0 : 0.0)
     }
     
-    private func applyFilters() {
+    private func applyAdvancedFilters() {
         model.filteredUniversals.removeAll()
         
-        for universal in model.universals {
+        // Start with either suggestion-filtered results or all universals
+        var baseUniversals = model.universals
+        if !model.searchCardsText.isEmpty && model.displayedUniversals.count < model.universals.count {
+            baseUniversals = model.displayedUniversals
+        }
+        
+        for universal in baseUniversals {
             var matches = true
             
-            // Text search filter
-            if !searchCardsText.isEmpty {
-                let searchText = searchCardsText.lowercased()
-                let titleMatch = universal.title.lowercased().contains(searchText)
-                let notesMatch = universal.notes.lowercased().contains(searchText)
-                
-                // For items, also search in sentence components
-                var sentenceMatch = false
-                if case .item(let item) = universal.type {
-                    sentenceMatch = item.whom.lowercased().contains(searchText) ||
-                                   item.projectName.lowercased().contains(searchText) ||
-                                   item.vehicleName.lowercased().contains(searchText) ||
-                                   model.taxReasonArray[item.taxReasonInt].lowercased().contains(searchText) ||
-                                   model.personalReasonArray[item.personalReasonInt].lowercased().contains(searchText)
-                }
-                
-                matches = titleMatch || notesMatch || sentenceMatch
-            }
-            
             // Project filter
-            if matches && !filterByProject.isEmpty {
+            if !filterByProject.isEmpty {
                 if case .item(let item) = universal.type {
                     matches = item.projectID == filterByProject
                 } else if case .project(let project) = universal.type {
@@ -288,7 +333,6 @@ struct FilterByHStack: View {
 
 struct BodyScrollView: View {
     @Bindable var model: Model
-    @Binding var searchCardsText: String
     @Binding var isFilterActive: Bool
     var body: some View {
         return ScrollView {
@@ -300,7 +344,7 @@ struct BodyScrollView: View {
                         CardView(model: model, displayedUniversal: displayedUniversal)
                             .frame(maxWidth: UIScreen.main.bounds.width * 0.9)
                     }
-                }//.searchable(text: $searchCardsText)
+                }
             }
         }
     }
