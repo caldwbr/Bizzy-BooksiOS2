@@ -96,11 +96,12 @@ struct FilterByHStack: View {
     @Binding var filterByTaxCategory: String
     @Binding var filterByVehicle: String
     var showAdvancedFilters: Bool
-    
+
     var body: some View {
         VStack(spacing: 8) {
             // Search bar with "what do you mean?" suggestions
-            VStack(spacing: 0) {
+            ZStack(alignment: .top) {
+                // Search field (always visible)
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
@@ -112,7 +113,6 @@ struct FilterByHStack: View {
                         }
                     ))
                     .onSubmit {
-                        // If only one suggestion, auto-select it
                         if model.searchSuggestions.count == 1 {
                             model.applySearchSuggestion(model.searchSuggestions[0], query: model.searchCardsText)
                         }
@@ -121,7 +121,6 @@ struct FilterByHStack: View {
                         Button(action: {
                             model.searchCardsText = ""
                             model.showSuggestions = false
-                            // Reset to show all
                             model.displayedUniversals = model.universals
                         }) {
                             Image(systemName: "xmark.circle.fill")
@@ -130,58 +129,71 @@ struct FilterByHStack: View {
                     }
                 }
                 .padding(10)
-                
-                // "What do you mean?" suggestion list
+                .background(Color.white)
+                .cornerRadius(8)
+                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                .zIndex(2)
+
+                // Dropdown suggestions (floats below search field)
                 if model.showSuggestions && !model.searchSuggestions.isEmpty {
-                    Divider()
-                    ScrollView {
+                    let suggestionCount = model.searchSuggestions.count
+                    let headerHeight: CGFloat = 36
+                    let rowHeight: CGFloat = 50
+                    let maxHeight: CGFloat = 450
+                    let dynamicHeight = min(headerHeight + CGFloat(suggestionCount) * rowHeight, maxHeight)
+
+                    VStack(spacing: 0) {
+                        // Spacer to push suggestions below the search bar
+                        Color.clear.frame(height: 56)
+
                         VStack(alignment: .leading, spacing: 0) {
                             Text("What do you mean?")
                                 .font(.caption)
+                                .fontWeight(.semibold)
                                 .foregroundColor(.secondary)
                                 .padding(.horizontal)
-                                .padding(.top, 4)
-                            
-                            ForEach(model.searchSuggestions, id: \.id) { suggestion in
-                                Button(action: {
-                                    model.applySearchSuggestion(suggestion, query: model.searchCardsText)
-                                }) {
-                                    HStack(spacing: 12) {
-                                        Image(systemName: suggestion.icon)
-                                            .font(.system(size: 20))
-                                            .foregroundColor(.blue)
-                                            .frame(width: 30)
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(suggestion.name)
-                                                .font(.system(size: 15))
-                                                .foregroundColor(.primary)
-                                                .lineLimit(1)
-                                            Text(suggestion.subtitle)
-                                                .font(.system(size: 12))
-                                                .foregroundColor(.secondary)
-                                                .lineLimit(1)
+                                .padding(.top, 8)
+                                .padding(.bottom, 4)
+
+                            List {
+                                ForEach(model.searchSuggestions, id: \.id) { suggestion in
+                                    Button(action: {
+                                        model.applySearchSuggestion(suggestion, query: model.searchCardsText)
+                                    }) {
+                                        HStack(spacing: 12) {
+                                            Image(systemName: suggestion.icon)
+                                                .font(.system(size: 22))
+                                                .foregroundColor(.blue)
+                                                .frame(width: 30)
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                Text(suggestion.name)
+                                                    .font(.system(size: 16, weight: .medium))
+                                                    .foregroundColor(.primary)
+                                                Text(suggestion.subtitle)
+                                                    .font(.system(size: 13))
+                                                    .foregroundColor(.secondary)
+                                            }
+                                            Spacer()
                                         }
-                                        Spacer()
+                                        .padding(.vertical, 4)
                                     }
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 8)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                
-                                if suggestion.id != model.searchSuggestions.last?.id {
-                                    Divider()
-                                        .padding(.leading, 54)
+                                    .listRowInsets(EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12))
+                                    .listRowBackground(Color.white)
                                 }
                             }
+                            .listStyle(.plain)
+                            .scrollContentBackground(.hidden)
+                            .background(Color.white)
+                            .frame(height: dynamicHeight - headerHeight)
                         }
+                        .background(Color.white)
+                        .cornerRadius(8)
+                        .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
                     }
-                    .frame(maxHeight: 300)
+                    .zIndex(1)
                 }
             }
-            .background(Color.white)
-            .cornerRadius(8)
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-            
+
             // Advanced filters (pickers)
             if showAdvancedFilters {
                 VStack(spacing: 8) {
