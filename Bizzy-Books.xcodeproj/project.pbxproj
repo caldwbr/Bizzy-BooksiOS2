@@ -342,10 +342,6 @@
 				Base,
 			);
 			mainGroup = 67E103C32B0E6DB10092082B;
-			packageReferences = (
-				67E103FE2B0E735A0092082B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				67D58C4B2B0ED54A00740E70 /* XCRemoteSwiftPackageReference "FirebaseUI-iOS" */,
-			);
 			productRefGroup = 67E103CD2B0E6DB10092082B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -725,7 +721,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-ObjC",
-					"-ld_classic",
 					"$(inherited)",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-Books";
@@ -779,7 +774,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-ObjC",
-					"-ld_classic",
 					"$(inherited)",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-Books";
@@ -923,25 +917,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		67D58C4B2B0ED54A00740E70 /* XCRemoteSwiftPackageReference "FirebaseUI-iOS" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/FirebaseUI-iOS.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.6.1;
-			};
-		};
-		67E103FE2B0E735A0092082B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 10.18.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = 67E103C42B0E6DB10092082B /* Project object */;
 }

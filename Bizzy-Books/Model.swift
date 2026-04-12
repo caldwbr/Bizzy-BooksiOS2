@@ -373,8 +373,14 @@ import Contacts
         items.removeAll()
         dataLoadGroup.enter()
         itemsRef?.observeSingleEvent(of: .value, with: { snapshot in
+            // Use a Set to prevent duplicates
+            var seenIDs = Set<String>()
             for item in snapshot.children {
-                self.items.append(Item(snapshot: item as! DataSnapshot))
+                let newItem = Item(snapshot: item as! DataSnapshot)
+                if !seenIDs.contains(newItem.id) {
+                    seenIDs.insert(newItem.id)
+                    self.items.append(newItem)
+                }
             }
             self.dataLoadGroup.leave()
         })
@@ -853,13 +859,31 @@ import Contacts
         workersCompRecords.removeAll()
         vehicleFuelStops.removeAll()
         projectRecords.removeAll()
+        
+        // Filter items for the selected year
         itemsByYear = items.filter { $0.year == year }
+        
+        // Guard against empty data
+        guard !itemsByYear.isEmpty else {
+            resetTDValues()
+            return
+        }
+        
         resetTDValues()
         // Temporary storage for aggregating data
         var tempWorkersCompData: [String: (name: String, incurredWC: Int, noWC: Int)] = [:]
         var projectData: [String: (name: String, grossIncome: Int, materialsCost: Int, laborAndProHelpCost: Int)] = [:]
         
+        // Use a set to track processed items and prevent double-counting
+        var processedItemIDs = Set<String>()
+
         for item in itemsByYear {
+            // Skip if already processed (prevents duplication)
+            if processedItemIDs.contains(item.id) {
+                continue
+            }
+            processedItemIDs.insert(item.id)
+            
             if item.itemType == .business {
                 if !item.projectID.isEmpty {
                     let projectID = item.projectID
@@ -1042,38 +1066,426 @@ import Contacts
         isGeneratingPDF = true
         calculateTaxData(forYear: year)
         let pdfMetaData = [
-            kCGPDFContextCreator: "MyApp",
+            kCGPDFContextCreator: "BizzyBooks",
             kCGPDFContextAuthor: "app user",
             kCGPDFContextTitle: "Financial Report for Fiscal Year \(year)"
         ]
         let format = UIGraphicsPDFRendererFormat()
         format.documentInfo = pdfMetaData as [String: Any]
-        
+
         let pageWidth = 8.5 * 72.0
         let pageHeight = 11 * 72.0
         let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
         let renderer = UIGraphicsPDFRenderer(bounds: pageRect, format: format)
-        
-        let data = renderer.pdfData { context in
-            context.beginPage()
-            // Define your text attributes
-            let attributes = [
-                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12),
-                NSAttributedString.Key.foregroundColor: UIColor.black
-            ]
-            // Customize the header of your PDF with the fiscal year
-            let header = "Financial Report for Fiscal Year \(year)"
-            header.draw(at: CGPoint(x: 20, y: 20), withAttributes: attributes)
-            
-            // Example drawing code, replace or expand with your content
-            let text = "User Report for \(self.trialName)"
-            text.draw(at: CGPoint(x: 20, y: 50), withAttributes: attributes)
-            
-            // Add more content as needed, such as financial data for the year
-            // You might loop through your data here, drawing each item
+
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencySymbol = "$"
+        formatter.maximumFractionDigits = 2
+        formatter.minimumFractionDigits = 2
+
+        let gallonsFormatter = NumberFormatter()
+        gallonsFormatter.numberStyle = .decimal
+        gallonsFormatter.maximumFractionDigits = 2
+        gallonsFormatter.minimumFractionDigits = 2
+
+        let titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 18, weight: .bold),
+            .foregroundColor: UIColor.black
+        ]
+        let headerAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 14, weight: .bold),
+            .foregroundColor: UIColor.black
+        ]
+        let bodyAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 11),
+            .foregroundColor: UIColor.black
+        ]
+        let boldBodyAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 11, weight: .bold),
+            .foregroundColor: UIColor.black
+        ]
+        let smallAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 9),
+            .foregroundColor: UIColor.darkGray
+        ]
+
+        let leftMargin: CGFloat = 50.0
+        let rightMargin: CGFloat = 50.0
+        let maxWidth = pageWidth - leftMargin - rightMargin
+        let topMargin: CGFloat = 70.0
+        let lineSpacing: CGFloat = 4.0
+        let sectionSpacing: CGFloat = 12.0
+
+        func drawText(_ text: String, at point: CGPoint, attributes: [NSAttributedString.Key: Any]) -> CGSize {
+            let attributedString = NSAttributedString(string: text, attributes: attributes)
+            let size = attributedString.size()
+            attributedString.draw(at: point)
+            return size
         }
+
+        func drawWrappedText(_ text: String, at point: CGPoint, maxWidth: CGFloat, attributes: [NSAttributedString.Key: Any]) -> CGSize {
+            let attributedString = NSAttributedString(string: text, attributes: attributes)
+            let boundingRect = attributedString.boundingRect(
+                with: CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                context: nil
+            )
+            attributedString.draw(with: CGRect(origin: point, size: CGSize(width: maxWidth, height: boundingRect.height)),
+                                  options: [.usesLineFragmentOrigin, .usesFontLeading],
+                                  context: nil)
+            return boundingRect.size
+        }
+
+        func drawSeparatorLine(at y: CGFloat, context: UIGraphicsPDFRendererContext) {
+            context.cgContext.setStrokeColor(UIColor.lightGray.cgColor)
+            context.cgContext.setLineWidth(0.5)
+            context.cgContext.move(to: CGPoint(x: leftMargin, y: y))
+            context.cgContext.addLine(to: CGPoint(x: pageWidth - rightMargin, y: y))
+            context.cgContext.strokePath()
+        }
+
+        let data = renderer.pdfData { context in
+            // ==================== PAGE 1: INCOME STATEMENT ====================
+            context.beginPage()
+            var currentY: CGFloat = topMargin
+
+            // Title
+            let titleSize = drawText("Financial Report - Fiscal Year \(year)", at: CGPoint(x: leftMargin, y: currentY), attributes: titleAttributes)
+            currentY += titleSize.height + sectionSpacing
+
+            drawSeparatorLine(at: currentY, context: context)
+            currentY += sectionSpacing
+
+            // ==================== INCOME SECTION ====================
+            let incomeSize = drawText("INCOME STATEMENT", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
+            currentY += incomeSize.height + sectionSpacing
+
+            // Gross Income
+            let grossIncomeFormatted = formatter.string(from: NSNumber(value: Double(self.tdGrossIncome) / 100.0)) ?? "$0.00"
+            let grossIncomeSize = drawText("Gross Income: \(grossIncomeFormatted)", at: CGPoint(x: leftMargin, y: currentY), attributes: boldBodyAttributes)
+            currentY += grossIncomeSize.height + sectionSpacing
+
+            drawSeparatorLine(at: currentY, context: context)
+            currentY += sectionSpacing
+
+            // ==================== BUSINESS EXPENSES ====================
+            let expensesSize = drawText("BUSINESS EXPENSES", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
+            currentY += expensesSize.height + lineSpacing
+
+            struct ExpenseLine {
+                let name: String
+                let amount: Int
+            }
+
+            let expenseLines: [ExpenseLine] = [
+                ExpenseLine(name: "Supplies", amount: self.tdSupplies),
+                ExpenseLine(name: "Labor (1099 Subcontractors)", amount: self.tdLabor),
+                ExpenseLine(name: "Vehicle/Fuel", amount: self.tdVehicle),
+                ExpenseLine(name: "Professional Help", amount: self.tdProHelp),
+                ExpenseLine(name: "Insurance (WC+GL)", amount: self.tdInsurance),
+                ExpenseLine(name: "Tax & License", amount: self.tdTaxLicense),
+                ExpenseLine(name: "Travel", amount: self.tdTravel),
+                ExpenseLine(name: "Meals", amount: self.tdMeals),
+                ExpenseLine(name: "Office", amount: self.tdOffice),
+                ExpenseLine(name: "Advertising", amount: self.tdAdvertising),
+                ExpenseLine(name: "Machine Rent", amount: self.tdMachineRent),
+                ExpenseLine(name: "Property Rent", amount: self.tdPropertyRent),
+                ExpenseLine(name: "Employee Benefits", amount: self.tdEmpBenefit),
+                ExpenseLine(name: "Depreciation", amount: self.tdDepreciation),
+                ExpenseLine(name: "Depletion", amount: self.tdDepletion),
+                ExpenseLine(name: "Utilities (Business)", amount: self.tdUtilitiesBusiness),
+                ExpenseLine(name: "Commissions", amount: self.tdCommissions),
+                ExpenseLine(name: "Wages", amount: self.tdWages),
+                ExpenseLine(name: "Mortgage Interest", amount: self.tdMortgageInt),
+                ExpenseLine(name: "Other Interest", amount: self.tdOtherInt),
+                ExpenseLine(name: "Repairs", amount: self.tdRepairs),
+                ExpenseLine(name: "Pension", amount: self.tdPension)
+            ]
+
+            // Column headers
+            let expenseCol1Width: CGFloat = maxWidth * 0.65
+            let catHeaderSize = drawText("Category", at: CGPoint(x: leftMargin, y: currentY), attributes: boldBodyAttributes)
+            let amtHeaderSize = drawText("Amount", at: CGPoint(x: leftMargin + expenseCol1Width, y: currentY), attributes: boldBodyAttributes)
+            currentY += max(catHeaderSize.height, amtHeaderSize.height) + lineSpacing
+
+            for expense in expenseLines {
+                if currentY > pageHeight - 80 {
+                    context.beginPage()
+                    currentY = topMargin
+                }
+                let amountFormatted = formatter.string(from: NSNumber(value: Double(expense.amount) / 100.0)) ?? "$0.00"
+                let nameSize = drawText(expense.name, at: CGPoint(x: leftMargin, y: currentY), attributes: bodyAttributes)
+                _ = drawText(amountFormatted, at: CGPoint(x: leftMargin + expenseCol1Width, y: currentY), attributes: bodyAttributes)
+                currentY += nameSize.height + lineSpacing
+            }
+
+            // Non-Labor Expenses Total
+            currentY += lineSpacing
+            drawSeparatorLine(at: currentY, context: context)
+            currentY += lineSpacing
+            let nonLaborFormatted = formatter.string(from: NSNumber(value: Double(self.tdNonLaborExpenses) / 100.0)) ?? "$0.00"
+            let nonLaborSize = drawText("Total Non-Labor Expenses: \(nonLaborFormatted)", at: CGPoint(x: leftMargin, y: currentY), attributes: boldBodyAttributes)
+            currentY += nonLaborSize.height + lineSpacing
+
+            // Labor Total
+            let laborFormatted = formatter.string(from: NSNumber(value: Double(self.tdLabor) / 100.0)) ?? "$0.00"
+            let laborSize = drawText("Total Labor Expenses: \(laborFormatted)", at: CGPoint(x: leftMargin, y: currentY), attributes: boldBodyAttributes)
+            currentY += laborSize.height + lineSpacing
+
+            // Total Expenses
+            drawSeparatorLine(at: currentY, context: context)
+            currentY += lineSpacing
+            let totalExpFormatted = formatter.string(from: NSNumber(value: Double(self.tdTotalExpenses) / 100.0)) ?? "$0.00"
+            let totalExpSize = drawText("TOTAL EXPENSES: \(totalExpFormatted)", at: CGPoint(x: leftMargin, y: currentY), attributes: boldBodyAttributes)
+            currentY += totalExpSize.height + sectionSpacing
+
+            // Net Income
+            let netIncomeFormatted = formatter.string(from: NSNumber(value: Double(self.tdNetIncome) / 100.0)) ?? "$0.00"
+            let netIncomeSize = drawText("NET INCOME: \(netIncomeFormatted)", at: CGPoint(x: leftMargin, y: currentY), attributes: titleAttributes)
+            currentY += netIncomeSize.height + sectionSpacing * 2
+
+            // ==================== EXPENSE PERCENTAGES ====================
+            if currentY > pageHeight - 200 {
+                context.beginPage()
+                currentY = topMargin
+            }
+            let pctSize = drawText("EXPENSE BREAKDOWN BY PERCENTAGE", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
+            currentY += pctSize.height + lineSpacing
+
+            let totalForPct = self.tdTotalExpenses > 0 ? self.tdTotalExpenses : 1
+            for expense in expenseLines {
+                if currentY > pageHeight - 80 {
+                    context.beginPage()
+                    currentY = topMargin
+                }
+                let pct = Double(expense.amount) / Double(totalForPct) * 100.0
+                let amountFormatted = formatter.string(from: NSNumber(value: Double(expense.amount) / 100.0)) ?? "$0.00"
+                let pctStr = String(format: "%.1f%%", pct)
+                let lineText = "\(expense.name): \(amountFormatted) (\(pctStr))"
+                let lineSize = drawText(lineText, at: CGPoint(x: leftMargin, y: currentY), attributes: bodyAttributes)
+                currentY += lineSize.height + lineSpacing
+            }
+
+            // ==================== VEHICLE FUEL TABLES ====================
+            if !self.vehicleFuelStops.isEmpty {
+                context.beginPage()
+                currentY = topMargin
+                let vehicleSize = drawText("VEHICLE FUEL RECORDS", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
+                currentY += vehicleSize.height + sectionSpacing
+
+                for (vehicleID, fuelStops) in self.vehicleFuelStops {
+                    if currentY > pageHeight - 150 {
+                        context.beginPage()
+                        currentY = topMargin
+                    }
+
+                    // Vehicle name
+                    let vehicleName = self.getVehicleName(by: vehicleID)
+                    let vNameSize = drawText("Vehicle: \(vehicleName)", at: CGPoint(x: leftMargin, y: currentY), attributes: boldBodyAttributes)
+                    currentY += vNameSize.height + lineSpacing
+
+                    // Sort fuel stops by date
+                    let sortedStops = fuelStops.sorted { $0.date < $1.date }
+
+                    // Find first and last odometer for total miles
+                    if let firstStop = sortedStops.first, let lastStop = sortedStops.last {
+                        let totalMiles = lastStop.odometer - firstStop.odometer
+                        let totalGallons = sortedStops.reduce(0) { $0 + $1.gallonsFilled }
+                        let totalSpent = sortedStops.reduce(0) { $0 + $1.amountSpent }
+                        let gallonsDouble = Double(totalGallons) / 1000.0
+                        let mpg = gallonsDouble > 0 ? Double(totalMiles) / gallonsDouble : 0.0
+                        let costPerMile = Double(totalMiles) > 0 ? Double(totalSpent) / 100.0 / Double(totalMiles) : 0.0
+
+                        let summaryText = "Total Miles: \(totalMiles) | Total Gallons: \(gallonsFormatter.string(from: NSNumber(value: gallonsDouble)) ?? "0") | Total Spent: \(formatter.string(from: NSNumber(value: Double(totalSpent) / 100.0)) ?? "$0.00") | MPG: \(String(format: "%.1f", mpg)) | Cost/Mile: \(formatter.string(from: NSNumber(value: costPerMile)) ?? "$0.00")"
+                        let summarySize = drawWrappedText(summaryText, at: CGPoint(x: leftMargin, y: currentY), maxWidth: maxWidth, attributes: bodyAttributes)
+                        currentY += summarySize.height + sectionSpacing
+                    }
+
+                    // Table headers
+                    let colWidths: [CGFloat] = [maxWidth * 0.2, maxWidth * 0.25, maxWidth * 0.15, maxWidth * 0.15, maxWidth * 0.12, maxWidth * 0.13]
+                    let headers = ["Date", "Station", "Odometer", "Gallons", "Cost", "Cost/Gal"]
+                    var xOffsets: [CGFloat] = [leftMargin]
+                    for i in 0..<colWidths.count - 1 {
+                        xOffsets.append(xOffsets.last! + colWidths[i])
+                    }
+
+                    for (i, header) in headers.enumerated() {
+                        _ = drawText(header, at: CGPoint(x: xOffsets[i], y: currentY), attributes: boldBodyAttributes)
+                    }
+                    currentY += 14 + lineSpacing
+                    drawSeparatorLine(at: currentY, context: context)
+                    currentY += lineSpacing
+
+                    for stop in sortedStops {
+                        if currentY > pageHeight - 80 {
+                            context.beginPage()
+                            currentY = topMargin
+                        }
+                        let dateStr = formatDate(stop.date)
+                        let gallonsDouble = Double(stop.gallonsFilled) / 1000.0
+                        let costStr = formatter.string(from: NSNumber(value: Double(stop.amountSpent) / 100.0)) ?? "$0.00"
+                        let gallonsStr = gallonsFormatter.string(from: NSNumber(value: gallonsDouble)) ?? "0"
+                        let costPerGallon = gallonsDouble > 0 ? Double(stop.amountSpent) / 100.0 / gallonsDouble : 0.0
+                        let costPerGalStr = formatter.string(from: NSNumber(value: costPerGallon)) ?? "$0.00"
+
+                        let stopData = [dateStr, stop.gasStation, "\(stop.odometer)", gallonsStr, costStr, costPerGalStr]
+                        for (i, val) in stopData.enumerated() {
+                            _ = drawText(val, at: CGPoint(x: xOffsets[i], y: currentY), attributes: bodyAttributes)
+                        }
+                        currentY += 14 + lineSpacing
+                    }
+
+                    currentY += sectionSpacing
+                    drawSeparatorLine(at: currentY, context: context)
+                    currentY += sectionSpacing
+                }
+            }
+
+            // ==================== PROJECT PROFITABILITY ====================
+            if !self.projectRecords.isEmpty {
+                context.beginPage()
+                currentY = topMargin
+                let projSize = drawText("PROJECT PROFITABILITY", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
+                currentY += projSize.height + sectionSpacing
+
+                // Table headers
+                let projColWidths: [CGFloat] = [maxWidth * 0.3, maxWidth * 0.2, maxWidth * 0.2, maxWidth * 0.15, maxWidth * 0.15]
+                let projHeaders = ["Project", "Income", "Materials+Labor", "Net Profit", "Margin"]
+                var projXOffsets: [CGFloat] = [leftMargin]
+                for i in 0..<projColWidths.count - 1 {
+                    projXOffsets.append(projXOffsets.last! + projColWidths[i])
+                }
+
+                for (i, header) in projHeaders.enumerated() {
+                    _ = drawText(header, at: CGPoint(x: projXOffsets[i], y: currentY), attributes: boldBodyAttributes)
+                }
+                currentY += 14 + lineSpacing
+                drawSeparatorLine(at: currentY, context: context)
+                currentY += lineSpacing
+
+                let sortedProjects = self.projectRecords.sorted { $0.grossIncome > $1.grossIncome }
+                for project in sortedProjects {
+                    if currentY > pageHeight - 80 {
+                        context.beginPage()
+                        currentY = topMargin
+                    }
+                    let incomeStr = formatter.string(from: NSNumber(value: Double(project.grossIncome) / 100.0)) ?? "$0.00"
+                    let costsTotal = project.materialsCost + project.laborAndProHelpCost
+                    let costsStr = formatter.string(from: NSNumber(value: Double(costsTotal) / 100.0)) ?? "$0.00"
+                    let netStr = formatter.string(from: NSNumber(value: Double(project.netIncome) / 100.0)) ?? "$0.00"
+                    let margin = project.grossIncome > 0 ? Double(project.netIncome) / Double(project.grossIncome) * 100.0 : 0.0
+                    let marginStr = String(format: "%.1f%%", margin)
+
+                    let projData = [project.projectName, incomeStr, costsStr, netStr, marginStr]
+                    for (i, val) in projData.enumerated() {
+                        _ = drawText(val, at: CGPoint(x: projXOffsets[i], y: currentY), attributes: bodyAttributes)
+                    }
+                    currentY += 14 + lineSpacing
+                }
+                currentY += sectionSpacing
+            }
+
+            // ==================== WORKERS COMP RECORDS ====================
+            if !self.workersCompRecords.isEmpty {
+                context.beginPage()
+                currentY = topMargin
+                let wcSize = drawText("WORKERS COMP RECORDS", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
+                currentY += wcSize.height + sectionSpacing
+
+                let wcColWidths: [CGFloat] = [maxWidth * 0.35, maxWidth * 0.2, maxWidth * 0.2, maxWidth * 0.25]
+                let wcHeaders = ["Worker", "With WC", "Without WC", "Total"]
+                var wcXOffsets: [CGFloat] = [leftMargin]
+                for i in 0..<wcColWidths.count - 1 {
+                    wcXOffsets.append(wcXOffsets.last! + wcColWidths[i])
+                }
+
+                for (i, header) in wcHeaders.enumerated() {
+                    _ = drawText(header, at: CGPoint(x: wcXOffsets[i], y: currentY), attributes: boldBodyAttributes)
+                }
+                currentY += 14 + lineSpacing
+                drawSeparatorLine(at: currentY, context: context)
+                currentY += lineSpacing
+
+                for record in self.workersCompRecords {
+                    if currentY > pageHeight - 80 {
+                        context.beginPage()
+                        currentY = topMargin
+                    }
+                    let withWCStr = formatter.string(from: NSNumber(value: Double(record.incurredWC) / 100.0)) ?? "$0.00"
+                    let noWCStr = formatter.string(from: NSNumber(value: Double(record.noWC) / 100.0)) ?? "$0.00"
+                    let totalStr = formatter.string(from: NSNumber(value: Double(record.total) / 100.0)) ?? "$0.00"
+
+                    let wcData = [record.workerName, withWCStr, noWCStr, totalStr]
+                    for (i, val) in wcData.enumerated() {
+                        _ = drawText(val, at: CGPoint(x: wcXOffsets[i], y: currentY), attributes: bodyAttributes)
+                    }
+                    currentY += 14 + lineSpacing
+                }
+                currentY += sectionSpacing
+            }
+
+            // ==================== PERSONAL EXPENSES ====================
+            let personalExpTotal = self.tdFood + self.tdFun + self.tdPet + self.tdUtilitiesPersonal +
+                                   self.tdPhone + self.tdInternet + self.tdOfficePersonal +
+                                   self.tdMedical + self.tdTravelPersonal + self.tdClothes + self.tdOtherPersonal
+
+            if personalExpTotal > 0 {
+                if currentY > pageHeight - 200 {
+                    context.beginPage()
+                    currentY = topMargin
+                }
+                let personalSize = drawText("PERSONAL EXPENSES", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
+                currentY += personalSize.height + lineSpacing
+
+                let personalLines: [ExpenseLine] = [
+                    ExpenseLine(name: "Food", amount: self.tdFood),
+                    ExpenseLine(name: "Fun", amount: self.tdFun),
+                    ExpenseLine(name: "Pet", amount: self.tdPet),
+                    ExpenseLine(name: "Utilities", amount: self.tdUtilitiesPersonal),
+                    ExpenseLine(name: "Phone", amount: self.tdPhone),
+                    ExpenseLine(name: "Internet", amount: self.tdInternet),
+                    ExpenseLine(name: "Office", amount: self.tdOfficePersonal),
+                    ExpenseLine(name: "Medical", amount: self.tdMedical),
+                    ExpenseLine(name: "Travel", amount: self.tdTravelPersonal),
+                    ExpenseLine(name: "Clothes", amount: self.tdClothes),
+                    ExpenseLine(name: "Other", amount: self.tdOtherPersonal)
+                ]
+
+                for expense in personalLines {
+                    if currentY > pageHeight - 80 {
+                        context.beginPage()
+                        currentY = topMargin
+                    }
+                    let amountFormatted = formatter.string(from: NSNumber(value: Double(expense.amount) / 100.0)) ?? "$0.00"
+                    let lineSize = drawText("\(expense.name): \(amountFormatted)", at: CGPoint(x: leftMargin, y: currentY), attributes: bodyAttributes)
+                    currentY += lineSize.height + lineSpacing
+                }
+
+                currentY += lineSpacing
+                drawSeparatorLine(at: currentY, context: context)
+                currentY += lineSpacing
+                let personalTotalFormatted = formatter.string(from: NSNumber(value: Double(personalExpTotal) / 100.0)) ?? "$0.00"
+                _ = drawText("Total Personal Expenses: \(personalTotalFormatted)", at: CGPoint(x: leftMargin, y: currentY), attributes: boldBodyAttributes)
+            }
+        }
+
         isGeneratingPDF = false
         return data
+    }
+
+    func getVehicleName(by id: String) -> String {
+        if let matchingVehicle = vehicles.first(where: { $0.id == id }) {
+            return matchingVehicle.name
+        } else {
+            return "Vehicle ID: \(id)"
+        }
+    }
+
+    func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yyyy"
+        return formatter.string(from: date)
     }
     
     func generateCustomerPDFReport(forProjectUID projectUID: String) -> Data? {
@@ -1380,19 +1792,517 @@ import Contacts
                 underSigCustomer.draw(at: CGPoint(x: leftMargin + boxWidth + 20, y: currentYPosition), withAttributes: infoAttributes)
                 
             case .invoice:
-                let text = "Invoice Details for \(projectUID)"
-                text.draw(at: CGPoint(x: 20, y: 50), withAttributes: titleAttributes)
-                // Add more specific drawing code for invoice document
+                // Invoice-specific header and document details
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .long
+                let dateString = dateFormatter.string(from: Date())
+                let dateAttributes = [NSAttributedString.Key.font: UIFont(name: "MinionPro-Regular", size: 10)!]
+                let dateStringSize = dateString.size(withAttributes: dateAttributes)
+                dateString.draw(at: CGPoint(x: pageWidth - dateStringSize.width - 60 - 50, y: 56), withAttributes: dateAttributes)
+                
+                let createdText = "Created with Bizzy Books"
+                let createdTextSize = createdText.size(withAttributes: dateAttributes)
+                createdText.draw(at: CGPoint(x: pageWidth - createdTextSize.width - 60 - 50, y: 80), withAttributes: dateAttributes)
+                
+                var projNumby = 1000
+                if let matchingProject = projects.first(where: { $0.id == projectUID }) {
+                    projNumby = matchingProject.projectNumber
+                }
+                let projNumbyStr = "Project Number: " + String(projNumby)
+                let projNumbyStrSize = projNumbyStr.size(withAttributes: dateAttributes)
+                projNumbyStr.draw(at: CGPoint(x: pageWidth - projNumbyStrSize.width - 60 - 50, y: 68), withAttributes: dateAttributes)
+
+                let projectInvoiceText = "Invoice"
+                let projectInvoiceAttributes = [NSAttributedString.Key.font: UIFont(name: "minionpro-bold", size: 20)!]
+                let projectInvoiceSize = projectInvoiceText.size(withAttributes: projectInvoiceAttributes)
+                projectInvoiceText.draw(at: CGPoint(x: 170, y: 30), withAttributes: projectInvoiceAttributes)
+
+                let businessName = youBusinessEntity?.name ?? ""
+                let infoAttributes = [NSAttributedString.Key.font: UIFont(name: "MinionPro-Regular", size: 10)!, NSAttributedString.Key.foregroundColor: UIColor.black]
+                let streetPre = youBusinessEntity?.street ?? ""
+                let cityPre = youBusinessEntity?.city ?? ""
+                let statePre = youBusinessEntity?.state ?? ""
+                let zipPre = youBusinessEntity?.zip ?? ""
+                let street = streetPre.trimmingCharacters(in: .whitespaces)
+                let city = cityPre.trimmingCharacters(in: .whitespaces)
+                let state = statePre.trimmingCharacters(in: .whitespaces)
+                let zip = zipPre.trimmingCharacters(in: .whitespaces)
+                let businessPhone = youBusinessEntity?.phone ?? ""
+                let businessEmail = youBusinessEntity?.email ?? ""
+                let businessPhoneEmail = "\(businessPhone) \(businessEmail)"
+
+                var businessAddress = ""
+                if !street.isEmpty {
+                    businessAddress += street + "; "
+                }
+                var cityState = [city, state].filter { !$0.isEmpty }.joined(separator: ", ")
+                if !state.isEmpty && !zip.isEmpty {
+                    cityState += " " + zip
+                } else if !zip.isEmpty {
+                    cityState += zip
+                }
+                if !cityState.isEmpty {
+                    businessAddress += cityState
+                }
+
+                businessName.draw(at: CGPoint(x: 170, y: 56), withAttributes: infoAttributes)
+                businessPhoneEmail.draw(at: CGPoint(x: 170, y: 68), withAttributes: infoAttributes)
+                businessAddress.draw(at: CGPoint(x: 170, y: 80), withAttributes: infoAttributes)
+
+                if let bizzyBooksIcon = UIImage(named: "bizzyBeeImage") {
+                    let iconRect = CGRect(x: pageRect.width - 100, y: 30, width: 60, height: 60)
+                    context.cgContext.saveGState()
+                    context.cgContext.translateBy(x: 0, y: pageRect.height)
+                    context.cgContext.scaleBy(x: 1.0, y: -1.0)
+                    let flippedIconRect = CGRect(x: iconRect.origin.x, y: pageRect.height - iconRect.origin.y - iconRect.height, width: iconRect.width, height: iconRect.height)
+                    context.cgContext.draw(bizzyBooksIcon.cgImage!, in: flippedIconRect)
+                    context.cgContext.restoreGState()
+                }
+                if let companyLogo = logoImage {
+                    let logoWidth: CGFloat = 120
+                    let logoXPosition: CGFloat = 40
+                    let logoYPosition: CGFloat = 30
+                    let aspectRatio = companyLogo.size.width / companyLogo.size.height
+                    let adjustedLogoHeight = logoWidth / aspectRatio
+                    let logoRect = CGRect(x: logoXPosition, y: logoYPosition, width: logoWidth, height: adjustedLogoHeight)
+                    if let cgImage = companyLogo.cgImage {
+                        context.cgContext.saveGState()
+                        context.cgContext.translateBy(x: 0, y: pageRect.height)
+                        context.cgContext.scaleBy(x: 1.0, y: -1.0)
+                        let flippedLogoRect = CGRect(x: logoRect.origin.x, y: pageRect.height - logoRect.origin.y - adjustedLogoHeight, width: logoWidth, height: adjustedLogoHeight)
+                        context.cgContext.draw(cgImage, in: flippedLogoRect)
+                        context.cgContext.restoreGState()
+                    }
+                }
+
+                let lineYPosition: CGFloat = 100
+                let lineWidth: CGFloat = 1.0
+                let lineColor: UIColor = .black
+                let margin: CGFloat = 40.0
+                context.cgContext.setStrokeColor(lineColor.cgColor)
+                context.cgContext.setLineWidth(lineWidth)
+                context.cgContext.move(to: CGPoint(x: margin, y: lineYPosition))
+                context.cgContext.addLine(to: CGPoint(x: pageWidth - margin, y: lineYPosition))
+                context.cgContext.strokePath()
+
+                var currentYPosition: CGFloat = 120
+                let itemSpacing: CGFloat = 20.0
+                let smallSpacing: CGFloat = 5.0
+                let tinySpacing: CGFloat = 2.0
+
+                var customerBlockNameLiteral = "Billed To:"
+                var customerBlockName = ""
+                var customerBlockSiteStreet = ""
+                var customerBlockSiteCityStateZip = ""
+                if let matchingProject = projects.first(where: { $0.id == projectUID }) {
+                    customerBlockName = matchingProject.customerName
+                    customerBlockSiteStreet = matchingProject.jobsiteStreet
+                    customerBlockSiteCityStateZip = "\(matchingProject.jobsiteCity.trimmingCharacters(in: .whitespaces)), \(matchingProject.jobsiteState) \(matchingProject.jobsiteZip)"
+                }
+
+                let customerLiteralAttributedString = NSAttributedString(string: customerBlockNameLiteral, attributes: attributesBold)
+                customerLiteralAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerLiteralAttributedString.size().height + tinySpacing
+
+                let customerNameAttributedString = NSAttributedString(string: customerBlockName, attributes: infoAttributes)
+                customerNameAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerNameAttributedString.size().height + tinySpacing
+
+                let customerStreetAttributedString = NSAttributedString(string: customerBlockSiteStreet, attributes: infoAttributes)
+                customerStreetAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerStreetAttributedString.size().height + tinySpacing
+
+                let customerCityStateZipAttributedString = NSAttributedString(string: customerBlockSiteCityStateZip, attributes: infoAttributes)
+                customerCityStateZipAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerCityStateZipAttributedString.size().height + itemSpacing
+
+                // Invoice table headers
+                let itemHeaderString = "Item"
+                let costHeaderString = "Total Cost"
+                let itemHeaderRect = CGRect(x: leftMargin, y: currentYPosition, width: maxWidth * 0.7, height: 20)
+                let costHeaderRect = CGRect(x: leftMargin + maxWidth * 0.7, y: currentYPosition, width: maxWidth * 0.3, height: 20)
+                NSAttributedString(string: itemHeaderString, attributes: attributesBold).draw(in: itemHeaderRect)
+                NSAttributedString(string: costHeaderString, attributes: attributesBold).draw(in: costHeaderRect)
+                currentYPosition += 25
+
+                var subtotal: Double = 0.0
+
+                // Drawing the list of line items
+                for tailoredScope in tailoredScopes {
+                    let priceInDollars = Double(tailoredScope.priceEa) / 100.0
+                    let formattedPrice = formatter.string(from: NSNumber(value: priceInDollars)) ?? "$0.00"
+                    let itemNameString = tailoredScope.name
+                    
+                    // Draw item name on the left
+                    let itemNameRect = CGRect(x: leftMargin, y: currentYPosition, width: maxWidth * 0.7, height: CGFloat.greatestFiniteMagnitude)
+                    let itemNameAttributedString = NSAttributedString(string: itemNameString, attributes: attributesRegular)
+                    let itemNameBoundingRect = itemNameAttributedString.boundingRect(with: CGSize(width: maxWidth * 0.7, height: CGFloat.greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+                    itemNameAttributedString.draw(in: itemNameRect)
+
+                    // Draw item price on the right, aligned
+                    let priceString = formattedPrice
+                    let priceRect = CGRect(x: leftMargin + maxWidth * 0.7, y: currentYPosition, width: maxWidth * 0.3, height: CGFloat.greatestFiniteMagnitude)
+                    let priceAttributedString = NSAttributedString(string: priceString, attributes: attributesRegular)
+                    let priceBoundingRect = priceAttributedString.boundingRect(with: CGSize(width: maxWidth * 0.3, height: CGFloat.greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+                    priceAttributedString.draw(in: priceRect)
+
+                    currentYPosition += max(itemNameBoundingRect.height, priceBoundingRect.height) + smallSpacing
+                    subtotal += priceInDollars
+                }
+
+                // Drawing the subtotal and total
+                let totalAmount = subtotal
+
+                let formattedSubtotal = formatter.string(from: NSNumber(value: subtotal)) ?? "$0.00"
+                let formattedTotal = formatter.string(from: NSNumber(value: totalAmount)) ?? "$0.00"
+
+                currentYPosition += itemSpacing
+
+                let subtotalString = "Subtotal:"
+                let totalString = "Total:"
+
+                // Draw labels and values for subtotal and total
+                let totalBlockX = leftMargin + maxWidth * 0.5
+                let totalBlockWidth = maxWidth * 0.5
+
+                subtotalString.draw(at: CGPoint(x: totalBlockX, y: currentYPosition), withAttributes: attributesRegular)
+                formattedSubtotal.draw(at: CGPoint(x: totalBlockX + 100, y: currentYPosition), withAttributes: attributesRegular)
+                currentYPosition += itemSpacing
+                
+                // There is no tax, so the total is the same as the subtotal
+                totalString.draw(at: CGPoint(x: totalBlockX, y: currentYPosition), withAttributes: attributesBold)
+                formattedTotal.draw(at: CGPoint(x: totalBlockX + 100, y: currentYPosition), withAttributes: attributesBold)
+                
+                currentYPosition += itemSpacing + 20
+
+                // Add a closing message
+                let thankYouText = "Thank you for your business!"
+                let thankYouAttributes = [NSAttributedString.Key.font: UIFont(name: "MinionPro-Regular", size: 12)!]
+                thankYouText.draw(at: CGPoint(x: leftMargin, y: currentYPosition), withAttributes: thankYouAttributes)
+                
+                
                 
             case .receipt:
-                let text = "Receipt Details for \(projectUID)"
-                text.draw(at: CGPoint(x: 20, y: 50), withAttributes: titleAttributes)
-                // Add more specific drawing code for receipt document
+                // Receipt-specific header and document details
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .long
+                let dateString = dateFormatter.string(from: Date())
+                let dateAttributes = [NSAttributedString.Key.font: UIFont(name: "MinionPro-Regular", size: 10)!]
+                let dateStringSize = dateString.size(withAttributes: dateAttributes)
+                dateString.draw(at: CGPoint(x: pageWidth - dateStringSize.width - 60 - 50, y: 56), withAttributes: dateAttributes)
                 
+                let createdText = "Created with Bizzy Books"
+                let createdTextSize = createdText.size(withAttributes: dateAttributes)
+                createdText.draw(at: CGPoint(x: pageWidth - createdTextSize.width - 60 - 50, y: 80), withAttributes: dateAttributes)
+                
+                var projNumby = 1000
+                if let matchingProject = projects.first(where: { $0.id == projectUID }) {
+                    projNumby = matchingProject.projectNumber
+                }
+                let projNumbyStr = "Project Number: " + String(projNumby)
+                let projNumbyStrSize = projNumbyStr.size(withAttributes: dateAttributes)
+                projNumbyStr.draw(at: CGPoint(x: pageWidth - projNumbyStrSize.width - 60 - 50, y: 68), withAttributes: dateAttributes)
+
+                let projectReceiptText = "Receipt"
+                let projectReceiptAttributes = [NSAttributedString.Key.font: UIFont(name: "minionpro-bold", size: 20)!]
+                let projectReceiptSize = projectReceiptText.size(withAttributes: projectReceiptAttributes)
+                projectReceiptText.draw(at: CGPoint(x: 170, y: 30), withAttributes: projectReceiptAttributes)
+                
+                let businessName = youBusinessEntity?.name ?? ""
+                let infoAttributes = [NSAttributedString.Key.font: UIFont(name: "MinionPro-Regular", size: 10)!, NSAttributedString.Key.foregroundColor: UIColor.black]
+                let streetPre = youBusinessEntity?.street ?? ""
+                let cityPre = youBusinessEntity?.city ?? ""
+                let statePre = youBusinessEntity?.state ?? ""
+                let zipPre = youBusinessEntity?.zip ?? ""
+                let street = streetPre.trimmingCharacters(in: .whitespaces)
+                let city = cityPre.trimmingCharacters(in: .whitespaces)
+                let state = statePre.trimmingCharacters(in: .whitespaces)
+                let zip = zipPre.trimmingCharacters(in: .whitespaces)
+                let businessPhone = youBusinessEntity?.phone ?? ""
+                let businessEmail = youBusinessEntity?.email ?? ""
+                let businessPhoneEmail = "\(businessPhone) \(businessEmail)"
+
+                var businessAddress = ""
+                if !street.isEmpty {
+                    businessAddress += street + "; "
+                }
+                var cityState = [city, state].filter { !$0.isEmpty }.joined(separator: ", ")
+                if !state.isEmpty && !zip.isEmpty {
+                    cityState += " " + zip
+                } else if !zip.isEmpty {
+                    cityState += zip
+                }
+                if !cityState.isEmpty {
+                    businessAddress += cityState
+                }
+                
+                businessName.draw(at: CGPoint(x: 170, y: 56), withAttributes: infoAttributes)
+                businessPhoneEmail.draw(at: CGPoint(x: 170, y: 68), withAttributes: infoAttributes)
+                businessAddress.draw(at: CGPoint(x: 170, y: 80), withAttributes: infoAttributes)
+
+                if let bizzyBooksIcon = UIImage(named: "bizzyBeeImage") {
+                    let iconRect = CGRect(x: pageRect.width - 100, y: 30, width: 60, height: 60)
+                    context.cgContext.saveGState()
+                    context.cgContext.translateBy(x: 0, y: pageRect.height)
+                    context.cgContext.scaleBy(x: 1.0, y: -1.0)
+                    let flippedIconRect = CGRect(x: iconRect.origin.x, y: pageRect.height - iconRect.origin.y - iconRect.height, width: iconRect.width, height: iconRect.height)
+                    context.cgContext.draw(bizzyBooksIcon.cgImage!, in: flippedIconRect)
+                    context.cgContext.restoreGState()
+                }
+                if let companyLogo = logoImage {
+                    let logoWidth: CGFloat = 120
+                    let logoXPosition: CGFloat = 40
+                    let logoYPosition: CGFloat = 30
+                    let aspectRatio = companyLogo.size.width / companyLogo.size.height
+                    let adjustedLogoHeight = logoWidth / aspectRatio
+                    let logoRect = CGRect(x: logoXPosition, y: logoYPosition, width: logoWidth, height: adjustedLogoHeight)
+                    if let cgImage = companyLogo.cgImage {
+                        context.cgContext.saveGState()
+                        context.cgContext.translateBy(x: 0, y: pageRect.height)
+                        context.cgContext.scaleBy(x: 1.0, y: -1.0)
+                        let flippedLogoRect = CGRect(x: logoRect.origin.x, y: pageRect.height - logoRect.origin.y - adjustedLogoHeight, width: logoWidth, height: adjustedLogoHeight)
+                        context.cgContext.draw(cgImage, in: flippedLogoRect)
+                        context.cgContext.restoreGState()
+                    }
+                }
+
+                let lineYPosition: CGFloat = 100
+                let lineWidth: CGFloat = 1.0
+                let lineColor: UIColor = .black
+                let margin: CGFloat = 40.0
+                context.cgContext.setStrokeColor(lineColor.cgColor)
+                context.cgContext.setLineWidth(lineWidth)
+                context.cgContext.move(to: CGPoint(x: margin, y: lineYPosition))
+                context.cgContext.addLine(to: CGPoint(x: pageWidth - margin, y: lineYPosition))
+                context.cgContext.strokePath()
+                
+                var currentYPosition: CGFloat = 120
+                let itemSpacing: CGFloat = 20.0
+                let smallSpacing: CGFloat = 5.0
+                let tinySpacing: CGFloat = 2.0
+                
+                var customerBlockNameLiteral = "Received From:"
+                var customerBlockName = ""
+                var customerBlockSiteStreet = ""
+                var customerBlockSiteCityStateZip = ""
+                if let matchingProject = projects.first(where: { $0.id == projectUID }) {
+                    customerBlockName = matchingProject.customerName
+                    customerBlockSiteStreet = matchingProject.jobsiteStreet
+                    customerBlockSiteCityStateZip = "\(matchingProject.jobsiteCity.trimmingCharacters(in: .whitespaces)), \(matchingProject.jobsiteState) \(matchingProject.jobsiteZip)"
+                }
+                
+                let customerLiteralAttributedString = NSAttributedString(string: customerBlockNameLiteral, attributes: attributesBold)
+                customerLiteralAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerLiteralAttributedString.size().height + tinySpacing
+                
+                let customerNameAttributedString = NSAttributedString(string: customerBlockName, attributes: infoAttributes)
+                customerNameAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerNameAttributedString.size().height + tinySpacing
+                
+                let customerStreetAttributedString = NSAttributedString(string: customerBlockSiteStreet, attributes: infoAttributes)
+                customerStreetAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerStreetAttributedString.size().height + tinySpacing
+                
+                let customerCityStateZipAttributedString = NSAttributedString(string: customerBlockSiteCityStateZip, attributes: infoAttributes)
+                customerCityStateZipAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerCityStateZipAttributedString.size().height + itemSpacing
+
+                // Receipt table headers
+                let itemHeaderString = "Item"
+                let costHeaderString = "Total Cost"
+                let itemHeaderRect = CGRect(x: leftMargin, y: currentYPosition, width: maxWidth * 0.7, height: 20)
+                let costHeaderRect = CGRect(x: leftMargin + maxWidth * 0.7, y: currentYPosition, width: maxWidth * 0.3, height: 20)
+                NSAttributedString(string: itemHeaderString, attributes: attributesBold).draw(in: itemHeaderRect)
+                NSAttributedString(string: costHeaderString, attributes: attributesBold).draw(in: costHeaderRect)
+                currentYPosition += 25
+                
+                var subtotal: Double = 0.0
+
+                // Drawing the list of line items
+                for tailoredScope in tailoredScopes {
+                    let priceInDollars = Double(tailoredScope.priceEa) / 100.0
+                    let formattedPrice = formatter.string(from: NSNumber(value: priceInDollars)) ?? "$0.00"
+                    let itemNameString = tailoredScope.name
+                    
+                    // Draw item name on the left
+                    let itemNameRect = CGRect(x: leftMargin, y: currentYPosition, width: maxWidth * 0.7, height: CGFloat.greatestFiniteMagnitude)
+                    let itemNameAttributedString = NSAttributedString(string: itemNameString, attributes: attributesRegular)
+                    let itemNameBoundingRect = itemNameAttributedString.boundingRect(with: CGSize(width: maxWidth * 0.7, height: CGFloat.greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+                    itemNameAttributedString.draw(in: itemNameRect)
+
+                    // Draw item price on the right, aligned
+                    let priceString = formattedPrice
+                    let priceRect = CGRect(x: leftMargin + maxWidth * 0.7, y: currentYPosition, width: maxWidth * 0.3, height: CGFloat.greatestFiniteMagnitude)
+                    let priceAttributedString = NSAttributedString(string: priceString, attributes: attributesRegular)
+                    let priceBoundingRect = priceAttributedString.boundingRect(with: CGSize(width: maxWidth * 0.3, height: CGFloat.greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+                    priceAttributedString.draw(in: priceRect)
+
+                    currentYPosition += max(itemNameBoundingRect.height, priceBoundingRect.height) + smallSpacing
+                    subtotal += priceInDollars
+                }
+
+                // Drawing the subtotal and total
+                let totalAmount = subtotal
+
+                let formattedSubtotal = formatter.string(from: NSNumber(value: subtotal)) ?? "$0.00"
+                let formattedTotal = formatter.string(from: NSNumber(value: totalAmount)) ?? "$0.00"
+
+                currentYPosition += itemSpacing
+
+                let totalString = "Total:"
+
+                // Draw labels and values for the total
+                let totalBlockX = leftMargin + maxWidth * 0.5
+                let totalBlockWidth = maxWidth * 0.5
+                
+                totalString.draw(at: CGPoint(x: totalBlockX, y: currentYPosition), withAttributes: attributesBold)
+                formattedTotal.draw(at: CGPoint(x: totalBlockX + 100, y: currentYPosition), withAttributes: attributesBold)
+                
+                currentYPosition += itemSpacing + 20
+                
+                // Add a thank you message
+                let thankYouText = "Thank you for your business!"
+                let thankYouAttributes = [NSAttributedString.Key.font: UIFont(name: "MinionPro-Regular", size: 12)!]
+                thankYouText.draw(at: CGPoint(x: leftMargin, y: currentYPosition), withAttributes: thankYouAttributes)
+                
+
             case .warranty:
-                let text = "Warranty Details for \(projectUID)"
-                text.draw(at: CGPoint(x: 20, y: 50), withAttributes: titleAttributes)
-                // Add more specific drawing code for warranty document
+                // Warranty-specific header and document details
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .long
+                let dateString = dateFormatter.string(from: Date())
+                let dateAttributes = [NSAttributedString.Key.font: UIFont(name: "MinionPro-Regular", size: 10)!]
+                let dateStringSize = dateString.size(withAttributes: dateAttributes)
+                dateString.draw(at: CGPoint(x: pageWidth - dateStringSize.width - 60 - 50, y: 56), withAttributes: dateAttributes)
+                
+                let createdText = "Created with Bizzy Books"
+                let createdTextSize = createdText.size(withAttributes: dateAttributes)
+                createdText.draw(at: CGPoint(x: pageWidth - createdTextSize.width - 60 - 50, y: 80), withAttributes: dateAttributes)
+                
+                var projNumby = 1000
+                if let matchingProject = projects.first(where: { $0.id == projectUID }) {
+                    projNumby = matchingProject.projectNumber
+                }
+                let projNumbyStr = "Project Number: " + String(projNumby)
+                let projNumbyStrSize = projNumbyStr.size(withAttributes: dateAttributes)
+                projNumbyStr.draw(at: CGPoint(x: pageWidth - projNumbyStrSize.width - 60 - 50, y: 68), withAttributes: dateAttributes)
+
+                let projectWarrantyText = "Project Warranty"
+                let projectWarrantyAttributes = [NSAttributedString.Key.font: UIFont(name: "minionpro-bold", size: 20)!]
+                let projectWarrantySize = projectWarrantyText.size(withAttributes: projectWarrantyAttributes)
+                projectWarrantyText.draw(at: CGPoint(x: 170, y: 30), withAttributes: projectWarrantyAttributes)
+                
+                let businessName = youBusinessEntity?.name ?? ""
+                let infoAttributes = [NSAttributedString.Key.font: UIFont(name: "MinionPro-Regular", size: 10)!, NSAttributedString.Key.foregroundColor: UIColor.black]
+                let streetPre = youBusinessEntity?.street ?? ""
+                let cityPre = youBusinessEntity?.city ?? ""
+                let statePre = youBusinessEntity?.state ?? ""
+                let zipPre = youBusinessEntity?.zip ?? ""
+                let street = streetPre.trimmingCharacters(in: .whitespaces)
+                let city = cityPre.trimmingCharacters(in: .whitespaces)
+                let state = statePre.trimmingCharacters(in: .whitespaces)
+                let zip = zipPre.trimmingCharacters(in: .whitespaces)
+                let businessPhone = youBusinessEntity?.phone ?? ""
+                let businessEmail = youBusinessEntity?.email ?? ""
+                let businessPhoneEmail = "\(businessPhone) \(businessEmail)"
+
+                var businessAddress = ""
+                if !street.isEmpty {
+                    businessAddress += street + "; "
+                }
+                var cityState = [city, state].filter { !$0.isEmpty }.joined(separator: ", ")
+                if !state.isEmpty && !zip.isEmpty {
+                    cityState += " " + zip
+                } else if !zip.isEmpty {
+                    cityState += zip
+                }
+                if !cityState.isEmpty {
+                    businessAddress += cityState
+                }
+                
+                businessName.draw(at: CGPoint(x: 170, y: 56), withAttributes: infoAttributes)
+                businessPhoneEmail.draw(at: CGPoint(x: 170, y: 68), withAttributes: infoAttributes)
+                businessAddress.draw(at: CGPoint(x: 170, y: 80), withAttributes: infoAttributes)
+
+                if let bizzyBooksIcon = UIImage(named: "bizzyBeeImage") {
+                    let iconRect = CGRect(x: pageRect.width - 100, y: 30, width: 60, height: 60)
+                    context.cgContext.saveGState()
+                    context.cgContext.translateBy(x: 0, y: pageRect.height)
+                    context.cgContext.scaleBy(x: 1.0, y: -1.0)
+                    let flippedIconRect = CGRect(x: iconRect.origin.x, y: pageRect.height - iconRect.origin.y - iconRect.height, width: iconRect.width, height: iconRect.height)
+                    context.cgContext.draw(bizzyBooksIcon.cgImage!, in: flippedIconRect)
+                    context.cgContext.restoreGState()
+                }
+                if let companyLogo = logoImage {
+                    let logoWidth: CGFloat = 120
+                    let logoXPosition: CGFloat = 40
+                    let logoYPosition: CGFloat = 30
+                    let aspectRatio = companyLogo.size.width / companyLogo.size.height
+                    let adjustedLogoHeight = logoWidth / aspectRatio
+                    let logoRect = CGRect(x: logoXPosition, y: logoYPosition, width: logoWidth, height: adjustedLogoHeight)
+                    if let cgImage = companyLogo.cgImage {
+                        context.cgContext.saveGState()
+                        context.cgContext.translateBy(x: 0, y: pageRect.height)
+                        context.cgContext.scaleBy(x: 1.0, y: -1.0)
+                        let flippedLogoRect = CGRect(x: logoRect.origin.x, y: pageRect.height - logoRect.origin.y - adjustedLogoHeight, width: logoWidth, height: adjustedLogoHeight)
+                        context.cgContext.draw(cgImage, in: flippedLogoRect)
+                        context.cgContext.restoreGState()
+                    }
+                }
+
+                let lineYPosition: CGFloat = 100
+                let lineWidth: CGFloat = 1.0
+                let lineColor: UIColor = .black
+                let margin: CGFloat = 40.0
+                context.cgContext.setStrokeColor(lineColor.cgColor)
+                context.cgContext.setLineWidth(lineWidth)
+                context.cgContext.move(to: CGPoint(x: margin, y: lineYPosition))
+                context.cgContext.addLine(to: CGPoint(x: pageWidth - margin, y: lineYPosition))
+                context.cgContext.strokePath()
+                
+                var currentYPosition: CGFloat = 120
+                let itemSpacing: CGFloat = 20.0
+                let smallSpacing: CGFloat = 5.0
+                let tinySpacing: CGFloat = 2.0
+                
+                var customerBlockNameLiteral = "Customer:"
+                var customerBlockName = ""
+                var customerBlockSiteStreet = ""
+                var customerBlockSiteCityStateZip = ""
+                if let matchingProject = projects.first(where: { $0.id == projectUID }) {
+                    customerBlockName = matchingProject.customerName
+                    customerBlockSiteStreet = matchingProject.jobsiteStreet
+                    customerBlockSiteCityStateZip = "\(matchingProject.jobsiteCity.trimmingCharacters(in: .whitespaces)), \(matchingProject.jobsiteState) \(matchingProject.jobsiteZip)"
+                }
+                
+                let customerLiteralAttributedString = NSAttributedString(string: customerBlockNameLiteral, attributes: attributesBold)
+                customerLiteralAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerLiteralAttributedString.size().height + tinySpacing
+                
+                let customerNameAttributedString = NSAttributedString(string: customerBlockName, attributes: infoAttributes)
+                customerNameAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerNameAttributedString.size().height + tinySpacing
+                
+                let customerStreetAttributedString = NSAttributedString(string: customerBlockSiteStreet, attributes: infoAttributes)
+                customerStreetAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerStreetAttributedString.size().height + tinySpacing
+                
+                let customerCityStateZipAttributedString = NSAttributedString(string: customerBlockSiteCityStateZip, attributes: infoAttributes)
+                customerCityStateZipAttributedString.draw(at: CGPoint(x: leftMargin, y: currentYPosition))
+                currentYPosition += customerCityStateZipAttributedString.size().height + itemSpacing
+
+                // Add the warranty text from your project data
+                var warrantyText = ""
+                if let matchingProject = projects.first(where: { $0.id == projectUID }) {
+                    // NOTE: This assumes your Project struct has a `warrantyText` property
+                    warrantyText = matchingProject.warrantyText
+                }
+                
+                let warrantyAttributedString = NSAttributedString(string: warrantyText, attributes: attributesRegular)
+                let warrantyDrawingRect = CGRect(x: leftMargin, y: currentYPosition, width: maxWidth, height: CGFloat.greatestFiniteMagnitude)
+                warrantyAttributedString.draw(with: warrantyDrawingRect, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+                
+                
             }
             
             // Use similar logic to add more content based on the document type

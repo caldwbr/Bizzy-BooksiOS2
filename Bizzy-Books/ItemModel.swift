@@ -48,6 +48,7 @@ enum UniversalType {
     case entity(Entity)
     case vehicle(Vehicle)
     case project(Project)
+    case activity(Activity)
 }
 
 struct Universal: Identifiable {
@@ -58,6 +59,7 @@ struct Universal: Identifiable {
         case .entity(let entity): return entity.id
         case .vehicle(let vehicle): return vehicle.id
         case .project(let project): return project.id
+        case .activity(let activity): return activity.id
         }
     }
     var timestamp: TimeInterval {
@@ -66,6 +68,7 @@ struct Universal: Identifiable {
         case .entity(let entity): return entity.timeStamp
         case .vehicle(let vehicle): return vehicle.timeStamp
         case .project(let project): return project.timeStamp
+        case .activity(let activity): return activity.timeStamp
         }
     }
     
@@ -386,6 +389,28 @@ struct Universal: Identifiable {
             return project.customerEIN
         }
         return ""
+    }
+    
+    // Computed properties for Activity
+    var activityDescription: String {
+        if case .activity(let activity) = type {
+            return activity.description
+        }
+        return ""
+    }
+    
+    var activityProjectID: String? {
+        if case .activity(let activity) = type {
+            return activity.projectID
+        }
+        return nil
+    }
+    
+    var activityCustomerID: String? {
+        if case .activity(let activity) = type {
+            return activity.customerID
+        }
+        return nil
     }
 }
 
@@ -895,4 +920,44 @@ struct Vehicle: Identifiable, Codable {
     }
 }
 
-
+// MARK: - Activity Struct for BizzyLogs
+struct Activity: Identifiable, Codable {
+    var id: String = UUID().uuidString
+    var timeStamp: TimeInterval = Date().timeIntervalSince1970
+    var description: String
+    
+    // Optional fields for linking to BizzyBooks data
+    var projectID: String?
+    var customerID: String?
+    let key: String
+    
+    // Initializer for creating a new activity
+    init(description: String, projectID: String? = nil, customerID: String? = nil, key: String = "") {
+        self.key = key
+        self.description = description
+        self.projectID = projectID
+        self.customerID = customerID
+    }
+    
+    // Initializer for reading from Firebase
+    init(snapshot: DataSnapshot) {
+        key = snapshot.key
+        let snapshotValue = snapshot.value as! [String: AnyObject]
+        id = snapshotValue["id"] as? String ?? ""
+        timeStamp = snapshotValue["timeStamp"] as? TimeInterval ?? 0.0
+        description = snapshotValue["description"] as? String ?? ""
+        projectID = snapshotValue["projectID"] as? String
+        customerID = snapshotValue["customerID"] as? String
+    }
+    
+    // Method for writing to Firebase
+    func toDictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        dictionary["id"] = id
+        dictionary["timeStamp"] = timeStamp
+        dictionary["description"] = description
+        dictionary["projectID"] = projectID
+        dictionary["customerID"] = customerID
+        return dictionary
+    }
+}

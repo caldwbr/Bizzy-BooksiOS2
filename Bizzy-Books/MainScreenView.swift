@@ -12,17 +12,50 @@ struct MainScreenView: View {
     @State private var showingAddItemView = false
     @State private var isReportsViewPresented = false
     @State var searchCardsText = ""
+    
+    // Advanced filter state
+    @State private var filterByProject = ""
+    @State private var filterByEntity = ""
+    @State private var filterByTaxCategory = ""
+    @State private var filterByVehicle = ""
+    @State private var showAdvancedFilters = false
+    
     var body: some View {
         Self._printChanges()
         @Bindable var model = model
         return VStack {
             TextField("", text: $model.authEmail)
-            HeaderHStack(isFilterActive: $isFilterActive)
-            FilterByHStack(model: model, searchCardsText: $searchCardsText, isFilterActive: $isFilterActive)
-            BodyScrollView(model: model, searchCardsText: $searchCardsText, isFilterActive: $isFilterActive)
-            FooterHStack(model: model, isFilterActive: $isFilterActive, isEditing: $isEditing, isEditingSheetPresented: $isEditingSheetPresented, showingAddItemView: $showingAddItemView, isReportsViewPresented: $isReportsViewPresented)
+            HeaderHStack(isFilterActive: $isFilterActive, showAdvancedFilters: $showAdvancedFilters)
+            FilterByHStack(
+                model: model,
+                searchCardsText: $searchCardsText,
+                isFilterActive: $isFilterActive,
+                filterByProject: $filterByProject,
+                filterByEntity: $filterByEntity,
+                filterByTaxCategory: $filterByTaxCategory,
+                filterByVehicle: $filterByVehicle,
+                showAdvancedFilters: showAdvancedFilters
+            )
+            BodyScrollView(
+                model: model,
+                searchCardsText: $searchCardsText,
+                isFilterActive: $isFilterActive
+            )
+            FooterHStack(
+                model: model,
+                isFilterActive: $isFilterActive,
+                isEditing: $isEditing,
+                isEditingSheetPresented: $isEditingSheetPresented,
+                showingAddItemView: $showingAddItemView,
+                isReportsViewPresented: $isReportsViewPresented,
+                showAdvancedFilters: $showAdvancedFilters,
+                filterByProject: $filterByProject,
+                filterByEntity: $filterByEntity,
+                filterByTaxCategory: $filterByTaxCategory,
+                filterByVehicle: $filterByVehicle
+            )
         }
-        .onAppear(perform: {            
+        .onAppear(perform: {
             model.configureFirebaseReferences()
             model.checkAndCreateYouEntity()
             model.loadDataAndConcatenate()
@@ -34,22 +67,20 @@ struct MainScreenView: View {
 
 struct HeaderHStack: View {
     @Binding var isFilterActive: Bool
+    @Binding var showAdvancedFilters: Bool
     var body: some View {
         HStack {
             // Left circle containing user profile picture or Bizzy icon
             CircleAvatarView(imageName: "bizzyBeeImage")
-            
+
             Spacer()
-            
+
             Text("Bizzy Books")
                 .font(.title)
                 .bold()
-                //.font(.custom("MinionPro-Regular", size: 14))
-                //.bold()
 
-            
             Spacer()
-            
+
             Button("Settings") {
                 openSettings()
             }
@@ -63,23 +94,195 @@ struct FilterByHStack: View {
     @Bindable var model: Model
     @Binding var searchCardsText: String
     @Binding var isFilterActive: Bool
+    @Binding var filterByProject: String
+    @Binding var filterByEntity: String
+    @Binding var filterByTaxCategory: String
+    @Binding var filterByVehicle: String
+    var showAdvancedFilters: Bool
+    
     var body: some View {
-        HStack {
-            TextField("Search", text: $searchCardsText)
-                .onChange(of: searchCardsText) { oldText, newText in
-                    model.filteredUniversals.removeAll()
-                    model.universals.forEach { universal in
-                        if universal.title.lowercased().contains(newText.lowercased()) {
-                            model.filteredUniversals.append(universal) // Append matching items
+        VStack(spacing: 8) {
+            // Basic text search
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.gray)
+                TextField("Search transactions, projects, entities, vehicles...", text: $searchCardsText)
+                    .onChange(of: searchCardsText) { _, _ in
+                        applyFilters()
+                    }
+                if !searchCardsText.isEmpty {
+                    Button(action: {
+                        searchCardsText = ""
+                        applyFilters()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+            .padding(8)
+            .background(Color.white)
+            .cornerRadius(8)
+            
+            // Advanced filters
+            if showAdvancedFilters {
+                VStack(spacing: 8) {
+                    // Project filter
+                    HStack {
+                        Text("Project:")
+                            .frame(width: 70, alignment: .leading)
+                        Picker("", selection: $filterByProject) {
+                            Text("All Projects").tag("")
+                            ForEach(model.projects, id: \.id) { project in
+                                Text(project.name).tag(project.id)
+                            }
+                        }
+                        .onChange(of: filterByProject) { _, _ in
+                            applyFilters()
                         }
                     }
-                    model.displayedUniversals.removeAll()
-                    model.displayedUniversals = model.filteredUniversals
+                    .padding(6)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    
+                    // Entity filter
+                    HStack {
+                        Text("Entity:")
+                            .frame(width: 70, alignment: .leading)
+                        Picker("", selection: $filterByEntity) {
+                            Text("All Entities").tag("")
+                            ForEach(model.entities, id: \.id) { entity in
+                                Text(entity.name).tag(entity.id)
+                            }
+                        }
+                        .onChange(of: filterByEntity) { _, _ in
+                            applyFilters()
+                        }
+                    }
+                    .padding(6)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    
+                    // Tax category filter
+                    HStack {
+                        Text("Category:")
+                            .frame(width: 70, alignment: .leading)
+                        Picker("", selection: $filterByTaxCategory) {
+                            Text("All Categories").tag("")
+                            ForEach(0..<model.taxReasonArray.count, id: \.self) { index in
+                                if index > 0 {
+                                    Text(model.taxReasonArray[index]).tag(model.taxReasonArray[index])
+                                }
+                            }
+                        }
+                        .onChange(of: filterByTaxCategory) { _, _ in
+                            applyFilters()
+                        }
+                    }
+                    .padding(6)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    
+                    // Vehicle filter
+                    HStack {
+                        Text("Vehicle:")
+                            .frame(width: 70, alignment: .leading)
+                        Picker("", selection: $filterByVehicle) {
+                            Text("All Vehicles").tag("")
+                            ForEach(model.vehicles, id: \.id) { vehicle in
+                                Text(vehicle.name).tag(vehicle.id)
+                            }
+                        }
+                        .onChange(of: filterByVehicle) { _, _ in
+                            applyFilters()
+                        }
+                    }
+                    .padding(6)
+                    .background(Color.white)
+                    .cornerRadius(8)
                 }
+            }
         }
         .padding()
         .background(Color.offWhiteGray)
         .opacity(isFilterActive ? 1.0 : 0.0)
+    }
+    
+    private func applyFilters() {
+        model.filteredUniversals.removeAll()
+        
+        for universal in model.universals {
+            var matches = true
+            
+            // Text search filter
+            if !searchCardsText.isEmpty {
+                let searchText = searchCardsText.lowercased()
+                let titleMatch = universal.title.lowercased().contains(searchText)
+                let notesMatch = universal.notes.lowercased().contains(searchText)
+                
+                // For items, also search in sentence components
+                var sentenceMatch = false
+                if case .item(let item) = universal.type {
+                    sentenceMatch = item.whom.lowercased().contains(searchText) ||
+                                   item.projectName.lowercased().contains(searchText) ||
+                                   item.vehicleName.lowercased().contains(searchText) ||
+                                   model.taxReasonArray[item.taxReasonInt].lowercased().contains(searchText) ||
+                                   model.personalReasonArray[item.personalReasonInt].lowercased().contains(searchText)
+                }
+                
+                matches = titleMatch || notesMatch || sentenceMatch
+            }
+            
+            // Project filter
+            if matches && !filterByProject.isEmpty {
+                if case .item(let item) = universal.type {
+                    matches = item.projectID == filterByProject
+                } else if case .project(let project) = universal.type {
+                    matches = project.id == filterByProject
+                } else {
+                    matches = false
+                }
+            }
+            
+            // Entity filter
+            if matches && !filterByEntity.isEmpty {
+                if case .item(let item) = universal.type {
+                    matches = item.whomID == filterByEntity
+                } else if case .entity(let entity) = universal.type {
+                    matches = entity.id == filterByEntity
+                } else {
+                    matches = false
+                }
+            }
+            
+            // Tax category filter
+            if matches && !filterByTaxCategory.isEmpty {
+                if case .item(let item) = universal.type {
+                    let taxReason = model.taxReasonArray[item.taxReasonInt]
+                    matches = taxReason == filterByTaxCategory
+                } else {
+                    matches = false
+                }
+            }
+            
+            // Vehicle filter
+            if matches && !filterByVehicle.isEmpty {
+                if case .item(let item) = universal.type {
+                    matches = item.itemType == .fuel && item.vehicleID == filterByVehicle
+                } else if case .vehicle(let vehicle) = universal.type {
+                    matches = vehicle.id == filterByVehicle
+                } else {
+                    matches = false
+                }
+            }
+            
+            if matches {
+                model.filteredUniversals.append(universal)
+            }
+        }
+        
+        model.displayedUniversals.removeAll()
+        model.displayedUniversals = model.filteredUniversals
     }
 }
 
@@ -110,7 +313,12 @@ struct FooterHStack: View {
     @Binding var isEditingSheetPresented: Bool
     @Binding var showingAddItemView: Bool
     @Binding var isReportsViewPresented: Bool
-    
+    @Binding var showAdvancedFilters: Bool
+    @Binding var filterByProject: String
+    @Binding var filterByEntity: String
+    @Binding var filterByTaxCategory: String
+    @Binding var filterByVehicle: String
+
     var body: some View {
         Self._printChanges()
         return HStack {
@@ -125,22 +333,34 @@ struct FooterHStack: View {
             }
             .foregroundColor(model.hasLoaded ? .blue : .gray)
             .disabled(!model.hasLoaded)
-            
+
             Spacer()
-            
+
             Button(action: {
                 if isFilterActive {
+                    // Clear all filters when deactivating
                     model.displayedUniversals.removeAll()
                     model.displayedUniversals = model.universals
                 }
                 isFilterActive.toggle()
             }) {
-                Image(systemName: "magnifyingglass").foregroundColor(model.hasLoaded ? .blue : .gray)
+                Image(systemName: isFilterActive ? "xmark.circle.fill" : "magnifyingglass")
+                    .foregroundColor(model.hasLoaded ? .blue : .gray)
             }
             .disabled(!model.hasLoaded)
-            
+
             Spacer()
-            
+
+            Button(action: {
+                showAdvancedFilters.toggle()
+            }) {
+                Image(systemName: "line.3.horizontal.decrease.circle")
+                    .foregroundColor(model.hasLoaded ? .blue : .gray)
+            }
+            .disabled(!model.hasLoaded)
+
+            Spacer()
+
             Button(action: {
                 isReportsViewPresented = true
             }) {
@@ -151,9 +371,9 @@ struct FooterHStack: View {
                 ReportsView(model: model)
             }
             .disabled(!model.hasLoaded)
-            
+
             Spacer()
-            
+
             Button(action: {
                 showingAddItemView = true
             }) {
@@ -440,6 +660,8 @@ struct CardView: View {
                 projectList
             case .item:
                 mainSentence
+            case .activity:
+                mainSentence
             }
             
             Spacer()
@@ -468,6 +690,8 @@ extension Universal {
             return projectName
         case .vehicle:
             return vehicleName
+        case .activity:
+            return activityDescription
         }
     }
     
@@ -482,6 +706,8 @@ extension Universal {
             return project.notes
         case .vehicle(let vehicle):
             // Return some vehicle specific note if needed
+            return ""
+        case .activity(let activity):
             return ""
         }
     }
@@ -503,6 +729,8 @@ extension Universal {
             return "hammer.circle"
         case .vehicle:
             return "car.circle"
+        case .activity:
+            return "person.circle"
         }
     }
     

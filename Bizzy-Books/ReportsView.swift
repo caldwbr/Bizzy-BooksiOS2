@@ -142,6 +142,12 @@ struct ReportsView: View {
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
+            .onChange(of: model.docuType) { oldType, newType in
+                // Only regenerate the PDF if a project has already been selected.
+                if !selectedProjectUIDForCustomerDocument.isEmpty {
+                    generateAndDisplayCustomerPDF()
+                }
+            }
 
             TextField("Project (type to filter)", text: $selectedProjectForCustomerDocumentSearchyField)
                 .textFieldStyle(.roundedBorder)
@@ -371,9 +377,17 @@ struct ReportsView: View {
     func generateAndDisplayCustomerPDF() {
         guard let initialPDFData = model.generateCustomerPDFReport(forProjectUID: selectedProjectUIDForCustomerDocument) else { return }
 
-        appendTermsAndConditions(to: initialPDFData) { appendedPDFData in
+        if model.docuType == .contract {
+            // Only append for the 'contract' case
+            appendTermsAndConditions(to: initialPDFData) { appendedPDFData in
+                DispatchQueue.main.async {
+                    self.pdfData = appendedPDFData
+                }
+            }
+        } else {
+            // For all other document types, just use the initial PDF data
             DispatchQueue.main.async {
-                self.pdfData = appendedPDFData
+                self.pdfData = initialPDFData
             }
         }
     }
