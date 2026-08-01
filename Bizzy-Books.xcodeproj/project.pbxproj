@@ -13,6 +13,8 @@
 		673CF3AF2B48952E00506736 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673CF3AE2B48952E00506736 /* Model.swift */; };
 		673CF3B12B4B497600506736 /* AddCustomerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673CF3B02B4B497600506736 /* AddCustomerView.swift */; };
 		674D4EB52B325BFA001699F2 /* AddItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674D4EB42B325BFA001699F2 /* AddItemModel.swift */; };
+		67FADE022E3C0001000AB002 /* InventoryModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67FADE012E3C0001000AB001 /* InventoryModule.swift */; };
+		67FADE042E3C0001000AB004 /* InventoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67FADE032E3C0001000AB003 /* InventoryViews.swift */; };
 		67559DC42B8E82C20051C9F0 /* MinionVariableConcept-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67559DC32B8E82C20051C9F0 /* MinionVariableConcept-Italic.otf */; };
 		67559DC82B8E830E0051C9F0 /* minionpro-bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67559DC72B8E830E0051C9F0 /* minionpro-bold.otf */; };
 		678FBB812B44F2A100A38561 /* AddWhomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678FBB802B44F2A100A38561 /* AddWhomView.swift */; };
@@ -40,8 +42,6 @@
 		67EEBF3D2B73F60400764C46 /* MinionPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */; };
 		67EEBF3E2B73F60400764C46 /* MinionPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */; };
 		67EEBF3F2B73F60400764C46 /* MinionPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */; };
-		67FADE022E3C0001000AB002 /* InventoryModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67FADE012E3C0001000AB001 /* InventoryModule.swift */; };
-		67FADE042E3C0001000AB004 /* InventoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67FADE032E3C0001000AB003 /* InventoryViews.swift */; };
 		811E0F4C9EF7FD937F0B34C1 /* Pods_Bizzy_Books_Bizzy_BooksUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E43A72C617758376343632D6 /* Pods_Bizzy_Books_Bizzy_BooksUITests.framework */; };
 		88B63E482E623416002B439F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 88B63E472E623416002B439F /* GoogleService-Info.plist */; };
 		88B63E492E623416002B439F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 88B63E472E623416002B439F /* GoogleService-Info.plist */; };
@@ -75,6 +75,8 @@
 		673CF3AE2B48952E00506736 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		673CF3B02B4B497600506736 /* AddCustomerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCustomerView.swift; sourceTree = "<group>"; };
 		674D4EB42B325BFA001699F2 /* AddItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemModel.swift; sourceTree = "<group>"; };
+		67FADE012E3C0001000AB001 /* InventoryModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryModule.swift; sourceTree = "<group>"; };
+		67FADE032E3C0001000AB003 /* InventoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryViews.swift; sourceTree = "<group>"; };
 		67559DC32B8E82C20051C9F0 /* MinionVariableConcept-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "MinionVariableConcept-Italic.otf"; sourceTree = "<group>"; };
 		67559DC72B8E830E0051C9F0 /* minionpro-bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "minionpro-bold.otf"; sourceTree = "<group>"; };
 		6759408F2B30C2D5002EAF9C /* FirebaseAuth.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = FirebaseAuth.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -106,8 +108,6 @@
 		67EEBF352B6FF78900764C46 /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
 		67EEBF3B2B73F08B00764C46 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "MinionPro-Regular.otf"; sourceTree = "<group>"; };
-		67FADE012E3C0001000AB001 /* InventoryModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryModule.swift; sourceTree = "<group>"; };
-		67FADE032E3C0001000AB003 /* InventoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryViews.swift; sourceTree = "<group>"; };
 		785FAAA8943D1E579DBA31A7 /* Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig"; path = "Target Support Files/Pods-Bizzy-Books-Bizzy-BooksUITests/Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		88B63E472E623416002B439F /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8E90569987E00A34D1754264 /* Pods-Bizzy-Books.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-Books.debug.xcconfig"; path = "Target Support Files/Pods-Bizzy-Books/Pods-Bizzy-Books.debug.xcconfig"; sourceTree = "<group>"; };
@@ -424,9 +424,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Bizzy-Books/Pods-Bizzy-Books-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Bizzy-Books/Pods-Bizzy-Books-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -441,9 +445,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Bizzy-Books-Bizzy-BooksUITests/Pods-Bizzy-Books-Bizzy-BooksUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Bizzy-Books-Bizzy-BooksUITests/Pods-Bizzy-Books-Bizzy-BooksUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -688,14 +696,15 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = "Bizzy-Books/Bizzy_Books.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				DEVELOPMENT_ASSET_PATHS = "\"Bizzy-Books/Preview Content\"";
 				DEVELOPMENT_TEAM = ALC53N96R3;
 				ENABLE_PREVIEWS = YES;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Bizzy-Books/Info.plist";
@@ -718,7 +727,7 @@
 					"$(inherited)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -730,7 +739,6 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -743,14 +751,15 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = "Bizzy-Books/Bizzy_Books.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				DEVELOPMENT_ASSET_PATHS = "\"Bizzy-Books/Preview Content\"";
 				DEVELOPMENT_TEAM = ALC53N96R3;
 				ENABLE_PREVIEWS = YES;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Bizzy-Books/Info.plist";
@@ -773,7 +782,7 @@
 					"$(inherited)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -785,7 +794,6 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -802,7 +810,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-BooksTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -825,7 +833,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-BooksTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -847,7 +855,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-BooksUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -869,7 +877,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.bizzybooks.Bizzy-BooksUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;

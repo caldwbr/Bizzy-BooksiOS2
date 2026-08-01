@@ -2673,7 +2673,16 @@ extension Model {
     
     func deleteAccount() async -> Bool {
         do {
+            let deletingUid = uid.isEmpty ? (user?.uid ?? "") : uid
             try await user?.delete()
+            // App Review (guideline 5.1.1) requires account deletion to remove
+            // the user's data, not just the login. The just-invalidated auth
+            // token is still honored for a short window, letting these through.
+            if !deletingUid.isEmpty {
+                try? await Database.database().reference().child("users").child(deletingUid).removeValue()
+                try? await logoStorageRef?.delete()
+                try? await termsPDFRef?.delete()
+            }
             return true
         }
         catch {
