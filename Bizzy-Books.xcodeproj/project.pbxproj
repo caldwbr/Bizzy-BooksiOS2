@@ -40,6 +40,8 @@
 		67EEBF3D2B73F60400764C46 /* MinionPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */; };
 		67EEBF3E2B73F60400764C46 /* MinionPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */; };
 		67EEBF3F2B73F60400764C46 /* MinionPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */; };
+		67FADE022E3C0001000AB002 /* InventoryModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67FADE012E3C0001000AB001 /* InventoryModule.swift */; };
+		67FADE042E3C0001000AB004 /* InventoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67FADE032E3C0001000AB003 /* InventoryViews.swift */; };
 		811E0F4C9EF7FD937F0B34C1 /* Pods_Bizzy_Books_Bizzy_BooksUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E43A72C617758376343632D6 /* Pods_Bizzy_Books_Bizzy_BooksUITests.framework */; };
 		88B63E482E623416002B439F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 88B63E472E623416002B439F /* GoogleService-Info.plist */; };
 		88B63E492E623416002B439F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 88B63E472E623416002B439F /* GoogleService-Info.plist */; };
@@ -104,6 +106,8 @@
 		67EEBF352B6FF78900764C46 /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
 		67EEBF3B2B73F08B00764C46 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		67EEBF3C2B73F60400764C46 /* MinionPro-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "MinionPro-Regular.otf"; sourceTree = "<group>"; };
+		67FADE012E3C0001000AB001 /* InventoryModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryModule.swift; sourceTree = "<group>"; };
+		67FADE032E3C0001000AB003 /* InventoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryViews.swift; sourceTree = "<group>"; };
 		785FAAA8943D1E579DBA31A7 /* Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig"; path = "Target Support Files/Pods-Bizzy-Books-Bizzy-BooksUITests/Pods-Bizzy-Books-Bizzy-BooksUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		88B63E472E623416002B439F /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8E90569987E00A34D1754264 /* Pods-Bizzy-Books.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bizzy-Books.debug.xcconfig"; path = "Target Support Files/Pods-Bizzy-Books/Pods-Bizzy-Books.debug.xcconfig"; sourceTree = "<group>"; };
@@ -193,6 +197,8 @@
 				678FBB842B45008000A38561 /* TFCurrencyGallonsOdo.swift */,
 				678FBB862B4500FD00A38561 /* LayoutFlow.swift */,
 				673CF3AE2B48952E00506736 /* Model.swift */,
+				67FADE012E3C0001000AB001 /* InventoryModule.swift */,
+				67FADE032E3C0001000AB003 /* InventoryViews.swift */,
 				678FBB882B45039800A38561 /* AddVehicleView.swift */,
 				678FBB8A2B4503A800A38561 /* AddProjectView.swift */,
 				67EEBF352B6FF78900764C46 /* ReportsView.swift */,
@@ -418,13 +424,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Bizzy-Books/Pods-Bizzy-Books-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Bizzy-Books/Pods-Bizzy-Books-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -439,13 +441,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Bizzy-Books-Bizzy-BooksUITests/Pods-Bizzy-Books-Bizzy-BooksUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Bizzy-Books-Bizzy-BooksUITests/Pods-Bizzy-Books-Bizzy-BooksUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -523,6 +521,8 @@
 				67C709C32B32075900C09CC6 /* ColorExtensions.swift in Sources */,
 				67EEBF362B6FF78900764C46 /* ReportsView.swift in Sources */,
 				673CF3AF2B48952E00506736 /* Model.swift in Sources */,
+				67FADE022E3C0001000AB002 /* InventoryModule.swift in Sources */,
+				67FADE042E3C0001000AB004 /* InventoryViews.swift in Sources */,
 				670D45BD2B43161D00FF9BB3 /* FirebaseDatabase.swift in Sources */,
 				678FBB832B45002500A38561 /* VMSVWhoWhomVehProj.swift in Sources */,
 			);
@@ -688,6 +688,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = "Bizzy-Books/Bizzy_Books.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -729,6 +730,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -741,6 +743,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_EXPLICIT_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = "Bizzy-Books/Bizzy_Books.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -782,6 +785,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

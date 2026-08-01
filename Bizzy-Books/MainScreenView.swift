@@ -11,6 +11,7 @@ struct MainScreenView: View {
     @State private var isEditingSheetPresented = false
     @State private var showingAddItemView = false
     @State private var isReportsViewPresented = false
+    @State private var showingInventoryView = false
     
     // Advanced filter state
     @State private var filterByProject = ""
@@ -21,20 +22,20 @@ struct MainScreenView: View {
     @FocusState private var searchFieldFocused: Bool
     
     var body: some View {
-        Self._printChanges()
         @Bindable var model = model
         return VStack {
-            TextField("", text: $model.authEmail)
             HeaderHStack(isFilterActive: $isFilterActive, showAdvancedFilters: $showAdvancedFilters)
-            FilterByHStack(
-                model: model,
-                isFilterActive: $isFilterActive,
-                filterByProject: $filterByProject,
-                filterByEntity: $filterByEntity,
-                filterByTaxCategory: $filterByTaxCategory,
-                filterByVehicle: $filterByVehicle,
-                showAdvancedFilters: showAdvancedFilters
-            )
+            if isFilterActive || showAdvancedFilters {
+                FilterByHStack(
+                    model: model,
+                    isFilterActive: $isFilterActive,
+                    filterByProject: $filterByProject,
+                    filterByEntity: $filterByEntity,
+                    filterByTaxCategory: $filterByTaxCategory,
+                    filterByVehicle: $filterByVehicle,
+                    showAdvancedFilters: showAdvancedFilters
+                )
+            }
             BodyScrollView(
                 model: model,
                 isFilterActive: $isFilterActive
@@ -46,6 +47,7 @@ struct MainScreenView: View {
                 isEditingSheetPresented: $isEditingSheetPresented,
                 showingAddItemView: $showingAddItemView,
                 isReportsViewPresented: $isReportsViewPresented,
+                showingInventoryView: $showingInventoryView,
                 showAdvancedFilters: $showAdvancedFilters,
                 filterByProject: $filterByProject,
                 filterByEntity: $filterByEntity,
@@ -88,6 +90,7 @@ struct HeaderHStack: View {
     }
 }
 
+@MainActor
 struct FilterByHStack: View {
     @Bindable var model: Model
     @Binding var isFilterActive: Bool
@@ -197,6 +200,7 @@ struct FilterByHStack: View {
             // Advanced filters (pickers)
             if showAdvancedFilters {
                 VStack(spacing: 8) {
+                    if model.businessType != .retail {
                     // Project filter
                     HStack {
                         Text("Project:")
@@ -214,7 +218,8 @@ struct FilterByHStack: View {
                     .padding(6)
                     .background(Color.white)
                     .cornerRadius(8)
-                    
+                    }
+
                     // Entity filter
                     HStack {
                         Text("Entity:")
@@ -275,7 +280,6 @@ struct FilterByHStack: View {
         }
         .padding()
         .background(Color.offWhiteGray)
-        .opacity(isFilterActive ? 1.0 : 0.0)
     }
     
     private func applyAdvancedFilters() {
@@ -369,6 +373,7 @@ struct FooterHStack: View {
     @Binding var isEditingSheetPresented: Bool
     @Binding var showingAddItemView: Bool
     @Binding var isReportsViewPresented: Bool
+    @Binding var showingInventoryView: Bool
     @Binding var showAdvancedFilters: Bool
     @Binding var filterByProject: String
     @Binding var filterByEntity: String
@@ -376,7 +381,6 @@ struct FooterHStack: View {
     @Binding var filterByVehicle: String
 
     var body: some View {
-        Self._printChanges()
         return HStack {
             Button("Edit") {
                 editBusiness()
@@ -429,6 +433,21 @@ struct FooterHStack: View {
             .disabled(!model.hasLoaded)
 
             Spacer()
+
+            if model.businessType == .retail {
+                Button(action: {
+                    showingInventoryView = true
+                }) {
+                    Image(systemName: "shippingbox")
+                        .foregroundColor(model.hasLoaded ? .blue : .gray)
+                }
+                .sheet(isPresented: $showingInventoryView) {
+                    InventoryHomeView(model: model)
+                }
+                .disabled(!model.hasLoaded)
+
+                Spacer()
+            }
 
             Button(action: {
                 showingAddItemView = true
@@ -484,6 +503,7 @@ struct CardView: View {
             case .business: forW; taxReason; project
             case .personal: forW; personalReason
             case .fuel: forW; howMany; gallonsOfFuelIn; vehicle; odometer
+            case .inventory: forW; inventoryTag
             }
         }
         .animation(.default, value: model.align)
@@ -600,6 +620,22 @@ struct CardView: View {
         }
     }
     
+    var inventoryTag: some View {
+        Text("inventory (goods for resale)")
+            .foregroundColor(Color.BizzyColor.taxReasonMagenta)
+            .padding()
+    }
+
+    var inventoryLinesList: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            ForEach(displayedUniversal.itemLines) { line in
+                Text("\(line.qty) × \(line.itemTypeName) @ \(InventoryFormat.dollars(line.unitCostCents))")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
     var entityList: some View {
         VStack(alignment: .leading) {
             if !displayedUniversal.entityBusinessName.isEmpty {
@@ -716,6 +752,9 @@ struct CardView: View {
                 projectList
             case .item:
                 mainSentence
+                if displayedUniversal.itemItemType == .inventory && !displayedUniversal.itemLines.isEmpty {
+                    inventoryLinesList
+                }
             case .activity:
                 mainSentence
             }
@@ -778,6 +817,8 @@ extension Universal {
                 return "house.circle"
             case .business:
                 return "building.2.crop.circle"
+            case .inventory:
+                return "shippingbox.circle"
             }
         case .entity:
             return "person.circle"

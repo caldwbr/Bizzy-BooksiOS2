@@ -79,6 +79,7 @@ struct AuthenticatedView<Content, Unauthenticated>: View where Content: View, Un
             }
         }
         .onAppear(perform: {
+            KeyboardDismisser.shared.installIfNeeded()
             model.registerAuthStateHandler()
 
 //            model.flow

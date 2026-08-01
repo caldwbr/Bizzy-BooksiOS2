@@ -260,6 +260,11 @@ import Contacts
         vehiclesRef = Database.database().reference().child("users").child(uid).child("vehicles")
         scopesRef = Database.database().reference().child("users").child(uid).child("scopes")
         projectNumbersRef = Database.database().reference().child("users").child(uid).child("projectnumbers")
+        businessTypeRef = Database.database().reference().child("users").child(uid).child("businesstype")
+        itemTypesRef = Database.database().reference().child("users").child(uid).child("itemtypes")
+        inventoryLocationsRef = Database.database().reference().child("users").child(uid).child("inventorylocations")
+        inventoryCountsRef = Database.database().reference().child("users").child(uid).child("inventorycounts")
+        taxYearsRef = Database.database().reference().child("users").child(uid).child("taxyears")
         storageRef = Storage.storage().reference(forURL: "gs://bizzy-books-2.appspot.com")
         logoStorageRef = storageRef?.child("\(uid)/logo.jpg")
         termsPDFRef = storageRef?.child("\(uid)/terms_and_conditions/current_terms.pdf")
@@ -627,6 +632,11 @@ import Contacts
         loadEntities()
         loadScopes()
         loadLogo()
+        loadBusinessType()
+        loadItemTypes()
+        loadInventoryLocations()
+        loadInventoryCounts()
+        loadTaxYearRecords()
         
         dataLoadGroup.notify(queue: .main) {
             self.concatenateUniversals()
@@ -873,6 +883,7 @@ import Contacts
         notesValue = ""
         showWorkersCompToggle = false
         incursWorkersComp = false
+        inventoryLineDrafts.removeAll()
     }
     
     func clearDocumentsBuffer() {
@@ -889,6 +900,28 @@ import Contacts
     
     var whatIsNegative = false
     var priceEaIsNegative: [String: Bool] = [:]
+
+    // MARK: Retail mode / inventory (logic lives in InventoryModule.swift)
+    var businessType: BusinessType = .contracting
+    var itemTypes: [ItemTypeRecord] = []
+    var inventoryLocations: [InventoryLocation] = []
+    var inventoryCounts: [InventoryCount] = []
+    var taxYearRecords: [String: TaxYearRecord] = [:]
+    var inventoryLineDrafts: [InventoryLineDraft] = []
+    var businessTypeRef: DatabaseReference? = nil
+    var itemTypesRef: DatabaseReference? = nil
+    var inventoryLocationsRef: DatabaseReference? = nil
+    var inventoryCountsRef: DatabaseReference? = nil
+    var taxYearsRef: DatabaseReference? = nil
+
+    // Schedule C Part III (COGS) figures for the tax document. Always zero in
+    // contracting mode — computeCOGS() is hard-gated on businessType.
+    var tdBeginningInventory = 0
+    var tdInventoryPurchases = 0
+    var tdEndingInventory = 0
+    var tdCOGS = 0
+    var tdGrossProfit = 0
+    var tdCogsAvailable = false
 
     // Business Expenses
     var tdGrossIncome = 0
@@ -976,6 +1009,13 @@ import Contacts
         tdOtherPersonal = 0
 
         tdNetIncome = 0
+
+        tdBeginningInventory = 0
+        tdInventoryPurchases = 0
+        tdEndingInventory = 0
+        tdCOGS = 0
+        tdGrossProfit = 0
+        tdCogsAvailable = false
     }
     
     // Tax Reason Int to String Mapping
@@ -1059,6 +1099,9 @@ import Contacts
         // Guard against empty data
         guard !itemsByYear.isEmpty else {
             resetTDValues()
+            computeCOGS(forYear: year)
+            tdGrossProfit = tdGrossIncome - tdCOGS
+            tdNetIncome = tdGrossProfit - tdTotalExpenses
             return
         }
         
@@ -1209,6 +1252,11 @@ import Contacts
                 } else {
                     vehicleFuelStops[item.vehicleID] = [fuelStop]
                 }
+            } else if item.itemType == .inventory {
+                // Inventory purchases post to the ASSET bucket. They must never
+                // appear in the Part II expense totals — they deduct via COGS
+                // at year end (see computeCOGS in InventoryModule.swift).
+                tdInventoryPurchases += item.what
             }
         }
         projectRecords = projectData.values.map {
@@ -1227,7 +1275,10 @@ import Contacts
                           tdDepletion + tdUtilitiesBusiness + tdCommissions + tdWages +
                           tdMortgageInt + tdOtherInt + tdRepairs + tdPension
         tdTotalExpenses = tdNonLaborExpenses + tdLabor
-        tdNetIncome = tdGrossIncome - tdTotalExpenses
+        // COGS comes off receipts before expenses. Zero in contracting mode.
+        computeCOGS(forYear: year)
+        tdGrossProfit = tdGrossIncome - tdCOGS
+        tdNetIncome = tdGrossProfit - tdTotalExpenses
         //print("Vehicle Fuel Stops: \(vehicleFuelStops)")
     }
     
@@ -1363,9 +1414,44 @@ import Contacts
             drawSeparatorLine(at: currentY, context: context)
             currentY += sectionSpacing
 
+            // ==================== COST OF GOODS SOLD (retail mode only) ====================
+            if self.businessType == .retail {
+                let cogsHeaderSize = drawText("COST OF GOODS SOLD — Schedule C, Part III", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
+                currentY += cogsHeaderSize.height + lineSpacing
+
+                let beginningFormatted = formatter.string(from: NSNumber(value: Double(self.tdBeginningInventory) / 100.0)) ?? "$0.00"
+                let purchasesFormatted = formatter.string(from: NSNumber(value: Double(self.tdInventoryPurchases) / 100.0)) ?? "$0.00"
+                let endingFormatted = formatter.string(from: NSNumber(value: Double(self.tdEndingInventory) / 100.0)) ?? "$0.00"
+                let cogsFormatted = formatter.string(from: NSNumber(value: Double(self.tdCOGS) / 100.0)) ?? "$0.00"
+
+                let line35Size = drawText("Beginning inventory (line 35): \(beginningFormatted)", at: CGPoint(x: leftMargin + 12, y: currentY), attributes: bodyAttributes)
+                currentY += line35Size.height + lineSpacing
+                let line36Size = drawText("+ Purchases of goods for resale (line 36): \(purchasesFormatted)", at: CGPoint(x: leftMargin + 12, y: currentY), attributes: bodyAttributes)
+                currentY += line36Size.height + lineSpacing
+                if self.tdCogsAvailable {
+                    let line41Size = drawText("− Ending inventory (line 41): \(endingFormatted)", at: CGPoint(x: leftMargin + 12, y: currentY), attributes: bodyAttributes)
+                    currentY += line41Size.height + lineSpacing
+                    let line42Size = drawText("= Cost of Goods Sold (line 42): \(cogsFormatted)", at: CGPoint(x: leftMargin + 12, y: currentY), attributes: boldBodyAttributes)
+                    currentY += line42Size.height + lineSpacing
+                } else {
+                    let cogsWarnSize = drawWrappedText("Ending inventory is not on record for \(year). Finalize a year-end count (or enter the figure manually under Inventory → Counts) to compute COGS. Until then COGS is $0.00 and inventory purchases are NOT deducted.", at: CGPoint(x: leftMargin + 12, y: currentY), maxWidth: maxWidth - 12, attributes: smallAttributes)
+                    currentY += cogsWarnSize.height + lineSpacing
+                }
+                let grossProfitFormatted = formatter.string(from: NSNumber(value: Double(self.tdGrossProfit) / 100.0)) ?? "$0.00"
+                let grossProfitSize = drawText("GROSS PROFIT (receipts − COGS): \(grossProfitFormatted)", at: CGPoint(x: leftMargin, y: currentY), attributes: boldBodyAttributes)
+                currentY += grossProfitSize.height + sectionSpacing
+
+                drawSeparatorLine(at: currentY, context: context)
+                currentY += sectionSpacing
+            }
+
             // ==================== BUSINESS EXPENSES ====================
             let expensesSize = drawText("BUSINESS EXPENSES", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
             currentY += expensesSize.height + lineSpacing
+            if self.businessType == .retail {
+                let expenseNoteSize = drawText("Inventory purchases are NOT included below — they deduct through COGS above.", at: CGPoint(x: leftMargin, y: currentY), attributes: smallAttributes)
+                currentY += expenseNoteSize.height + lineSpacing
+            }
 
             struct ExpenseLine {
                 let name: String
@@ -1437,7 +1523,11 @@ import Contacts
             // Net Income
             let netIncomeFormatted = formatter.string(from: NSNumber(value: Double(self.tdNetIncome) / 100.0)) ?? "$0.00"
             let netIncomeSize = drawText("NET INCOME: \(netIncomeFormatted)", at: CGPoint(x: leftMargin, y: currentY), attributes: titleAttributes)
-            currentY += netIncomeSize.height + sectionSpacing * 2
+            currentY += netIncomeSize.height + sectionSpacing
+
+            // Required disclaimer — keep on every tax document.
+            let disclaimerSize = drawWrappedText("Bizzy Books is a record-keeping tool, not tax advice. Review all figures with a qualified tax preparer before filing.", at: CGPoint(x: leftMargin, y: currentY), maxWidth: maxWidth, attributes: smallAttributes)
+            currentY += disclaimerSize.height + sectionSpacing
 
             // ==================== EXPENSE PERCENTAGES ====================
             if currentY > pageHeight - 200 {
@@ -1537,7 +1627,7 @@ import Contacts
             }
 
             // ==================== PROJECT PROFITABILITY ====================
-            if !self.projectRecords.isEmpty {
+            if !self.projectRecords.isEmpty && self.businessType != .retail {
                 context.beginPage()
                 currentY = topMargin
                 let projSize = drawText("PROJECT PROFITABILITY", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
@@ -1581,7 +1671,7 @@ import Contacts
             }
 
             // ==================== WORKERS COMP RECORDS ====================
-            if !self.workersCompRecords.isEmpty {
+            if !self.workersCompRecords.isEmpty && self.businessType != .retail {
                 context.beginPage()
                 currentY = topMargin
                 let wcSize = drawText("WORKERS COMP RECORDS", at: CGPoint(x: leftMargin, y: currentY), attributes: headerAttributes)
@@ -2544,6 +2634,19 @@ extension Model {
         }
     }
     
+    func sendPasswordReset() async -> Bool {
+        do {
+            try await Auth.auth().sendPasswordReset(withEmail: authEmail)
+            errorMessage = ""
+            return true
+        }
+        catch {
+            print(error)
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
     func signUpWithEmailPassword() async -> Bool {
         authenticationState = .authenticating
         do  {

@@ -59,12 +59,16 @@ struct ReportsView: View {
             PDFViewer(pdfData: $pdfData)
                 .frame(maxHeight: .infinity)
             HStack {
-                selectTermsButton
+                if !model.isRetail {
+                    selectTermsButton
+                }
                 Text("PDF")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.secondary)
                 uploadLogoButton
-                addBinderButton
+                if !model.isRetail {
+                    addBinderButton
+                }
                 customerSiteButton
                 addScopeItemButton
                 shareButton
@@ -82,6 +86,9 @@ struct ReportsView: View {
         }
         .onAppear {
             fetchCompanyLogo()
+            if !model.availableCustomerDocuments.contains(model.docuType) {
+                model.docuType = .invoice
+            }
         }
         
     }
@@ -130,13 +137,17 @@ struct ReportsView: View {
                     .progressViewStyle(CircularProgressViewStyle()) // Use the circular style
                     .scaleEffect(1.5) // Optional: Scale the progress view for better visibility
             }
+            Text("Record-keeping tool — not tax advice. Review all figures with a qualified preparer.")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .padding(.horizontal)
         }
     }
     
     var customerDocumentSection: some View {
         VStack(spacing: 12) {
             Picker("Document Type", selection: $model.docuType) {
-                ForEach(CustomerDocument.allCases, id: \.self) { doc in
+                ForEach(model.availableCustomerDocuments, id: \.self) { doc in
                     Text(doc.rawValue).tag(doc)
                 }
             }
@@ -304,7 +315,9 @@ struct ReportsView: View {
     
     var shareButton: some View {
         Group {
-            if let pdfURL = pdfURL, model.tailoredScopes.count > 0  {
+            // Tax documents are shareable as soon as they render; customer
+            // documents still require scopes to be loaded for the project.
+            if let pdfURL = pdfURL, documentSelection == .taxDocument || model.tailoredScopes.count > 0 {
                 ShareLink(item: pdfURL, label: {
                     Image(systemName: "square.and.arrow.up")
                         .padding()

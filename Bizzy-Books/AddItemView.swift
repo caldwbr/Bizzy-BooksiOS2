@@ -16,9 +16,19 @@ struct AddItemView: View {
                 wcToggle
             }
             yeSentence
+            if model.itemType == .inventory {
+                ScrollView {
+                    InventoryLinesEditor(model: model)
+                }
+            }
         }
         .onAppear(perform: {
             model.clearButtonsTFsAndPickers()
+            // Fuel is hidden in retail mode (and Inventory in contracting) —
+            // never leave the picker stuck on an unavailable type.
+            if !model.availableItemTypes.contains(model.itemType) {
+                model.itemType = .business
+            }
         })
         .onDisappear(perform: {
             model.checkAndCreateYouEntity()
@@ -44,23 +54,51 @@ struct AddItemView: View {
     var saveButton: some View {
         Button(action: {
             model.selectedWhoUID = model.uid
-            let newItem = Item(latitude: model.latitude ?? 0.0, longitude: model.longitude ?? 0.0, itemType: model.itemType, notes: model.notesValue, what: model.whatInt, whom: model.selectedWhom, whomID: model.selectedWhomUID, personalReasonInt: model.personalReasonIndex, taxReasonInt: model.taxReasonIndex, vehicleName: model.selectedVehicle, vehicleID: model.selectedVehicleUID, workersComp: model.incursWorkersComp, projectName: model.selectedProject, projectID: model.selectedProjectUID, howMany: model.howManyInt, odometer: model.odometerInt)
+            if model.isRetail && model.itemType == .business && model.selectedProjectUID.isEmpty {
+                // Retail mode hides projects — business items file under Overhead.
+                model.selectedProject = "Overhead"
+                model.selectedProjectUID = "OverheadID"
+            }
+            var newItem = Item(latitude: model.latitude ?? 0.0, longitude: model.longitude ?? 0.0, itemType: model.itemType, notes: model.notesValue, what: model.whatInt, whom: model.selectedWhom, whomID: model.selectedWhomUID, personalReasonInt: model.personalReasonIndex, taxReasonInt: model.taxReasonIndex, vehicleName: model.selectedVehicle, vehicleID: model.selectedVehicleUID, workersComp: model.incursWorkersComp, projectName: model.selectedProject, projectID: model.selectedProjectUID, howMany: model.howManyInt, odometer: model.odometerInt)
+            if model.itemType == .inventory {
+                // Shipment lines ride along on the item. This is the ASSET
+                // bucket — never an immediate expense (deducts via COGS).
+                newItem.lines = model.validInventoryLines
+            }
             let newItemID = newItem.id
             print("New Item Id: ", newItem.id)
             let newItemDict = newItem.toDictionary()
             Database.database().reference().child("users").child(model.uid).child("items").child(newItemID).setValue(newItemDict)
+            if model.itemType == .inventory {
+                model.recordInventoryPurchaseSideEffects(newItem)
+            }
             self.isAddItemViewPresented = false
         }, label: {
             Text("Save")
         })
-        .disabled((model.itemType == .business && model.taxReasonIndex == 0) || (model.itemType == .business && model.selectedProjectUID.isEmpty) || (model.itemType == .personal && model.personalReasonIndex == 0) || (model.itemType == .fuel && model.howManyInt == 0) || (model.itemType == .fuel && model.selectedVehicleUID.isEmpty) || (model.itemType == .fuel && model.odometerInt == 0))
+        .disabled(saveDisabled)
         .font(.largeTitle)
         .padding()
     }
     
+    private var saveDisabled: Bool {
+        switch model.itemType {
+        case .business:
+            if model.taxReasonIndex == 0 { return true }
+            if !model.isRetail && model.selectedProjectUID.isEmpty { return true }
+            return false
+        case .personal:
+            return model.personalReasonIndex == 0
+        case .fuel:
+            return model.howManyInt == 0 || model.selectedVehicleUID.isEmpty || model.odometerInt == 0
+        case .inventory:
+            return model.selectedWhomUID.isEmpty || model.validInventoryLines.isEmpty
+        }
+    }
+    
     var typePicker: some View {
         Picker("Item Type", selection: $model.itemType) {
-            ForEach(ItemType.allCases) { itemType in
+            ForEach(model.availableItemTypes) { itemType in
                 Text(itemType.rawValue.capitalized).tag(itemType)
             }
         }
@@ -88,13 +126,18 @@ struct AddItemView: View {
                 whoS; paid; plusMinus; what; toW; whom
             }
             switch model.itemType {
-            case .business: forW; taxReason; project
+            case .business:
+                forW; taxReason
+                if !model.isRetail {
+                    project
+                }
             case .personal: forW; personalReason
             case .fuel: forW; howMany; gallonsOfFuelIn; vehicle; odometer
+            case .inventory: forW; inventoryTag
             }
         }
         .animation(.default, value: model.align)
-        .frame(maxHeight: 300)
+        .frame(maxHeight: model.itemType == .inventory ? 170 : 300)
     }
     
     var whoS: some View {
@@ -154,6 +197,12 @@ struct AddItemView: View {
         Text("for").padding() //5=forW, below, 6=TaxReason
     }
     
+    var inventoryTag: some View {
+        Text("inventory (goods for resale)")
+            .foregroundColor(Color.BizzyColor.taxReasonMagenta)
+            .padding()
+    }
+    
     var taxReason: some View {
         Picker(model.taxReasonArray[0], selection: $model.taxReasonIndex) {
             ForEach(0..<model.taxReasonArray.count, id: \.self) { index in
@@ -161,7 +210,7 @@ struct AddItemView: View {
             }
         }
         .onChange(of: model.taxReasonIndex) { oldValue, newValue in
-            if newValue == 3 {
+            if newValue == 3 && !model.isRetail {
                 model.showWorkersCompToggle = true
             } else {
                 model.showWorkersCompToggle = false
@@ -224,4 +273,3 @@ struct AddItemView: View {
     }
     
 }
-

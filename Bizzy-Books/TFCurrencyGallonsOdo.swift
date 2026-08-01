@@ -143,7 +143,7 @@ struct GallonsTextField: View {
             TextField("", text: $value)
                 .foregroundColor(Color.BizzyColor.darkerGreen)
                 .keyboardType(.decimalPad)
-                .onChange(of: value) { newValue, _ in
+                .onChange(of: value) { _, newValue in
                     formatGallonsInput(newValue)
                 }
                 .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
@@ -155,7 +155,9 @@ struct GallonsTextField: View {
         if let intValue = Int(numericString), intValue < Int(pow(10.0, Double(maxDigits))) {
             let gallonsValue = Double(intValue) / 1000.0 // Starting with three decimal points
             if let formattedString = formatter.string(from: NSNumber(value: gallonsValue)) {
-                value = formattedString
+                if formattedString != value {
+                    value = formattedString
+                }
                 model.howManyInt = intValue
             }
         }
@@ -189,7 +191,7 @@ struct OdometerTextField: View {
             TextField("", text: $value)
                 .foregroundColor(Color.BizzyColor.grey)
                 .keyboardType(.numberPad)
-                .onChange(of: value) { newValue, _ in
+                .onChange(of: value) { _, newValue in
                     formatOdometerInput(newValue)
                 }
                 .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
@@ -200,7 +202,9 @@ struct OdometerTextField: View {
         let numericString = input.filter { "0123456789".contains($0) }
         if let intValue = Int(numericString), intValue < Int(pow(10.0, Double(maxDigits))) {
             if let formattedString = formatter.string(from: NSNumber(value: intValue)) {
-                value = formattedString
+                if formattedString != value {
+                    value = formattedString
+                }
                 model.odometerInt = intValue
             }
         }
@@ -232,6 +236,7 @@ enum ItemType: String, CaseIterable, Identifiable, Codable {
     case business = "Business"
     case personal = "Personal"
     case fuel = "Fuel"
+    case inventory = "Inventory"
     
     var id: String { self.rawValue }
 }

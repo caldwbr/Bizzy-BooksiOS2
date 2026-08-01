@@ -31,6 +31,15 @@ struct LoginView: View {
   @Environment(\.dismiss) var dismiss
 
   @FocusState private var focus: FocusableField?
+  @State private var resetEmailSent = false
+
+  private func sendPasswordReset() {
+    Task {
+      if await model.sendPasswordReset() == true {
+        resetEmailSent = true
+      }
+    }
+  }
 
   private func signInWithEmailPassword() {
     Task {
@@ -56,6 +65,9 @@ struct LoginView: View {
         TextField("Email", text: $model.authEmail)
           .textInputAutocapitalization(.never)
           .disableAutocorrection(true)
+          .onChange(of: model.authEmail) { _, _ in
+            resetEmailSent = false
+          }
           .focused($focus, equals: .email)
           .submitLabel(.next)
           .onSubmit {
@@ -78,6 +90,24 @@ struct LoginView: View {
       .padding(.vertical, 6)
       .background(Divider(), alignment: .bottom)
       .padding(.bottom, 8)
+
+      HStack {
+        Spacer()
+        Button(action: sendPasswordReset) {
+          Text("Forgot password?")
+            .font(.footnote)
+            .foregroundColor(.blue)
+        }
+        .disabled(model.authEmail.isEmpty)
+      }
+      .padding(.bottom, 8)
+
+      if resetEmailSent {
+        Text("Reset link sent to \(model.authEmail) — check your inbox (and spam), then come back and log in.")
+          .font(.footnote)
+          .foregroundColor(.green)
+          .frame(maxWidth: .infinity, alignment: .leading)
+      }
 
       if !model.errorMessage.isEmpty {
         VStack {

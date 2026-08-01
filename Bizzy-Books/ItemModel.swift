@@ -192,6 +192,13 @@ struct Universal: Identifiable {
         return 0
     }
     
+    var itemLines: [InventoryPurchaseLine] {
+        if case .item(let item) = type {
+            return item.lines
+        }
+        return []
+    }
+    
     // Computed properties for Entity
     var entityName: String {
         if case .entity(let entity) = type {
@@ -537,6 +544,7 @@ struct Item: Identifiable, Codable {
     var projectID: String //nil for overhead
     var howMany: Int //thousandths of gallons of fuel
     var odometer: Int //miles
+    var lines: [InventoryPurchaseLine] = [] //inventory purchases only (retail mode)
     let key: String
     
     init(snapshot: DataSnapshot) {
@@ -564,6 +572,9 @@ struct Item: Identifiable, Codable {
         projectID = snapshotValue["projectID"] as? String ?? ""
         howMany = snapshotValue["howMany"] as? Int ?? 0
         odometer = snapshotValue["odometer"] as? Int ?? 0
+        if let lineDicts = snapshotValue["lines"] as? [[String: Any]] {
+            lines = lineDicts.map { InventoryPurchaseLine(fromDictionary: $0) }
+        }
     }
     
     func toDictionary() -> [String: Any] {
@@ -586,6 +597,9 @@ struct Item: Identifiable, Codable {
         dictionary["projectID"] = projectID
         dictionary["howMany"] = howMany
         dictionary["odometer"] = odometer
+        if !lines.isEmpty {
+            dictionary["lines"] = lines.map { $0.toDictionary() }
+        }
         return dictionary
     }
     

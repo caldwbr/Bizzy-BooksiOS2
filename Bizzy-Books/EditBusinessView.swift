@@ -21,9 +21,27 @@ struct EditBusinessView: View {
     @State private var uBizZip: String = ""
     @State private var uBizSSN: String = ""
     @State private var uBizEIN: String = ""
+    @State private var bizType: BusinessType = .contracting
     
     var body: some View {
         Form {
+            Section(header: Text("Business Type"),
+                    footer: Text(bizType == .retail
+                                 ? "Retail: adds Inventory purchases, the inventory list, year-end counts, and the Cost of Goods Sold block on the tax document. Keeps fuel fill-ups; hides projects, contracts, and warranties. Applies immediately."
+                                 : "Contracting: projects, contracts, and warranties. Switch to Retail if you sell goods you keep in stock. Applies immediately.")) {
+                Picker("Business Type", selection: $bizType) {
+                    ForEach(BusinessType.allCases) { type in
+                        Text(type.displayName).tag(type)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: bizType) { oldValue, newValue in
+                    if newValue != model.businessType {
+                        model.setBusinessType(newValue)
+                    }
+                }
+            }
+            
             Section(header: Text("Business Information")) {
                 TextField("Business Name", text: $uBizName)
                 TextField("Email", text: $uBizEmail)
@@ -52,25 +70,23 @@ struct EditBusinessView: View {
         }
         .onAppear(perform: {
             importBizData()
-            print("sup")
-            print(uBizEmail)
         })
         .navigationBarTitle("Edit Business")
     }
     
     @MainActor
     func importBizData() {
+        bizType = model.businessType
         if let yeYou = model.youBusinessEntity {
             uBizName = yeYou.name
-            uBizEmail = yeYou.email ?? ""
-            uBizPhone = yeYou.phone ?? ""
-            uBizStreet = yeYou.street ?? ""
-            uBizCity = yeYou.city ?? ""
-            uBizState = yeYou.state ?? ""
-            uBizZip = yeYou.zip ?? ""
-            uBizEIN = yeYou.ein ?? ""
-            uBizSSN = yeYou.ssn ?? ""
+            uBizEmail = yeYou.email
+            uBizPhone = yeYou.phone
+            uBizStreet = yeYou.street
+            uBizCity = yeYou.city
+            uBizState = yeYou.state
+            uBizZip = yeYou.zip
+            uBizEIN = yeYou.ein
+            uBizSSN = yeYou.ssn
         }
     }
 }
-
